@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>บันทึกการส่องกล้องหลอดลม</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #f0f5fb;
+  --surface:  #ffffff;
+  --border:   #dde5f0;
+  --border2:  #eef2f8;
+  --teal:     #0891b2;
+  --teal-dk:  #0e7490;
+  --teal-lt:  #e0f7fa;
+  --green:    #059669;
+  --green-lt: #d1fae5;
+  --blue:     #1d6fa4;
+  --blue-lt:  #dbeafe;
+  --orange:   #d97706;
+  --orange-lt:#fef3c7;
+  --red:      #dc2626;
+  --red-lt:   #fee2e2;
+  --purple:   #7c3aed;
+  --purple-lt:#ede9fe;
+  --text:     #1a2332;
+  --text2:    #3d5166;
+  --text3:    #7c8fa6;
+  --shadow:   0 2px 16px rgba(8,145,178,.10);
+  --r:        12px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px}
+body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+button{cursor:pointer;font-family:inherit}
+.hidden{display:none!important}
+
+/* ── Topbar ── */
+.topbar{
+  background:linear-gradient(135deg,var(--teal-dk),var(--teal));
+  padding:16px 20px;box-shadow:0 2px 12px rgba(8,145,178,.25);
+  position:sticky;top:0;z-index:100;
+}
+.topbar-inner{max-width:860px;margin:0 auto;display:flex;align-items:center;gap:12px}
+.topbar-icon{font-size:26px}
+.topbar-title{font-size:18px;font-weight:800;color:#fff}
+.topbar-sub{font-size:13px;color:rgba(255,255,255,.75);margin-top:1px}
+
+/* ── Layout ── */
+.page{max-width:860px;margin:0 auto;padding:24px 16px 60px}
+
+/* ── Section card ── */
+.section{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:16px;box-shadow:var(--shadow);
+  margin-bottom:16px;overflow:hidden;
+}
+.section-head{
+  padding:16px 20px;
+  border-bottom:1px solid var(--border2);
+  display:flex;align-items:center;gap:10px;
+}
+.section-num{
+  width:28px;height:28px;border-radius:8px;
+  background:var(--teal);color:#fff;
+  font-size:13px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.section-title{font-size:16px;font-weight:800;color:var(--text)}
+.section-body{padding:20px}
+
+/* ── Form grid ── */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.form-grid.cols3{grid-template-columns:1fr 1fr 1fr}
+.form-grid.cols1{grid-template-columns:1fr}
+.span2{grid-column:span 2}
+.span3{grid-column:span 3}
+@media(max-width:600px){
+  .form-grid,.form-grid.cols3{grid-template-columns:1fr}
+  .span2,.span3{grid-column:span 1}
+}
+
+/* ── Form elements ── */
+.form-group{display:flex;flex-direction:column;gap:6px}
+.form-label{font-size:13px;font-weight:700;color:var(--text2);display:flex;align-items:center;gap:4px}
+.req{color:var(--red);font-size:14px}
+.form-input,.form-select,.form-textarea{
+  width:100%;padding:11px 14px;
+  border:2px solid var(--border);border-radius:10px;
+  font-family:'Sarabun',sans-serif;font-size:15px;color:var(--text);
+  background:#fff;outline:none;transition:border-color .2s,background .2s;
+}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--teal);background:#fafeff}
+.form-textarea{resize:vertical;min-height:80px;line-height:1.5}
+.form-input.prefilled{background:#f0f9ff;border-color:#bae6fd}
+.form-select{
+  appearance:none;-webkit-appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b7c93' stroke-width='1.8' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 12px center;padding-right:36px;
+}
+.form-hint{font-size:12px;color:var(--text3);margin-top:2px}
+
+/* ── Datalist input combo ── */
+.combo-wrap{position:relative}
+
+/* ── Toggle pills ── */
+.toggle-group{display:flex;gap:8px;flex-wrap:wrap}
+.toggle-btn{
+  padding:9px 18px;border-radius:50px;
+  border:2px solid var(--border);background:#fff;
+  font-size:14px;font-weight:600;color:var(--text2);
+  transition:all .2s;
+}
+.toggle-btn:hover{border-color:var(--teal);color:var(--teal)}
+.toggle-btn.active{background:var(--teal);border-color:var(--teal);color:#fff}
+.toggle-btn.active-orange{background:var(--orange);border-color:var(--orange);color:#fff}
+
+/* ── Price box ── */
+.price-box{
+  background:linear-gradient(135deg,#f0fdf4,#dcfce7);
+  border:2px solid #86efac;border-radius:12px;
+  padding:16px 20px;margin-top:4px;
+}
+.price-label{font-size:13px;font-weight:700;color:var(--green);margin-bottom:6px}
+.price-val{font-size:32px;font-weight:800;color:var(--green);letter-spacing:-.03em}
+.price-unit{font-size:15px;color:var(--green);margin-left:4px}
+.price-breakdown{font-size:12px;color:#4ade80;margin-top:4px}
+
+/* ── Booking card ── */
+.booking-card{
+  background:var(--teal-lt);border:2px solid #7dd3e0;
+  border-radius:12px;padding:14px 16px;margin-bottom:16px;
+}
+.bc-proc{font-size:16px;font-weight:800;color:var(--teal-dk)}
+.bc-info{font-size:13px;color:var(--text2);margin-top:4px;display:flex;flex-wrap:wrap;gap:8px}
+.bc-badge{
+  background:#fff;border:1px solid #7dd3e0;
+  border-radius:20px;padding:2px 10px;font-size:12px;font-weight:600;
+}
+
+/* ── Buttons ── */
+.btn{
+  padding:14px 24px;border:none;border-radius:12px;
+  font-family:'Sarabun',sans-serif;font-size:16px;font-weight:700;
+  transition:all .2s;cursor:pointer;
+}
+.btn:active{transform:scale(.98)}
+.btn:disabled{opacity:.35;cursor:not-allowed;transform:none}
+.btn-primary{background:linear-gradient(135deg,var(--teal-dk),var(--teal));color:#fff;width:100%}
+.btn-primary:hover:not(:disabled){filter:brightness(.9)}
+.btn-outline{background:#fff;color:var(--text2);border:2px solid var(--border);padding:10px 20px;font-size:14px}
+.btn-outline:hover{border-color:var(--teal);color:var(--teal)}
+
+/* ── Alert ── */
+.alert{border-radius:10px;padding:12px 14px;font-size:14px;font-weight:600;margin-bottom:14px}
+.alert-info{background:var(--blue-lt);color:#1e3a5f;border:1px solid #93c5fd}
+.alert-warn{background:var(--orange-lt);color:#92400e;border:1px solid #fcd34d}
+.alert-err {background:var(--red-lt);color:#7f1d1d;border:1px solid #fca5a5;display:none}
+.alert-err.show{display:block}
+
+/* ── Success ── */
+.success-page{text-align:center;padding:40px 20px}
+.success-icon{font-size:72px;margin-bottom:12px}
+.success-title{font-size:26px;font-weight:800;color:var(--green)}
+.success-sub{font-size:15px;color:var(--text3);margin-top:8px}
+
+/* ── Loading ── */
+.spinner{
+  width:40px;height:40px;border-radius:50%;
+  border:4px solid var(--border);border-top-color:var(--teal);
+  animation:spin .6s linear infinite;margin:0 auto;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-box{text-align:center;padding:32px;color:var(--text3)}
+.loading-box p{margin-top:12px;font-size:15px}
+
+/* ── Divider ── */
+.divider{height:1px;background:var(--border2);margin:16px 0}
+
+/* Animations */
+.fade-in{animation:fi .3s ease both}
+@keyframes fi{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+</style>
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script src="config.js"></script>
+<script src="common.js"></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="topbar-icon">📋</div>
+    <div>
+      <div class="topbar-title">บันทึกการส่องกล้องหลอดลม</div>
+      <div class="topbar-sub">Bronchoscopy Procedure Record</div>
+    </div>
+  </div>
+</header>
+
+<div class="page">
+
+  <div id="load-banner" class="hidden" style="margin-bottom:14px;padding:12px 14px;border-radius:10px;background:#fee2e2;color:#991b1b;font-size:14px">
+    <span id="load-banner-text"></span>
+    <button class="btn btn-primary" style="width:auto;padding:6px 14px;margin-left:8px" onclick="init()">🔄 ลองใหม่</button>
+  </div>
+
+  <!-- ════ FORM ════ -->
+  <div id="form-page" class="fade-in">
+
+    <!-- ── 1. เลือกวันที่และ Case ── -->
+    <div class="section">
+      <div class="section-head">
+        <div class="section-num">1</div>
+        <div class="section-title">เลือกวันที่และ Case ที่จะบันทึก</div>
+      </div>
+      <div class="section-body">
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">📅 วันที่ทำหัตถการ <span class="req">*</span></label>
+            <input type="date" id="inp-date" class="form-input" onchange="onDateChange()">
+          </div>
+          <div class="form-group">
+            <label class="form-label">🗓 เลือก Case <span class="req">*</span></label>
+            <select id="sel-case" class="form-select" onchange="onCaseSelect()">
+              <option value="">— เลือกวันที่ก่อน —</option>
+            </select>
+          </div>
+        </div>
+        <div id="booking-preview" class="hidden" style="margin-top:14px"></div>
+      </div>
+    </div>
+
+    <!-- ── 2. ข้อมูลผู้ป่วย ── -->
+    <div class="section">
+      <div class="section-head">
+        <div class="section-num">2</div>
+        <div class="section-title">ข้อมูลผู้ป่วย</div>
+      </div>
+      <div class="section-body">
+        <div class="form-grid cols3">
+          <div class="form-group">
+            <label class="form-label">🏥 HN <span class="req">*</span></label>
+            <input type="text" id="inp-hn" class="form-input" placeholder="เช่น 123456" inputmode="numeric">
+          </div>
+          <div class="form-group">
+            <label class="form-label">คำนำหน้า <span class="req">*</span></label>
+            <select id="sel-prefix" class="form-select">
+              <option value="">— เลือก —</option>
+              <option>นาย</option><option>นาง</option><option>นางสาว</option>
+              <option>พระ</option><option>เด็กชาย</option><option>เด็กหญิง</option>
+            </select>
+          </div>
+          <div class="form-group span2" style="grid-column:2/4">
+            <label class="form-label">👤 ชื่อ-สกุล <span class="req">*</span></label>
+            <input type="text" id="inp-patient" class="form-input" placeholder="ชื่อ นามสกุล">
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">🔍 Pre-diagnosis</label>
+            <input type="text" id="inp-prediag" class="form-input" placeholder="การวินิจฉัยก่อนทำหัตถการ">
+          </div>
+          <div class="form-group">
+            <label class="form-label">✅ Post-diagnosis</label>
+            <input type="text" id="inp-postdiag" class="form-input" placeholder="การวินิจฉัยหลังทำหัตถการ">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 3. รายละเอียดหัตถการ ── -->
+    <div class="section">
+      <div class="section-head">
+        <div class="section-num">3</div>
+        <div class="section-title">รายละเอียดหัตถการ</div>
+      </div>
+      <div class="section-body">
+        <div class="form-grid">
+          <div class="form-group span2">
+            <label class="form-label">🔬 Operation (หัตถการ) <span class="req">*</span></label>
+            <input type="text" id="inp-operation" class="form-input" placeholder="เช่น Bronchoscopy (BAL, TBBx)" readonly style="background:#f0f9ff;border-color:#bae6fd">
+            <div class="form-hint">ดึงจากการจอง — แก้ไขได้โดยลบ readonly ออก</div>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">👨‍⚕️ แพทย์ผู้ทำหัตถการ <span class="req">*</span></label>
+            <input type="text" id="inp-doctor" class="form-input" placeholder="ชื่อแพทย์">
+          </div>
+          <div class="form-group">
+            <label class="form-label">👥 จำนวนพยาบาลที่เข้าช่วย</label>
+            <input type="number" id="inp-nurses" class="form-input" min="0" max="10" value="2" placeholder="2">
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div class="form-group" style="margin-bottom:14px">
+          <label class="form-label">💉 Anesthesic Mode <span class="req">*</span></label>
+          <div class="toggle-group" id="tg-anesthesia">
+            <button class="toggle-btn" onclick="setToggle('anesthesia','MAC',this)">MAC</button>
+            <button class="toggle-btn" onclick="setToggle('anesthesia','GA',this)">GA</button>
+          </div>
+        </div>
+        <div class="form-group" style="margin-bottom:14px">
+          <label class="form-label">🔭 Fluoroscope <span class="req">*</span></label>
+          <div class="toggle-group" id="tg-fluoro">
+            <button class="toggle-btn" onclick="setFluoro('ใช้',this)">✅ ใช้</button>
+            <button class="toggle-btn" onclick="setFluoro('ไม่ใช้',this)">❌ ไม่ใช้</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">💊 Anesthesia Nurse</label>
+          <input type="text" id="inp-anesth-nurse" class="form-input" placeholder="ชื่อพยาบาลวิสัญญี">
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 4. เวลาและกล้อง ── -->
+    <div class="section">
+      <div class="section-head">
+        <div class="section-num">4</div>
+        <div class="section-title">เวลาและอุปกรณ์</div>
+      </div>
+      <div class="section-body">
+        <div class="form-grid cols3">
+          <div class="form-group">
+            <label class="form-label">⏰ เวลาเริ่ม</label>
+            <input type="time" id="inp-tstart" class="form-input" onchange="calcDuration()">
+          </div>
+          <div class="form-group">
+            <label class="form-label">⏰ เวลาสิ้นสุด</label>
+            <input type="time" id="inp-tend" class="form-input" onchange="calcDuration()">
+          </div>
+          <div class="form-group">
+            <label class="form-label">⏱ ระยะเวลา</label>
+            <input type="text" id="inp-duration" class="form-input" placeholder="คำนวณอัตโนมัติ" readonly style="background:var(--bg)">
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">🔭 Bronchoscope (กล้องที่ใช้)</label>
+            <div class="combo-wrap">
+              <input type="text" id="inp-scope" class="form-input" list="scope-list" placeholder="เช่น BF-1, BF-2 หรือพิมพ์ชื่อกล้อง">
+              <datalist id="scope-list"></datalist>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">🧹 ผู้ล้างกล้อง</label>
+            <input type="text" id="inp-washer" class="form-input" placeholder="ชื่อผู้ล้างกล้อง">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 5. ราคา ── -->
+    <div class="section">
+      <div class="section-head">
+        <div class="section-num">5</div>
+        <div class="section-title">ราคา</div>
+      </div>
+      <div class="section-body">
+        <div class="price-box" id="price-box">
+          <div class="price-label">💰 ราคารวม (คำนวณจาก Price List)</div>
+          <div>
+            <span class="price-val" id="price-val">—</span>
+            <span class="price-unit">บาท</span>
+          </div>
+          <div class="price-breakdown" id="price-breakdown"></div>
+        </div>
+        <div class="form-group" style="margin-top:14px">
+          <label class="form-label">💰 ราคา (แก้ไขได้) <span class="req">*</span></label>
+          <input type="number" id="inp-price" class="form-input" min="0" step="50" placeholder="0" oninput="onPriceManualEdit()">
+          <div class="form-hint">ระบบคำนวณให้อัตโนมัติ แต่สามารถแก้ไขได้</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 6. หมายเหตุและผู้บันทึก ── -->
+    <div class="section">
+      <div class="section-head">
+        <div class="section-num">6</div>
+        <div class="section-title">หมายเหตุและผู้บันทึก</div>
+      </div>
+      <div class="section-body">
+        <div class="form-grid">
+          <div class="form-group span2">
+            <label class="form-label">📝 หมายเหตุ</label>
+            <textarea id="inp-remark" class="form-textarea" placeholder="หมายเหตุเพิ่มเติม (ถ้ามี)"></textarea>
+          </div>
+          <div class="form-group span2">
+            <label class="form-label">👩‍⚕️ ผู้บันทึก <span class="req">*</span></label>
+            <input type="text" id="inp-recorder" class="form-input" placeholder="ชื่อพยาบาลผู้บันทึก">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="alert-err" id="err-submit" style="margin-bottom:14px"></div>
+    <button class="btn btn-primary" id="btn-submit" onclick="submitRecord()" disabled>
+      💾 บันทึกข้อมูล
+    </button>
+
+  </div><!-- /form-page -->
+
+  <!-- ════ SUCCESS ════ -->
+  <div id="success-page" class="hidden fade-in">
+    <div class="section">
+      <div class="section-body">
+        <div class="success-page">
+          <div class="success-icon">✅</div>
+          <div class="success-title">บันทึกสำเร็จ!</div>
+          <div class="success-sub" id="success-detail">บันทึกข้อมูลการส่องกล้องเรียบร้อยแล้ว</div>
+          <div style="margin-top:24px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+            <button class="btn btn-primary" style="width:auto;padding:12px 28px" onclick="resetForm()">
+              📋 บันทึก Case ใหม่
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /page -->
+
+<script>
+// ══════════════════════════════════════════════
+//  CONFIG
+// ══════════════════════════════════════════════
+const { esc } = Broncho;
+
+// ══════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════
+const S = {
+  bookings:    [],
+  priceList:   [],
+  selectedCase: null,
+  anesthesia:  null,
+  fluoroscope: null,
+  priceManual: false,
+};
+
+// ══════════════════════════════════════════════
+//  API
+// ══════════════════════════════════════════════
+const api = Broncho.api;
+
+let listenersBound = false;
+
+async function init() {
+  const banner = document.getElementById('load-banner');
+  banner.classList.add('hidden');
+  try {
+    if (!(await Broncho.startLiff(() => {}))) return;   // redirect ไป login
+    const auth = await api('checkAuth');
+    if (!auth.success) throw new Error(auth.error || 'SERVER_ERROR');
+    if (!auth.authorized) throw new Error('UNAUTHORIZED');
+
+    document.getElementById('inp-date').value = localDate();
+
+    const [priceRes, scopeRes] = await Promise.all([api('getPriceList'), api('getBookingScopes')]);
+    if (priceRes.success) S.priceList = priceRes.prices;
+    if (scopeRes.success) {
+      const dl = document.getElementById('scope-list');
+      dl.innerHTML = '';
+      scopeRes.scopes.forEach(sc => {
+        const opt = document.createElement('option');
+        opt.value = sc; dl.appendChild(opt);
+      });
+    }
+
+    await onDateChange();
+
+    if (!listenersBound) {
+      listenersBound = true;
+      document.querySelectorAll('.form-input,.form-select,.form-textarea').forEach(el => {
+        el.addEventListener('input',  validateForm);
+        el.addEventListener('change', validateForm);
+      });
+    }
+  } catch (err) {
+    document.getElementById('load-banner-text').textContent = '⚠️ ' + Broncho.errorText(err);
+    banner.classList.remove('hidden');
+  }
+}
+
+function localDate() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+// ══════════════════════════════════════════════
+//  DATE & CASE SELECTION
+// ══════════════════════════════════════════════
+async function onDateChange() {
+  const dateISO = document.getElementById('inp-date').value; // yyyy-MM-dd
+  if (!dateISO) return;
+
+  // Convert to dd/MM/yyyy for querying
+  const [y,m,d] = dateISO.split('-');
+  const dateTH  = `${d}/${m}/${y}`;
+
+  S.selectedCase = null; S.bookings = [];
+  clearPrefill();
+  document.getElementById('booking-preview').classList.add('hidden');
+  const sel = document.getElementById('sel-case');
+  sel.innerHTML = '<option value="">⏳ กำลังโหลด...</option>';
+  sel.disabled = true;
+
+  try {
+    const r = await api('getBookingsByDate', { date: dateTH });
+    sel.innerHTML = '';
+    if (!r.success) throw new Error(r.error);
+
+    S.bookings = r.bookings;
+
+    if (!r.bookings.length) {
+      sel.innerHTML = '<option value="">— ไม่มีการจองในวันนี้ —</option>';
+      sel.disabled = true;
+      document.getElementById('booking-preview').classList.add('hidden');
+      return;
+    }
+
+    sel.innerHTML = '<option value="">— เลือก Case —</option>';
+    r.bookings.forEach((b, i) => {
+      const opt = document.createElement('option');
+      opt.value = i;
+      opt.textContent = `${b.dateTime.split(' ')[1]} น.  |  ${b.procedure}  |  HN: ${b.hn}`;
+      sel.appendChild(opt);
+    });
+    sel.disabled = false;
+
+    // ถ้ามีแค่ 1 case เลือกให้อัตโนมัติ
+    if (r.bookings.length === 1) {
+      sel.value = '0';
+      onCaseSelect();
+    }
+  } catch(err) {
+    sel.innerHTML = '';
+    const eo = document.createElement('option');
+    eo.value = ''; eo.textContent = '⚠️ โหลดไม่ได้: ' + Broncho.errorText(err);
+    sel.appendChild(eo);
+    sel.disabled = false;
+  }
+}
+
+function onCaseSelect() {
+  const idx = document.getElementById('sel-case').value;
+  if (idx === '') {
+    document.getElementById('booking-preview').classList.add('hidden');
+    S.selectedCase = null;
+    clearPrefill();
+    return;
+  }
+
+  const b = S.bookings[parseInt(idx)];
+  S.selectedCase = b;
+  prefillFromBooking(b);
+  showBookingPreview(b);
+  validateForm();
+}
+
+function showBookingPreview(b) {
+  document.getElementById('booking-preview').className = 'booking-card fade-in';
+  document.getElementById('booking-preview').innerHTML = `
+    <div class="bc-proc">🔬 ${esc(b.procedure)}</div>
+    <div class="bc-info">
+      <span class="bc-badge">⏰ ${esc(b.dateTime.split(' ')[1])} น.</span>
+      <span class="bc-badge">👨‍⚕️ ${esc(b.doctor)}</span>
+      <span class="bc-badge">🏥 HN: ${esc(b.hn)}</span>
+      <span class="bc-badge">👤 ${esc(b.patientName)}</span>
+      ${b.anesthesicMode ? `<span class="bc-badge">💉 ${esc(b.anesthesicMode)}</span>` : ''}
+      ${b.fluoroscope    ? `<span class="bc-badge">🔭 Fluoro: ${esc(b.fluoroscope)}</span>` : ''}
+    </div>`;
+}
+
+function prefillFromBooking(b) {
+  setVal('inp-hn',        b.hn,           true);
+  setVal('inp-patient',   b.patientName,  true);
+  setVal('inp-doctor',    b.doctor,       true);
+  setVal('inp-operation', b.procedure,    true);
+  if (b.anesthesicMode) {
+    S.anesthesia = b.anesthesicMode;
+    document.querySelectorAll('#tg-anesthesia .toggle-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.textContent.trim() === b.anesthesicMode);
+    });
+  }
+  if (b.fluoroscope) {
+    const fl = ({ 'จอง': 'ใช้', 'ไม่จอง': 'ไม่ใช้' })[b.fluoroscope] || b.fluoroscope;
+    S.fluoroscope = fl;
+    document.querySelectorAll('#tg-fluoro .toggle-btn').forEach(btn => {
+      const label = btn.textContent.includes('ใช้') && !btn.textContent.includes('ไม่') ? 'ใช้' : 'ไม่ใช้';
+      btn.classList.toggle('active', label === fl);
+    });
+    calcPrice();
+  }
+  if (b.diagnosis) setVal('inp-prediag', b.diagnosis, true);
+}
+
+function clearPrefill() {
+  ['inp-hn','inp-patient','inp-doctor','inp-operation','inp-prediag'].forEach(id => {
+    document.getElementById(id).value = '';
+    document.getElementById(id).classList.remove('prefilled');
+  });
+}
+
+function setVal(id, val, prefill=false) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.value = val || '';
+  if (prefill && val) el.classList.add('prefilled');
+  else el.classList.remove('prefilled');
+}
+
+// ══════════════════════════════════════════════
+//  TOGGLE BUTTONS
+// ══════════════════════════════════════════════
+function setToggle(group, val, btn) {
+  if (group === 'anesthesia') {
+    S.anesthesia = val;
+    document.querySelectorAll('#tg-anesthesia .toggle-btn').forEach(b => b.classList.remove('active'));
+  }
+  btn.classList.add('active');
+  validateForm();
+}
+
+function setFluoro(val, btn) {
+  S.fluoroscope = val;
+  document.querySelectorAll('#tg-fluoro .toggle-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  calcPrice();
+  validateForm();
+}
+
+// ══════════════════════════════════════════════
+//  DURATION
+// ══════════════════════════════════════════════
+function calcDuration() {
+  const ts = document.getElementById('inp-tstart').value;
+  const te = document.getElementById('inp-tend').value;
+  if (!ts || !te) { document.getElementById('inp-duration').value = ''; return; }
+  validateForm();
+  const [sh, sm] = ts.split(':').map(Number);
+  const [eh, em] = te.split(':').map(Number);
+  const diff = (eh*60+em) - (sh*60+sm);
+  if (diff <= 0) { document.getElementById('inp-duration').value = 'ตรวจสอบเวลา'; return; }
+  const h = Math.floor(diff/60), m = diff%60;
+  document.getElementById('inp-duration').value =
+    h > 0 ? `${h} ชม. ${m} นาที` : `${m} นาที`;
+}
+
+// ══════════════════════════════════════════════
+//  PRICE CALCULATION
+// ══════════════════════════════════════════════
+function calcPrice() {
+  if (S.priceManual) return;
+
+  if (!S.priceList.length) {
+    document.getElementById('price-breakdown').textContent =
+      '⚠️ ยังไม่พบ Price_List — กรอกราคาเองได้';
+    return;
+  }
+
+  const operation  = document.getElementById('inp-operation').value.trim();
+  const fluoroUsed = S.fluoroscope || '';
+
+  if (!operation || !fluoroUsed) {
+    document.getElementById('price-val').textContent = '—';
+    document.getElementById('price-breakdown').textContent =
+      !fluoroUsed ? 'เลือก Fluoroscope ก่อนเพื่อคำนวณราคา' : '';
+    return;
+  }
+
+  // ค้นหาจาก operation เต็มๆ ก่อน เช่น "Bronchoscopy (BAL)"
+  const entry = S.priceList.find(p =>
+    p.procedure.trim().toLowerCase() === operation.toLowerCase() &&
+    p.fluoroscope.trim() === fluoroUsed
+  );
+
+  if (entry) {
+    document.getElementById('price-val').textContent = entry.price.toLocaleString();
+    document.getElementById('inp-price').value       = entry.price;
+    document.getElementById('price-breakdown').textContent =
+      `${operation} (${fluoroUsed}): ${entry.price.toLocaleString()} บาท`;
+  } else {
+    document.getElementById('price-val').textContent = '—';
+    document.getElementById('inp-price').value       = '';
+    document.getElementById('price-breakdown').textContent =
+      `⚠️ ไม่พบราคาของ "${operation}" (${fluoroUsed}) ใน Price_List`;
+  }
+}
+
+function onPriceManualEdit() {
+  S.priceManual = true;
+  document.getElementById('price-val').textContent =
+    parseFloat(document.getElementById('inp-price').value || 0).toLocaleString();
+  document.getElementById('price-breakdown').textContent = '(แก้ไขด้วยตนเอง)';
+}
+
+// ══════════════════════════════════════════════
+//  VALIDATE & SUBMIT
+// ══════════════════════════════════════════════
+function validateForm() {
+  const hn       = document.getElementById('inp-hn').value.trim();
+  const prefix   = document.getElementById('sel-prefix').value;
+  const patient  = document.getElementById('inp-patient').value.trim();
+  const operation= document.getElementById('inp-operation').value.trim();
+  const doctor   = document.getElementById('inp-doctor').value.trim();
+  const recorder = document.getElementById('inp-recorder').value.trim();
+
+  const ts = document.getElementById('inp-tstart').value, te = document.getElementById('inp-tend').value;
+  const timeOk = !(ts && te && te <= ts);
+  const ok = /^[A-Za-z0-9\-]{1,15}$/.test(hn) && prefix && patient && operation && doctor &&
+             recorder && S.anesthesia && S.fluoroscope && timeOk;
+
+  document.getElementById('btn-submit').disabled = !ok;
+}
+
+async function submitRecord() {
+  const btn = document.getElementById('btn-submit');
+  btn.disabled = true; btn.textContent = '⏳ กำลังบันทึก...';
+  showErr('');
+
+  const dateISO = document.getElementById('inp-date').value;
+  const [y,m,d] = dateISO.split('-');
+  const dateTH  = `${d}/${m}/${y}`;
+
+  const price = parseFloat(document.getElementById('inp-price').value) || 0;
+
+  try {
+    const r = await api('saveProcedureRecord', {
+      procedureDate:   dateTH,
+      bookingRef:      S.selectedCase ? (S.selectedCase.eventId || String(S.selectedCase.rowIndex)) : '',
+      hn:              document.getElementById('inp-hn').value.trim(),
+      namePrefix:      document.getElementById('sel-prefix').value,
+      patientName:     document.getElementById('inp-patient').value.trim(),
+      preDiagnosis:    document.getElementById('inp-prediag').value.trim(),
+      operation:       document.getElementById('inp-operation').value.trim(),
+      postDiagnosis:   document.getElementById('inp-postdiag').value.trim(),
+      doctor:          document.getElementById('inp-doctor').value.trim(),
+      nurseCount:      parseInt(document.getElementById('inp-nurses').value) || 0,
+      anesthesicMode:  S.anesthesia,
+      anesthesiaNurse: document.getElementById('inp-anesth-nurse').value.trim(),
+      timeStart:       document.getElementById('inp-tstart').value,
+      timeEnd:         document.getElementById('inp-tend').value,
+      price:           price,
+      bronchoscope:    document.getElementById('inp-scope').value.trim(),
+      fluoroscope:     S.fluoroscope,
+      scopeWasher:     document.getElementById('inp-washer').value.trim(),
+      remark:          document.getElementById('inp-remark').value.trim(),
+      recordedBy:      document.getElementById('inp-recorder').value.trim(),
+    });
+
+    if (r.success) {
+      const pname = document.getElementById('inp-patient').value.trim();
+      const hn    = document.getElementById('inp-hn').value.trim();
+      document.getElementById('success-detail').textContent =
+        `${pname}  |  HN: ${hn}  |  ${document.getElementById('inp-operation').value}`;
+      document.getElementById('form-page').classList.add('hidden');
+      document.getElementById('success-page').classList.remove('hidden');
+    } else {
+      showErr('❌ ' + Broncho.errorText(new Error(r.error)));
+    }
+  } catch(err) {
+    showErr('⚠️ ' + Broncho.errorText(err) + ' — ตรวจสอบก่อนบันทึกซ้ำ');
+  } finally {
+    btn.disabled = false; btn.textContent = '💾 บันทึกข้อมูล';
+  }
+}
+
+function showErr(msg) {
+  const el = document.getElementById('err-submit');
+  el.textContent = msg;
+  el.classList.toggle('show', !!msg);
+}
+
+// ══════════════════════════════════════════════
+//  RESET
+// ══════════════════════════════════════════════
+function resetForm() {
+  S.selectedCase = null; S.anesthesia = null; S.fluoroscope = null; S.priceManual = false;
+
+  ['inp-hn','inp-patient','inp-doctor','inp-operation','inp-prediag',
+   'inp-postdiag','inp-anesth-nurse','inp-tstart','inp-tend',
+   'inp-duration','inp-scope','inp-washer','inp-remark','inp-recorder'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.value = ''; el.classList.remove('prefilled'); }
+  });
+  document.getElementById('inp-nurses').value = '2';
+  document.getElementById('inp-price').value  = '';
+  document.getElementById('sel-prefix').value = '';
+  document.getElementById('sel-case').value   = '';
+  document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('price-val').textContent   = '—';
+  document.getElementById('price-breakdown').textContent = '';
+  document.getElementById('booking-preview').className = 'hidden';
+  document.getElementById('form-page').classList.remove('hidden');
+  document.getElementById('success-page').classList.add('hidden');
+  document.getElementById('btn-submit').disabled = true;
+
+  // Reset date to today and reload bookings
+  document.getElementById('inp-date').value = localDate();
+  onDateChange();
+}
+
+// ══════════════════════════════════════════════
+//  Listen for operation field change to recalc price
+// ══════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('inp-operation').removeAttribute('readonly');
+  document.getElementById('inp-operation').addEventListener('input', () => {
+    S.priceManual = false;
+    calcPrice();
+  });
+});
+
+// Boot
+window.addEventListener('load', init);
+</script>
+</body>
+</html>

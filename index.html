@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>จองห้องส่องกล้องหลอดลม</title>
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <script src="config.js"></script>
+  <script src="common.js"></script>
+  <style>
+    /* ── Design Tokens ─────────────────────────────────────── */
+    :root {
+      --blue:         #0078d4;
+      --blue-light:   #e8f4fd;
+      --blue-dark:    #005a9e;
+      --green:        #107c10;
+      --green-light:  #dff0d8;
+      --red:          #d32f2f;
+      --red-light:    #fdecea;
+      --orange:       #e65100;
+      --grey-bg:      #f3f6fa;
+      --grey-border:  #dde3ea;
+      --text:         #1a2332;
+      --text-light:   #6b7c93;
+      --card:         #ffffff;
+      --shadow:       0 2px 12px rgba(0,0,0,.08);
+      --radius:       12px;
+      --radius-sm:    8px;
+    }
+
+    /* ── Reset ──────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, 'Sarabun', BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--grey-bg);
+      color: var(--text);
+      min-height: 100vh;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .hidden { display: none !important; }
+
+    /* ── Loading ────────────────────────────────────────────── */
+    #loading {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      min-height: 100vh; gap: 14px;
+    }
+    .spinner {
+      width: 44px; height: 44px;
+      border: 4px solid #dde3ea;
+      border-top-color: var(--blue);
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Header ─────────────────────────────────────────────── */
+    .header {
+      background: linear-gradient(135deg, var(--blue-dark) 0%, var(--blue) 100%);
+      color: #fff;
+      padding: 18px 16px 14px;
+      position: sticky; top: 0; z-index: 50;
+      box-shadow: 0 2px 8px rgba(0,120,212,.25);
+    }
+    .header-title { font-size: 16px; font-weight: 700; }
+    .header-sub   { font-size: 12px; opacity: .80; margin-top: 3px; }
+
+    /* ── Content wrapper ────────────────────────────────────── */
+    .content { padding: 14px; max-width: 480px; margin: 0 auto; }
+
+    /* ── Card ───────────────────────────────────────────────── */
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 16px;
+      box-shadow: var(--shadow);
+      margin-bottom: 12px;
+    }
+    .card-title {
+      font-size: 13px; font-weight: 700;
+      color: var(--blue-dark);
+      margin-bottom: 12px;
+      display: flex; align-items: center; gap: 6px;
+    }
+
+    /* ── Step indicator ─────────────────────────────────────── */
+    .steps { display: flex; gap: 5px; margin-bottom: 14px; }
+    .step-dot {
+      flex: 1; height: 4px; border-radius: 2px;
+      background: var(--grey-border);
+      transition: background .3s;
+    }
+    .step-dot.active { background: var(--blue); }
+    .step-dot.done   { background: var(--green); }
+
+    /* ── Week nav ───────────────────────────────────────────── */
+    .week-nav {
+      display: flex; align-items: center;
+      justify-content: space-between; margin-bottom: 12px;
+    }
+    .week-nav-btn {
+      background: var(--grey-bg); border: 2px solid var(--grey-border);
+      border-radius: var(--radius-sm);
+      width: 38px; height: 38px; font-size: 20px;
+      cursor: pointer; line-height: 1;
+      display: flex; align-items: center; justify-content: center;
+      transition: all .2s;
+    }
+    .week-nav-btn:hover:not(:disabled) { border-color: var(--blue); color: var(--blue); }
+    .week-nav-btn:disabled { opacity: .3; cursor: not-allowed; }
+    .week-label { font-size: 13px; color: var(--text-light); font-weight: 600; }
+
+    /* ── Date cards ─────────────────────────────────────────── */
+    .date-list { display: flex; flex-direction: column; gap: 8px; }
+    .date-card {
+      border: 2px solid var(--grey-border);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px; cursor: pointer;
+      transition: all .2s; background: white;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .date-card:active { transform: scale(.98); }
+    .date-card.selected { border-color: var(--blue); background: var(--blue-light); }
+    .date-card .dc-date { font-size: 14px; font-weight: 700; }
+    .date-card .dc-info { font-size: 12px; font-weight: 600; }
+
+    /* ── Slot grid ──────────────────────────────────────────── */
+    .slot-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .slot-btn {
+      padding: 12px 8px; border-radius: var(--radius-sm);
+      border: 2px solid var(--grey-border);
+      background: white; cursor: pointer;
+      text-align: center; font-size: 14px; font-weight: 700;
+      transition: all .2s;
+    }
+    .slot-btn .slot-sub { font-size: 10px; font-weight: 400; margin-top: 3px; display: block; }
+    .slot-btn.available  { border-color: #2e7d32; color: #1b5e20; background: var(--green-light); }
+    .slot-btn.available:hover,
+    .slot-btn.available.selected { background: #2e7d32; color: white; border-color: #2e7d32; }
+    .slot-btn.booked     { border-color: #ffcdd2; color: #b71c1c; background: var(--red-light); cursor: not-allowed; opacity: .65; }
+
+    /* ── Back button ────────────────────────────────────────── */
+    .btn-back {
+      background: none; border: none; color: var(--text-light);
+      font-size: 13px; cursor: pointer; padding: 0;
+      margin-bottom: 10px; display: flex; align-items: center; gap: 4px;
+    }
+    .btn-back:active { opacity: .6; }
+
+    /* ── Form ───────────────────────────────────────────────── */
+    .form-group { margin-bottom: 14px; }
+    .form-label {
+      font-size: 12px; font-weight: 700;
+      color: var(--text-light); text-transform: uppercase;
+      letter-spacing: .04em; margin-bottom: 6px; display: block;
+    }
+    .form-input {
+      width: 100%; padding: 11px 13px;
+      border: 2px solid var(--grey-border); border-radius: var(--radius-sm);
+      font-size: 15px; color: var(--text); outline: none;
+      transition: border-color .2s;
+    }
+    .form-input:focus { border-color: var(--blue); }
+
+    /* ── Procedure buttons ──────────────────────────────────── */
+    .proc-options  { display: flex; gap: 8px; }
+    .proc-btn {
+      flex: 1; padding: 11px 8px; text-align: center;
+      border: 2px solid var(--grey-border); border-radius: var(--radius-sm);
+      cursor: pointer; font-size: 13px; font-weight: 700;
+      transition: all .2s; background: white; line-height: 1.4;
+    }
+    .proc-btn.selected { border-color: var(--blue); background: var(--blue-light); color: var(--blue-dark); }
+
+    /* ── Sub-procedure checkboxes ───────────────────────────── */
+    .sub-proc-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+    .check-btn {
+      padding: 10px 6px; text-align: center;
+      border: 2px solid var(--grey-border); border-radius: var(--radius-sm);
+      cursor: pointer; font-size: 12px; font-weight: 700;
+      transition: all .2s; background: white; user-select: none;
+    }
+    .check-btn .ci { display: block; font-size: 16px; margin-bottom: 2px; }
+    .check-btn.checked { border-color: var(--blue); background: var(--blue-light); color: var(--blue-dark); }
+
+    /* ── Anesthesia & Fluoro toggle ── */
+    .toggle-row { display: flex; gap: 8px; }
+    .toggle-item {
+      flex: 1; padding: 10px 8px; text-align: center;
+      border: 2px solid var(--grey-border); border-radius: var(--radius-sm);
+      cursor: pointer; font-size: 13px; font-weight: 700;
+      transition: all .2s; background: white; user-select: none;
+    }
+    .toggle-item.active { border-color: var(--blue); background: var(--blue-light); color: var(--blue-dark); }
+
+    /* ── Slot summary badge ─────────────────────────────────── */
+    .slot-summary {
+      background: var(--blue-light); border-left: 4px solid var(--blue);
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      padding: 10px 12px; margin-bottom: 14px;
+      font-size: 14px; font-weight: 700; color: var(--blue-dark);
+    }
+
+    /* ── Buttons ────────────────────────────────────────────── */
+    .btn {
+      width: 100%; padding: 14px; border: none; border-radius: 10px;
+      font-size: 15px; font-weight: 700; cursor: pointer;
+      transition: opacity .2s, transform .1s; margin-top: 8px;
+    }
+    .btn:active { transform: scale(.98); }
+    .btn:disabled { opacity: .35; cursor: not-allowed; transform: none; }
+    .btn-primary  { background: linear-gradient(135deg, var(--blue-dark), var(--blue)); color: white; }
+    .btn-outline  { background: white; color: var(--blue-dark); border: 2px solid var(--blue); }
+    .btn-danger   { background: white; color: var(--red); border: 2px solid var(--red); }
+    .btn-danger.solid { background: var(--red); color: white; }
+
+    /* ── Confirm table ──────────────────────────────────────── */
+    .confirm-row {
+      display: flex; padding: 9px 0;
+      border-bottom: 1px solid var(--grey-border); font-size: 14px;
+    }
+    .confirm-row:last-child { border-bottom: none; }
+    .confirm-lbl { color: var(--text-light); width: 90px; flex-shrink: 0; font-size: 13px; }
+    .confirm-val { font-weight: 600; }
+
+    /* ── Success screen ─────────────────────────────────────── */
+    .success-wrap { text-align: center; padding: 24px 0 12px; }
+    .success-icon  { font-size: 60px; }
+    .success-title { font-size: 22px; font-weight: 800; color: var(--green); margin-top: 8px; }
+    .success-sub   { font-size: 13px; color: var(--text-light); margin-top: 6px; }
+
+    /* ── Booking card (My Bookings) ─────────────────────────── */
+    .booking-card {
+      background: white; border-radius: 10px;
+      border-left: 5px solid var(--blue);
+      padding: 12px 14px; margin-bottom: 10px;
+      box-shadow: 0 1px 5px rgba(0,0,0,.06);
+    }
+    .bc-date  { font-size: 12px; font-weight: 700; color: var(--blue); }
+    .bc-proc  { font-size: 15px; font-weight: 700; margin: 4px 0 2px; }
+    .bc-pt    { font-size: 12px; color: var(--text-light); }
+
+    /* ── Empty state ────────────────────────────────────────── */
+    .empty { text-align: center; padding: 48px 20px; color: var(--text-light); }
+    .empty .ei { font-size: 52px; margin-bottom: 12px; }
+    .empty p   { font-size: 14px; line-height: 1.6; }
+
+    /* ── Unauthorized ───────────────────────────────────────── */
+    #unauthorized {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      min-height: 100vh; padding: 32px 24px; text-align: center;
+    }
+    #unauthorized .icon { font-size: 60px; margin-bottom: 16px; }
+    #unauthorized h2    { font-size: 20px; margin-bottom: 8px; }
+    #unauthorized p     { color: var(--text-light); font-size: 14px; line-height: 1.7; }
+
+    /* ── Modal ──────────────────────────────────────────────── */
+    .overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.5); z-index: 200;
+      display: flex; align-items: flex-end;
+    }
+    .modal {
+      background: white; border-radius: 20px 20px 0 0;
+      padding: 24px 16px 32px; width: 100%;
+      max-height: 80vh; overflow-y: auto;
+    }
+    .modal-title { font-size: 17px; font-weight: 800; margin-bottom: 14px; }
+  </style>
+</head>
+<body>
+
+<!-- ╔══════════════════════════════╗ -->
+<!-- ║  LOADING                     ║ -->
+<!-- ╚══════════════════════════════╝ -->
+<div id="loading">
+  <div class="spinner" id="load-spinner"></div>
+  <p id="load-status" style="color:var(--text-light);font-size:14px;text-align:center;padding:0 24px">กำลังโหลด...</p>
+  <button class="btn btn-primary hidden" id="btn-retry" style="max-width:240px" onclick="init()">🔄 ลองใหม่</button>
+</div>
+
+<!-- ╔══════════════════════════════╗ -->
+<!-- ║  UNAUTHORIZED                ║ -->
+<!-- ╚══════════════════════════════╝ -->
+<div id="unauthorized" class="hidden">
+  <div class="icon">🚫</div>
+  <h2>ไม่มีสิทธิ์เข้าใช้งาน</h2>
+  <p>ระบบนี้สำหรับแพทย์ที่ได้รับสิทธิ์เท่านั้น<br>กรุณาติดต่อผู้ดูแลระบบ</p>
+</div>
+
+<!-- ╔══════════════════════════════════════════════════╗ -->
+<!-- ║  VIEW: จองห้อง                                   ║ -->
+<!-- ╚══════════════════════════════════════════════════╝ -->
+<div id="view-book" class="hidden">
+  <div class="header">
+    <div class="header-title">📅 จองห้องส่องกล้องหลอดลม</div>
+    <div class="header-sub" id="book-doctor-lbl"></div>
+  </div>
+  <div class="content">
+    <!-- Step progress dots -->
+    <div class="steps">
+      <div class="step-dot" id="dot1"></div>
+      <div class="step-dot" id="dot2"></div>
+      <div class="step-dot" id="dot3"></div>
+    </div>
+
+    <!-- ─── Step 1: เลือกวันที่ ─────────────────────── -->
+    <div id="step1">
+      <div class="card">
+        <div class="card-title">🗓 เลือกวันที่</div>
+        <div class="week-nav">
+          <button class="week-nav-btn" id="btn-prev-week" onclick="changeWeek(-1)">‹</button>
+          <span class="week-label" id="week-label">กำลังโหลด...</span>
+          <button class="week-nav-btn" id="btn-next-week" onclick="changeWeek(1)">›</button>
+        </div>
+        <div id="date-list" class="date-list">
+          <div style="text-align:center;padding:24px">
+            <div class="spinner" style="margin:0 auto"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── Step 2: เลือกเวลา ───────────────────────── -->
+    <div id="step2" class="hidden">
+      <button class="btn-back" onclick="goToStep(1)">‹ เปลี่ยนวันที่</button>
+      <div class="card">
+        <div class="card-title">🕐 เลือกเวลา</div>
+        <div id="selected-date-label" style="font-size:15px;font-weight:700;margin-bottom:12px"></div>
+        <div id="slot-grid" class="slot-grid"></div>
+      </div>
+      <button class="btn btn-primary" id="btn-to-step3" onclick="goToStep(3)" disabled>
+        กรอกรายละเอียด →
+      </button>
+    </div>
+
+    <!-- ─── Step 3: กรอกรายละเอียด ─────────────────── -->
+    <div id="step3" class="hidden">
+      <button class="btn-back" onclick="goToStep(2)">‹ เปลี่ยนเวลา</button>
+      <div class="card">
+        <div class="card-title">🔬 รายละเอียดการจอง</div>
+
+        <!-- Slot summary -->
+        <div class="slot-summary" id="slot-summary-text">—</div>
+
+        <!-- Procedure -->
+        <div class="form-group">
+          <label class="form-label">หัตถการ *</label>
+          <div class="proc-options">
+            <div class="proc-btn" id="proc-broncho" onclick="selectProc('Bronchoscopy')">
+              🫁<br>Bronchoscopy
+            </div>
+            <div class="proc-btn" id="proc-pleuro" onclick="selectProc('Pleuroscopy')">
+              🫀<br>Pleuroscopy
+            </div>
+          </div>
+        </div>
+
+        <!-- Sub-procedures (Bronchoscopy only) -->
+        <div class="form-group hidden" id="sub-proc-group">
+          <label class="form-label">หัตถการย่อย * (เลือกได้หลายอย่าง)</label>
+          <div class="sub-proc-grid">
+            <div class="check-btn" id="cb-BAL" onclick="toggleSub('BAL')">
+              <span class="ci">☐</span>BAL
+            </div>
+            <div class="check-btn" id="cb-TBBx" onclick="toggleSub('TBBx')">
+              <span class="ci">☐</span>TBBx
+            </div>
+            <div class="check-btn" id="cb-EBUS" onclick="toggleSub('EBUS TBNA')">
+              <span class="ci">☐</span>EBUS TBNA
+            </div>
+          </div>
+        </div>
+
+        <!-- HN -->
+        <div class="form-group">
+          <label class="form-label">HN ผู้ป่วย *</label>
+          <input type="text" id="inp-hn" class="form-input"
+            placeholder="เช่น 123456" inputmode="numeric" oninput="validateStep3()">
+        </div>
+
+        <!-- Patient name -->
+        <div class="form-group">
+          <label class="form-label">ชื่อ-นามสกุล ผู้ป่วย *</label>
+          <input type="text" id="inp-patient" class="form-input"
+            placeholder="ชื่อ นามสกุล" oninput="validateStep3()">
+        </div>
+
+        <!-- Diagnosis -->
+        <div class="form-group">
+          <label class="form-label">การวินิจฉัยโรค (Diagnosis)</label>
+          <input type="text" id="inp-diagnosis" class="form-input"
+            placeholder="เช่น Lung mass, Hemoptysis" oninput="validateStep3()">
+        </div>
+
+        <!-- Anesthesic Mode -->
+        <div class="form-group">
+          <label class="form-label">Anesthesic Mode *</label>
+          <div class="toggle-row">
+            <div class="toggle-item" id="tm-mac" onclick="selectAnesthesia('MAC')">MAC</div>
+            <div class="toggle-item" id="tm-ga"  onclick="selectAnesthesia('GA')">GA</div>
+          </div>
+        </div>
+
+        <!-- Fluoroscopy -->
+        <div class="form-group">
+          <label class="form-label">จอง Fluoroscopy *</label>
+          <div class="toggle-row">
+            <div class="toggle-item" id="tf-yes" onclick="selectFluoro('จอง')">✅ จอง</div>
+            <div class="toggle-item" id="tf-no"  onclick="selectFluoro('ไม่จอง')">❌ ไม่จอง</div>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" id="btn-show-confirm" onclick="openBookingModal()" disabled>
+        ตรวจสอบและยืนยัน →
+      </button>
+    </div>
+
+    <!-- ─── Step 4: สำเร็จ ─────────────────────────── -->
+    <div id="step4" class="hidden">
+      <div class="success-wrap">
+        <div class="success-icon">✅</div>
+        <div class="success-title">จองสำเร็จ!</div>
+        <div class="success-sub">ระบบบันทึกการจองและแจ้ง Admin เรียบร้อยแล้ว</div>
+      </div>
+      <div class="card" id="success-detail"></div>
+      <button class="btn btn-primary" onclick="resetBook()">📅 จองเพิ่มเติม</button>
+      <button class="btn btn-outline" onclick="switchView('my-bookings')">📋 ดูการจองของฉัน</button>
+    </div>
+  </div><!-- /content -->
+</div><!-- /view-book -->
+
+
+<!-- ╔══════════════════════════════════════════════════╗ -->
+<!-- ║  VIEW: การจองของฉัน / ยกเลิก                    ║ -->
+<!-- ╚══════════════════════════════════════════════════╝ -->
+<div id="view-my-bookings" class="hidden">
+  <div class="header">
+    <div class="header-title" id="mb-title">📋 การจองของฉัน</div>
+    <div class="header-sub" id="mb-doctor-lbl"></div>
+  </div>
+  <div class="content" id="bookings-list">
+    <div style="text-align:center;padding:40px">
+      <div class="spinner" style="margin:0 auto"></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ╔══════════════════════════════╗ -->
+<!-- ║  MODAL: ยืนยันการจอง         ║ -->
+<!-- ╚══════════════════════════════╝ -->
+<div id="modal-confirm" class="overlay hidden">
+  <div class="modal">
+    <div class="modal-title">📋 ยืนยันการจอง</div>
+    <div id="modal-confirm-body"></div>
+    <button class="btn btn-primary" id="btn-final-submit" onclick="submitBooking()">
+      ✅ ยืนยัน
+    </button>
+    <button class="btn btn-outline" onclick="closeModal('modal-confirm')" style="margin-top:6px">
+      แก้ไข
+    </button>
+  </div>
+</div>
+
+<!-- ╔══════════════════════════════╗ -->
+<!-- ║  MODAL: ยืนยันยกเลิก         ║ -->
+<!-- ╚══════════════════════════════╝ -->
+<div id="modal-cancel" class="overlay hidden">
+  <div class="modal">
+    <div class="modal-title">❌ ยืนยันยกเลิกการจอง</div>
+    <div id="modal-cancel-body" style="font-size:14px;line-height:1.7;color:var(--text-light);margin-bottom:16px"></div>
+    <button class="btn btn-danger solid" id="btn-do-cancel" onclick="doCancel()">ยืนยันยกเลิก</button>
+    <button class="btn btn-outline" onclick="closeModal('modal-cancel')" style="margin-top:6px">ปิด</button>
+  </div>
+</div>
+
+
+<script>
+const { esc } = Broncho;
+
+// ══════════════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════════════
+const S = {
+  prefetched:    null,    // slots ที่โหลดขนานกับ checkAuth
+  myBookings:    [],
+  doctorName:    null,
+  weekOffset:    0,
+  allSlots:      [],      // raw slot array from server
+  selectedDate:  null,    // "yyyy-MM-dd"
+  selectedSlot:  null,    // slot object
+  procedure:     null,    // "Bronchoscopy" | "Pleuroscopy"
+  subProcs:      [],      // ["BAL","TBBx","EBUS TBNA"]
+  anesthesia:    null,    // "MAC" | "GA"
+  fluoroscope:   null,    // "จอง" | "ไม่จอง"
+  cancelTarget:  null,    // { eventId, rowIndex, dateTime, procedure }
+};
+
+// Sub-proc meta
+const SUB_PROCS = [
+  { id: 'BAL',  cbId: 'cb-BAL',  label: 'BAL'      },
+  { id: 'TBBx', cbId: 'cb-TBBx', label: 'TBBx'     },
+  { id: 'EBUS', cbId: 'cb-EBUS', label: 'EBUS TBNA' },
+];
+
+// ══════════════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════════════
+async function init() {
+  const status = t => { document.getElementById('load-status').textContent = t; };
+  showEl('loading');
+  document.getElementById('load-spinner').classList.remove('hidden');
+  document.getElementById('btn-retry').classList.add('hidden');
+  try {
+    if (!(await Broncho.startLiff(status))) return;      // กำลัง redirect ไป login
+    status('กำลังตรวจสอบสิทธิ์และโหลดตาราง...');
+    const page = Broncho.getPage();
+    // ขนานกัน: ตรวจสิทธิ์ + โหลดตารางว่าง (เดิมทำทีละขั้น)
+    const [auth, slots] = await Promise.all([
+      Broncho.api('checkAuth'),
+      page === 'book' ? Broncho.api('getAvailableSlots', { weekOffset: 0 }).catch(() => null) : null,
+    ]);
+    if (!auth.success) throw new Error(auth.error || 'SERVER_ERROR');
+    if (!auth.authorized) { showEl('unauthorized'); return; }
+    S.doctorName = auth.name;
+    S.prefetched = (slots && slots.success) ? slots : null;
+    switchView(page);
+  } catch (err) {
+    document.getElementById('load-spinner').classList.add('hidden');
+    status(Broncho.errorText(err));
+    document.getElementById('btn-retry').classList.remove('hidden');
+    showEl('loading');
+  }
+}
+
+// ══════════════════════════════════════════════════════
+//  VIEW SWITCHING
+// ══════════════════════════════════════════════════════
+function showEl(id) {
+  ['loading','unauthorized','view-book','view-my-bookings']
+    .forEach(v => document.getElementById(v).classList.toggle('hidden', v !== id));
+}
+
+function switchView(page) {
+  if (page === 'book') {
+    showEl('view-book');
+    document.getElementById('book-doctor-lbl').textContent = '👨‍⚕️ ' + S.doctorName;
+    goToStep(1);
+    loadSlots();
+  } else {
+    const isCancel = page === 'cancel';
+    showEl('view-my-bookings');
+    document.getElementById('mb-title').textContent    = isCancel ? '❌ ยกเลิกการจอง' : '📋 การจองของฉัน';
+    document.getElementById('mb-doctor-lbl').textContent = '👨‍⚕️ ' + S.doctorName;
+    loadMyBookings(isCancel);
+  }
+}
+
+// ══════════════════════════════════════════════════════
+//  STEP MANAGEMENT
+// ══════════════════════════════════════════════════════
+function goToStep(n) {
+  [1,2,3,4].forEach(i =>
+    document.getElementById('step'+i).classList.toggle('hidden', i !== n)
+  );
+  [1,2,3].forEach(i => {
+    const el = document.getElementById('dot'+i);
+    el.classList.remove('active','done');
+    if (i < n)      el.classList.add('done');
+    else if (i === n) el.classList.add('active');
+  });
+  if (n === 2 && S.selectedDate) renderSlotGrid();
+}
+
+// ══════════════════════════════════════════════════════
+//  LOAD & RENDER SLOTS
+// ══════════════════════════════════════════════════════
+async function loadSlots() {
+  document.getElementById('date-list').innerHTML =
+    '<div style="text-align:center;padding:24px"><div class="spinner" style="margin:0 auto"></div></div>';
+  updateWeekLabel();
+
+  try {
+    let res = null;
+    if (S.prefetched && S.weekOffset === 0) { res = S.prefetched; S.prefetched = null; }
+    else res = await Broncho.api('getAvailableSlots', { weekOffset: S.weekOffset });
+    if (!res.success) throw new Error(res.error);
+    S.allSlots = res.slots;
+    renderDateList();
+  } catch (err) {
+    document.getElementById('date-list').innerHTML =
+      `<div style="text-align:center;padding:20px"><p style="color:var(--red)">${esc(Broncho.errorText(err))}</p>
+       <button class="btn btn-outline" style="max-width:200px" onclick="loadSlots()">🔄 ลองใหม่</button></div>`;
+  }
+}
+
+function updateWeekLabel() {
+  const w = S.weekOffset;
+  document.getElementById('week-label').textContent =
+    w === 0 ? '4 สัปดาห์ถัดไป' : `ล่วงหน้า ${w*4+1}–${(w+1)*4} สัปดาห์`;
+  document.getElementById('btn-prev-week').disabled = w <= 0;
+}
+
+function changeWeek(d) {
+  S.weekOffset = Math.max(0, S.weekOffset + d);
+  S.selectedDate = null; S.selectedSlot = null;
+  loadSlots();
+}
+
+function renderDateList() {
+  // Group by date
+  const map = {};
+  S.allSlots.forEach(s => {
+    if (!map[s.dateKey]) map[s.dateKey] = { label: s.dateLabel, slots: [] };
+    map[s.dateKey].slots.push(s);
+  });
+
+  const keys = Object.keys(map).sort();
+
+  if (!keys.length) {
+    document.getElementById('date-list').innerHTML =
+      '<div class="empty"><div class="ei">📅</div><p>ไม่มีวันที่ว่างในช่วงนี้<br>ลองเลือกช่วงเวลาอื่น</p></div>';
+    return;
+  }
+
+  let html = '';
+  keys.forEach(key => {
+    const { label, slots } = map[key];
+    const avail = slots.filter(s => s.available).length;
+    const total = slots.length;
+    let infoColor, infoText;
+    if (avail === 0)  { infoColor = 'var(--red)';    infoText = `เต็มทุก slot`; }
+    else if (avail <= 2) { infoColor = 'var(--orange)'; infoText = `ว่าง ${avail}/${total} slot`; }
+    else             { infoColor = 'var(--green)';  infoText = `ว่าง ${avail}/${total} slot`; }
+
+    html += `
+      <div class="date-card ${S.selectedDate === key ? 'selected' : ''}" onclick="pickDate('${esc(key)}')">
+        <div>
+          <div class="dc-date">📅 ${esc(label)}</div>
+        </div>
+        <div class="dc-info" style="color:${infoColor}">● ${infoText}</div>
+      </div>`;
+  });
+
+  document.getElementById('date-list').innerHTML = html;
+}
+
+function pickDate(key) {
+  S.selectedDate = key;
+  S.selectedSlot = null;
+  renderDateList();
+
+  const first = S.allSlots.find(s => s.dateKey === key);
+  document.getElementById('selected-date-label').textContent = first ? '📅 ' + first.dateLabel : key;
+  document.getElementById('btn-to-step3').disabled = true;
+  goToStep(2);
+}
+
+function renderSlotGrid() {
+  const daySlots = S.allSlots.filter(s => s.dateKey === S.selectedDate);
+  let html = '';
+
+  daySlots.forEach((slot, idx) => {
+    const isSel = S.selectedSlot && S.selectedSlot.startISO === slot.startISO;
+    if (slot.available) {
+      html += `
+        <button class="slot-btn available ${isSel ? 'selected' : ''}"
+                onclick="pickSlot(${idx})">
+          ${esc(slot.timeStr)}
+          <span class="slot-sub">🟢 ว่าง</span>
+        </button>`;
+    } else {
+      html += `
+        <button class="slot-btn booked" disabled>
+          ${esc(slot.timeStr)}
+          <span class="slot-sub">🔴 เต็ม</span>
+        </button>`;
+    }
+  });
+
+  document.getElementById('slot-grid').innerHTML = html;
+}
+
+function pickSlot(idx) {
+  const slot = S.allSlots.filter(s => s.dateKey === S.selectedDate)[idx];
+  S.selectedSlot = slot;
+  document.getElementById('btn-to-step3').disabled = false;
+  // Update summary
+  document.getElementById('slot-summary-text').textContent =
+    '🗓 ' + slot.dateLabel + '  ⏰ ' + slot.timeStr;
+  renderSlotGrid(); // re-render to update selected state
+}
+
+// ══════════════════════════════════════════════════════
+//  PROCEDURE SELECTION
+// ══════════════════════════════════════════════════════
+function selectProc(proc) {
+  S.procedure = proc;
+  S.subProcs  = [];
+
+  document.getElementById('proc-broncho').classList.toggle('selected', proc === 'Bronchoscopy');
+  document.getElementById('proc-pleuro').classList.toggle('selected', proc === 'Pleuroscopy');
+  document.getElementById('sub-proc-group').classList.toggle('hidden', proc !== 'Bronchoscopy');
+
+  // Reset checkboxes
+  SUB_PROCS.forEach(sp => {
+    const el = document.getElementById(sp.cbId);
+    el.classList.remove('checked');
+    el.querySelector('.ci').textContent = '☐';
+  });
+
+  validateStep3();
+}
+
+function toggleSub(label) {
+  const sp  = SUB_PROCS.find(s => s.label === label);
+  const idx = S.subProcs.indexOf(label);
+  const el  = document.getElementById(sp.cbId);
+
+  if (idx === -1) {
+    S.subProcs.push(label);
+    el.classList.add('checked');
+    el.querySelector('.ci').textContent = '☑';
+  } else {
+    S.subProcs.splice(idx, 1);
+    el.classList.remove('checked');
+    el.querySelector('.ci').textContent = '☐';
+  }
+  validateStep3();
+}
+
+function selectAnesthesia(val) {
+  S.anesthesia = val;
+  ['tm-mac','tm-ga'].forEach(id => document.getElementById(id).classList.remove('active'));
+  document.getElementById(val === 'MAC' ? 'tm-mac' : 'tm-ga').classList.add('active');
+  validateStep3();
+}
+
+function selectFluoro(val) {
+  S.fluoroscope = val;
+  ['tf-yes','tf-no'].forEach(id => document.getElementById(id).classList.remove('active'));
+  document.getElementById(val === 'จอง' ? 'tf-yes' : 'tf-no').classList.add('active');
+  validateStep3();
+}
+
+function validateStep3() {
+  const hn      = document.getElementById('inp-hn').value.trim();
+  const patient = document.getElementById('inp-patient').value.trim();
+  let ok = !!S.procedure && /^[A-Za-z0-9\-]{1,15}$/.test(hn) && !!patient && !!S.anesthesia && !!S.fluoroscope;
+  if (S.procedure === 'Bronchoscopy' && S.subProcs.length === 0) ok = false;
+  document.getElementById('btn-show-confirm').disabled = !ok;
+}
+
+// ══════════════════════════════════════════════════════
+//  BOOKING CONFIRM MODAL
+// ══════════════════════════════════════════════════════
+function buildProcTitle() {
+  if (S.procedure === 'Bronchoscopy' && S.subProcs.length > 0)
+    return `Bronchoscopy (${S.subProcs.join(', ')})`;
+  return S.procedure || '—';
+}
+
+function openBookingModal() {
+  const hn      = document.getElementById('inp-hn').value.trim();
+  const patient = document.getElementById('inp-patient').value.trim();
+  const proc    = buildProcTitle();
+
+  const diag = document.getElementById('inp-diagnosis').value.trim();
+  document.getElementById('modal-confirm-body').innerHTML = `
+    <div class="confirm-row"><span class="confirm-lbl">แพทย์</span>      <span class="confirm-val">${esc(S.doctorName)}</span></div>
+    <div class="confirm-row"><span class="confirm-lbl">วันที่</span>      <span class="confirm-val">${esc(S.selectedSlot.dateLabel)}</span></div>
+    <div class="confirm-row"><span class="confirm-lbl">เวลา</span>        <span class="confirm-val">${esc(S.selectedSlot.timeStr)}</span></div>
+    <div class="confirm-row"><span class="confirm-lbl">หัตถการ</span>     <span class="confirm-val">${esc(proc)}</span></div>
+    <div class="confirm-row"><span class="confirm-lbl">HN</span>          <span class="confirm-val">${esc(hn)}</span></div>
+    <div class="confirm-row"><span class="confirm-lbl">ผู้ป่วย</span>     <span class="confirm-val">${esc(patient)}</span></div>
+    ${diag ? `<div class="confirm-row"><span class="confirm-lbl">Diagnosis</span>  <span class="confirm-val">${esc(diag)}</span></div>` : ''}
+    <div class="confirm-row"><span class="confirm-lbl">Anesthesia</span>  <span class="confirm-val">${esc(S.anesthesia)}</span></div>
+    <div class="confirm-row"><span class="confirm-lbl">Fluoroscopy</span> <span class="confirm-val">${esc(S.fluoroscope)}</span></div>
+  `;
+  document.getElementById('modal-confirm').classList.remove('hidden');
+}
+
+async function submitBooking() {
+  const btn = document.getElementById('btn-final-submit');
+  btn.disabled = true; btn.textContent = '⏳ กำลังจอง...';
+
+  const hn      = document.getElementById('inp-hn').value.trim();
+  const patient = document.getElementById('inp-patient').value.trim();
+
+  try {
+    const res = await Broncho.api('createBooking', {
+      slotStart:      S.selectedSlot.startISO,
+      slotEnd:        S.selectedSlot.endISO,
+      procedure:      S.procedure,
+      subProcedures:  S.subProcs,
+      hn:             hn,
+      patientName:    patient,
+      diagnosis:      document.getElementById('inp-diagnosis').value.trim(),
+      anesthesicMode: S.anesthesia,
+      fluoroscope:    S.fluoroscope,
+    });
+
+    closeModal('modal-confirm');
+
+    if (!res.success) {
+      if (res.error === 'SLOT_TAKEN') {
+        Broncho.toast('⚠️ slot นี้ถูกจองไปแล้ว กรุณาเลือก slot ใหม่', true);
+        S.selectedSlot = null;
+        await loadSlots();
+        goToStep(2);
+      } else {
+        Broncho.toast(Broncho.errorText(new Error(res.error)), true);
+      }
+      return;
+    }
+
+    // Show success
+    document.getElementById('success-detail').innerHTML = `
+      <div class="confirm-row"><span class="confirm-lbl">แพทย์</span>  <span class="confirm-val">${esc(res.doctorName)}</span></div>
+      <div class="confirm-row"><span class="confirm-lbl">วันเวลา</span> <span class="confirm-val">${esc(res.dateTimeStr)} น.</span></div>
+      <div class="confirm-row"><span class="confirm-lbl">หัตถการ</span> <span class="confirm-val">${esc(res.eventTitle)}</span></div>
+      <div class="confirm-row"><span class="confirm-lbl">HN</span>      <span class="confirm-val">${esc(res.hn)}</span></div>
+      <div class="confirm-row"><span class="confirm-lbl">ผู้ป่วย</span> <span class="confirm-val">${esc(res.patientName)}</span></div>
+    `;
+    goToStep(4);
+
+  } catch (err) {
+    closeModal('modal-confirm');
+    Broncho.toast(Broncho.errorText(err) + ' — โปรดตรวจ "การจองของฉัน" ก่อนจองซ้ำ', true);
+  } finally {
+    btn.disabled = false; btn.textContent = '✅ ยืนยัน';
+  }
+}
+
+function resetBook() {
+  S.selectedDate = null; S.selectedSlot = null;
+  S.procedure = null; S.subProcs = [];
+  document.getElementById('inp-hn').value = '';
+  document.getElementById('inp-patient').value = '';
+  document.getElementById('inp-diagnosis').value = '';
+  S.anesthesia = null; S.fluoroscope = null;
+  ['tm-mac','tm-ga','tf-yes','tf-no'].forEach(id => document.getElementById(id).classList.remove('active'));
+  document.getElementById('proc-broncho').classList.remove('selected');
+  document.getElementById('proc-pleuro').classList.remove('selected');
+  document.getElementById('sub-proc-group').classList.add('hidden');
+  loadSlots(); goToStep(1);
+}
+
+// ══════════════════════════════════════════════════════
+//  MY BOOKINGS
+// ══════════════════════════════════════════════════════
+async function loadMyBookings(showCancel = false) {
+  document.getElementById('bookings-list').innerHTML =
+    '<div style="text-align:center;padding:40px"><div class="spinner" style="margin:0 auto"></div></div>';
+
+  try {
+    const res = await Broncho.api('getUserBookings');
+    if (!res.success) throw new Error(res.error);
+
+    if (!res.bookings.length) {
+      document.getElementById('bookings-list').innerHTML = `
+        <div class="empty">
+          <div class="ei">📭</div>
+          <p>ไม่มีการจองที่กำลังจะมาถึง</p>
+          <button class="btn btn-primary" style="margin-top:16px;max-width:240px"
+            onclick="switchView('book')">📅 จองห้องเลย</button>
+        </div>`;
+      return;
+    }
+
+    S.myBookings = res.bookings;
+    let html = '';
+    res.bookings.forEach((b, i) => {
+      html += `
+        <div class="booking-card">
+          <div class="bc-date">🗓 ${esc(b.dateTime)} น.</div>
+          <div class="bc-proc">🔬 ${esc(b.procedure)}</div>
+          <div class="bc-pt">👤 ${esc(b.patientName)} &nbsp;|&nbsp; HN: ${esc(b.hn)}</div>
+          ${showCancel ? `
+          <button class="btn btn-danger btn-cancel-booking" data-idx="${i}" style="margin-top:10px;font-size:13px">
+            ❌ ยกเลิกการจองนี้
+          </button>` : ''}
+        </div>`;
+    });
+    document.getElementById('bookings-list').innerHTML = html;
+    document.querySelectorAll('.btn-cancel-booking').forEach(btn =>
+      btn.addEventListener('click', () => openCancelModal(S.myBookings[+btn.dataset.idx])));
+
+  } catch (err) {
+    document.getElementById('bookings-list').innerHTML =
+      `<div style="text-align:center;padding:20px"><p style="color:var(--red)">${esc(Broncho.errorText(err))}</p>
+       <button class="btn btn-outline" style="max-width:200px" onclick="loadMyBookings(${showCancel})">🔄 ลองใหม่</button></div>`;
+  }
+}
+
+// ══════════════════════════════════════════════════════
+//  CANCEL BOOKING
+// ══════════════════════════════════════════════════════
+function openCancelModal(b) {
+  S.cancelTarget = { rowIndex: b.rowIndex };
+  document.getElementById('modal-cancel-body').innerHTML =
+    `<strong>วันเวลา:</strong> ${esc(b.dateTime)} น.<br>` +
+    `<strong>หัตถการ:</strong> ${esc(b.procedure)}<br><br>` +
+    `<span style="color:var(--red)">⚠️ การยกเลิกนี้ไม่สามารถเรียกคืนได้</span>`;
+  document.getElementById('modal-cancel').classList.remove('hidden');
+}
+
+async function doCancel() {
+  const btn = document.getElementById('btn-do-cancel');
+  btn.disabled = true; btn.textContent = '⏳ กำลังยกเลิก...';
+  try {
+    const res = await Broncho.api('cancelBooking', { rowIndex: S.cancelTarget.rowIndex });
+    closeModal('modal-cancel');
+    if (res.success) {
+      Broncho.toast('✅ ยกเลิกการจองสำเร็จ');
+      loadMyBookings(true);
+    } else {
+      Broncho.toast(Broncho.errorText(new Error(res.error)), true);
+    }
+  } catch (err) {
+    closeModal('modal-cancel');
+    Broncho.toast(Broncho.errorText(err), true);
+  } finally {
+    btn.disabled = false; btn.textContent = 'ยืนยันยกเลิก';
+  }
+}
+
+// ══════════════════════════════════════════════════════
+//  MODAL HELPERS
+// ══════════════════════════════════════════════════════
+function closeModal(id) {
+  document.getElementById(id).classList.add('hidden');
+}
+// Close modal when clicking overlay background
+document.querySelectorAll('.overlay').forEach(el => {
+  el.addEventListener('click', e => { if (e.target === el) el.classList.add('hidden'); });
+});
+
+// ══════════════════════════════════════════════════════
+//  START
+// ══════════════════════════════════════════════════════
+window.addEventListener('load', init);
+</script>
+</body>
+</html>
