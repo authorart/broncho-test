@@ -73,7 +73,7 @@ window.Broncho = (() => {
     let lastErr;
     for (let i = 0; i < attempts; i++) {
       try {
-        const data = await fetchJson({ action, params: { ...params, idToken: liff.getIDToken() } }, 20000);
+        const data = await fetchJson({ action, params: { ...params, idToken: liff.getIDToken() } }, 45000);   // Apps Script cold start อาจนาน 30+ วินาที
         if (data && (data.error === 'TOKEN_EXPIRED' || data.error === 'TOKEN_INVALID' || data.error === 'TOKEN_MISSING')) {
           if (!liff.isInClient()) { liff.logout(); liff.login({ redirectUri: location.href }); }
           throw new Error('SESSION_EXPIRED');
@@ -89,7 +89,7 @@ window.Broncho = (() => {
   }
 
   const MESSAGES = {
-    TIMEOUT:            'เซิร์ฟเวอร์ตอบช้าเกินไป กรุณาลองใหม่',
+    TIMEOUT:            'เซิร์ฟเวอร์ตอบช้าเกินไป (เกิน 45 วินาที) กรุณากด "ลองใหม่" — ครั้งถัดไปมักเร็วขึ้น',
     SERVER_404:         'ไม่พบเซิร์ฟเวอร์ (404) — ตรวจสอบ SCRIPT_URL / การ deploy ของ Apps Script',
     SESSION_EXPIRED:    'เซสชันหมดอายุ กรุณาปิดแล้วเปิดหน้านี้ใหม่จาก LINE',
     SCRIPT_URL_NOT_SET: 'ยังไม่ได้ตั้งค่า SCRIPT_URL ใน config.js',

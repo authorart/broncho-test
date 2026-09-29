@@ -517,18 +517,21 @@ async function init() {
   try {
     if (!(await Broncho.startLiff(status))) return;      // กำลัง redirect ไป login
     status('กำลังตรวจสอบสิทธิ์และโหลดตาราง...');
+    const slowTimer = setTimeout(() => status('เซิร์ฟเวอร์กำลังเริ่มทำงาน ครั้งแรกอาจใช้เวลาถึง 30–40 วินาที กรุณารอสักครู่...'), 8000);
     const page = Broncho.getPage();
     // ขนานกัน: ตรวจสิทธิ์ + โหลดตารางว่าง (เดิมทำทีละขั้น)
     const [auth, slots] = await Promise.all([
       Broncho.api('checkAuth'),
       page === 'book' ? Broncho.api('getAvailableSlots', { weekOffset: 0 }).catch(() => null) : null,
     ]);
+    clearTimeout(slowTimer);
     if (!auth.success) throw new Error(auth.error || 'SERVER_ERROR');
     if (!auth.authorized) { showEl('unauthorized'); return; }
     S.doctorName = auth.name;
     S.prefetched = (slots && slots.success) ? slots : null;
     switchView(page);
   } catch (err) {
+    if (typeof slowTimer !== 'undefined') clearTimeout(slowTimer);
     document.getElementById('load-spinner').classList.add('hidden');
     status(Broncho.errorText(err));
     document.getElementById('btn-retry').classList.remove('hidden');
