@@ -516,6 +516,8 @@ async function init() {
   document.getElementById('btn-retry').classList.add('hidden');
   try {
     if (!(await Broncho.startLiff(status))) return;      // กำลัง redirect ไป login
+    const goPage = Broncho.getPage();
+    if (goPage === 'record' || goPage === 'dashboard') { status('กำลังเปิดหน้า...'); location.replace(goPage + '.html'); return; }
     status('กำลังตรวจสอบสิทธิ์และโหลดตาราง...');
     const slowTimer = setTimeout(() => status('เซิร์ฟเวอร์กำลังเริ่มทำงาน ครั้งแรกอาจใช้เวลาถึง 30–40 วินาที กรุณารอสักครู่...'), 8000);
     const page = Broncho.getPage();

@@ -29,7 +29,7 @@ window.Broncho = (() => {
       const st = q.get('liff.state');
       if (st) { try { p = new URLSearchParams(st.replace(/^\?/, '')).get('page'); } catch (_) {} }
     }
-    return ['book', 'my', 'cancel'].includes(p) ? p : 'book';
+    return ['book', 'my', 'cancel', 'record', 'dashboard'].includes(p) ? p : 'book';
   }
 
   async function startLiff(setStatus) {
@@ -64,7 +64,7 @@ window.Broncho = (() => {
   }
 
   const READS = ['checkAuth', 'getAvailableSlots', 'getUserBookings', 'getBookingsByDate',
-                 'getPriceList', 'getBookingScopes', 'getDashboardData', 'getProcedureData', 'getDoctorList'];
+                 'getPriceList', 'getBookingScopes', 'getDashboardData', 'getProcedureData', 'getDoctorList', 'getRoomQueue'];
 
   // คืน JSON จาก server (อาจเป็น {success:false,error}); throw เมื่อเครือข่าย/timeout/โทเคนหมดอายุ
   async function api(action, params = {}) {

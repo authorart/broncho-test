@@ -3,834 +3,569 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Bronchoscopy Room · Dashboard</title>
-<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<title>Dashboard — ห้องส่องกล้องหลอดลม</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script src="config.js"></script>
 <script src="common.js"></script>
 <style>
-/* ── Tokens ────────────────────────────────────────── */
 :root{
-  --bg:#f0f4f8;--surface:#fff;--border:#d1dbe8;--border2:#e8eef5;
-  --text:#1a2332;--text2:#3d5166;--text3:#6b7c93;
-  --teal:#0891b2;--teal-lt:#e0f7fa;--teal-dk:#0e7490;
-  --green:#059669;--green-lt:#d1fae5;
-  --blue:#1d6fa4;--blue-lt:#dbeafe;
-  --orange:#d97706;--orange-lt:#fef3c7;
-  --red:#dc2626;--red-lt:#fee2e2;
-  --purple:#7c3aed;--purple-lt:#ede9fe;
-  --shadow:0 2px 10px rgba(0,0,0,.07);
-  --shadow2:0 4px 20px rgba(0,0,0,.10);
-  --r:12px;--r2:16px;
+  --bg:#f3f6fb; --surface:#fff; --line:#e3e9f2; --line2:#eef2f8;
+  --ink:#152238; --ink2:#51627a; --ink3:#8595ab;
+  --brand:#0b7fa8; --brand-dk:#075f80; --brand-lt:#e3f4fa;
+  --green:#12945f; --green-lt:#dcf5e9; --amber:#d98a0b; --amber-lt:#fdf0d6;
+  --red:#d6343f; --red-lt:#fde5e7; --violet:#6d4ad6; --violet-lt:#ece7fb;
+  --shadow:0 1px 2px rgba(16,32,64,.05),0 6px 20px rgba(16,32,64,.06);
+  --r:14px;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{font-size:16px}
-body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.6}
-button{cursor:pointer;font-family:inherit}
+html{scroll-behavior:smooth}
+body{font-family:'Sarabun',-apple-system,'Segoe UI',sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased}
 .hidden{display:none!important}
+button{font-family:inherit;cursor:pointer}
 
-/* ── Loading ── */
-#loading-overlay{
-  position:fixed;inset:0;background:rgba(240,244,248,.92);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;
-  z-index:999;backdrop-filter:blur(3px);
-}
-#loading-overlay.hidden{display:none}
-.spinner{width:48px;height:48px;border-radius:50%;border:4px solid var(--border);border-top-color:var(--teal);animation:spin .7s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-.loading-text{font-size:17px;color:var(--text2);font-weight:500}
-
-/* ── Topbar ── */
-.topbar{background:var(--surface);border-bottom:2px solid var(--border);box-shadow:var(--shadow);position:sticky;top:0;z-index:100}
-.topbar-inner{max-width:1300px;margin:0 auto;padding:0 20px;height:66px;display:flex;align-items:center;gap:14px}
-.topbar-icon{width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--teal),var(--teal-dk));display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
-.topbar-title{font-size:19px;font-weight:800;color:var(--text)}
-.topbar-sub{font-size:14px;color:var(--text3);margin-top:1px}
-.topbar-right{margin-left:auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.clock-badge{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:7px 14px;font-size:14px;font-weight:600;color:var(--text2);white-space:nowrap}
-.btn-refresh{background:var(--teal);color:white;border:none;border-radius:8px;padding:9px 18px;font-size:15px;font-weight:700;transition:background .2s}
-.btn-refresh:hover{background:var(--teal-dk)}
+/* ── Header ── */
+.top{background:linear-gradient(120deg,#063e57 0%,#0b7fa8 60%,#19a6c9 100%);color:#fff;position:sticky;top:0;z-index:40;box-shadow:0 4px 18px rgba(6,62,87,.25)}
+.top-in{max-width:1280px;margin:0 auto;padding:14px 20px;display:flex;align-items:center;gap:14px}
+.logo{width:42px;height:42px;border-radius:12px;background:rgba(255,255,255,.16);display:grid;place-items:center;font-size:22px}
+.top h1{font-size:18px;font-weight:700;letter-spacing:.2px}
+.top .sub{font-size:12px;opacity:.8}
+.top-r{margin-left:auto;display:flex;align-items:center;gap:10px}
+.chip{background:rgba(255,255,255,.14);border-radius:999px;padding:6px 12px;font-size:12.5px;white-space:nowrap}
+.btn-ref{background:#fff;color:var(--brand-dk);border:0;border-radius:10px;padding:8px 14px;font-weight:700;font-size:13px}
+.btn-ref:active{transform:scale(.97)}
 
 /* ── Tabs ── */
-.tab-bar{background:var(--surface);border-bottom:2px solid var(--border);position:sticky;top:66px;z-index:90}
-.tab-bar-inner{max-width:1300px;margin:0 auto;padding:0 20px;display:flex;gap:4px}
-.tab-btn{
-  padding:14px 22px;font-size:15px;font-weight:700;color:var(--text3);
-  border:none;background:none;border-bottom:3px solid transparent;
-  transition:all .2s;margin-bottom:-2px;
-}
-.tab-btn:hover{color:var(--text)}
-.tab-btn.active{color:var(--teal);border-bottom-color:var(--teal)}
+.tabs{background:var(--surface);border-bottom:1px solid var(--line);position:sticky;top:70px;z-index:30}
+.tabs-in{max-width:1280px;margin:0 auto;padding:0 20px;display:flex;gap:4px;overflow-x:auto}
+.tab{border:0;background:none;padding:14px 18px;font-size:14.5px;font-weight:600;color:var(--ink2);border-bottom:3px solid transparent;white-space:nowrap}
+.tab:hover{color:var(--brand)}
+.tab.active{color:var(--brand-dk);border-bottom-color:var(--brand)}
 
-/* ── Main ── */
-.main{max-width:1300px;margin:0 auto;padding:24px 20px 48px;display:flex;flex-direction:column;gap:20px}
+.wrap{max-width:1280px;margin:0 auto;padding:20px}
+.card{background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow);padding:18px}
+.card h3{font-size:14.5px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.card h3 .badge{margin-left:auto;font-size:12px;font-weight:600;color:var(--ink2);background:var(--line2);padding:3px 10px;border-radius:999px}
+.grid{display:grid;gap:16px}
+.g-kpi{grid-template-columns:repeat(auto-fit,minmax(190px,1fr));margin-bottom:16px}
+.g-2{grid-template-columns:repeat(auto-fit,minmax(340px,1fr));margin-bottom:16px}
 
-/* ── Filter Card ── */
-.filter-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);box-shadow:var(--shadow);padding:20px 22px}
-.filter-title{font-size:16px;font-weight:800;color:var(--text);margin-bottom:14px}
-.period-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
-.pill{padding:8px 18px;border-radius:50px;border:2px solid var(--border);background:white;color:var(--text2);font-size:14px;font-weight:600;transition:all .2s}
-.pill:hover{border-color:var(--teal);color:var(--teal)}
-.pill.active{background:var(--teal);border-color:var(--teal);color:white}
-.filter-row{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end}
-.filter-group{display:flex;flex-direction:column;gap:5px;flex:1;min-width:150px}
-.filter-label{font-size:13px;font-weight:700;color:var(--text2)}
-.filter-ctrl{
-  background:var(--bg);border:2px solid var(--border);border-radius:var(--r);
-  padding:10px 13px;font-family:'Sarabun',sans-serif;font-size:15px;color:var(--text);
-  outline:none;transition:border-color .2s;width:100%;
-  appearance:none;-webkit-appearance:none;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b7c93' stroke-width='1.8' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-  background-repeat:no-repeat;background-position:right 12px center;padding-right:34px;
-}
-.filter-ctrl:focus{border-color:var(--teal);background-color:white}
-.btn-apply{background:var(--teal);color:white;border:none;border-radius:var(--r);padding:11px 24px;font-size:15px;font-weight:700;transition:background .2s;white-space:nowrap;align-self:flex-end}
-.btn-apply:hover{background:var(--teal-dk)}
-.btn-export-csv{background:white;color:var(--text2);border:2px solid var(--border);border-radius:var(--r);padding:11px 18px;font-size:15px;font-weight:600;transition:all .2s;white-space:nowrap;align-self:flex-end}
-.btn-export-csv:hover{border-color:var(--teal);color:var(--teal)}
-.btn-export-pdf{background:white;color:var(--red);border:2px solid var(--red-lt);border-radius:var(--r);padding:11px 18px;font-size:15px;font-weight:600;transition:all .2s;white-space:nowrap;align-self:flex-end}
-.btn-export-pdf:hover{background:var(--red-lt)}
+/* ── Filters ── */
+.filters{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:flex-end;margin-bottom:16px}
+.pills{display:flex;gap:6px;flex-wrap:wrap}
+.pill{border:1px solid var(--line);background:var(--surface);color:var(--ink2);padding:7px 14px;border-radius:999px;font-size:13px;font-weight:600}
+.pill.active{background:var(--brand);border-color:var(--brand);color:#fff}
+.fg{display:flex;flex-direction:column;gap:3px}
+.fg label{font-size:11.5px;color:var(--ink3);font-weight:600}
+.ctl{border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px 10px;font-size:13.5px;font-family:inherit;color:var(--ink);min-width:140px}
+.ctl:focus{outline:2px solid var(--brand-lt);border-color:var(--brand)}
+.btn{border:0;border-radius:10px;padding:9px 16px;font-size:13.5px;font-weight:700}
+.btn-p{background:var(--brand);color:#fff}
+.btn-o{background:#fff;color:var(--brand-dk);border:1px solid var(--brand)}
+.sp{flex:1}
 
 /* ── KPI ── */
-.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
-@media(max-width:800px){.kpi-row{grid-template-columns:repeat(2,1fr)}}
-.kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);box-shadow:var(--shadow);padding:20px 22px;position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s}
-.kpi:hover{transform:translateY(-3px);box-shadow:var(--shadow2)}
-.kpi-bar{position:absolute;top:0;left:0;right:0;height:5px;background:var(--accent,var(--teal))}
-.kpi-icon{width:44px;height:44px;border-radius:10px;background:var(--accent-lt,var(--teal-lt));display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:10px}
-.kpi-value{font-size:40px;font-weight:800;color:var(--accent,var(--teal));letter-spacing:-.03em;line-height:1}
-.kpi-label{font-size:15px;font-weight:700;color:var(--text2);margin-top:6px}
-.kpi-sub{font-size:13px;color:var(--text3);margin-top:2px}
+.kpi{display:flex;gap:14px;align-items:center}
+.kpi .ic{width:46px;height:46px;border-radius:13px;display:grid;place-items:center;font-size:22px;flex-shrink:0}
+.kpi .v{font-size:27px;font-weight:800;line-height:1.05}
+.kpi .l{font-size:12.5px;color:var(--ink2);margin-top:2px}
+.kpi .n{font-size:11.5px;color:var(--ink3)}
+.ic-b{background:var(--brand-lt)}.ic-g{background:var(--green-lt)}.ic-a{background:var(--amber-lt)}.ic-r{background:var(--red-lt)}.ic-v{background:var(--violet-lt)}
 
-/* ── Panel ── */
-.panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);box-shadow:var(--shadow);padding:22px}
-.panel-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:8px}
-.panel-title{font-size:17px;font-weight:800;color:var(--text);display:flex;align-items:center;gap:8px}
-.panel-sub{font-size:13px;color:var(--text3)}
-.badge{background:var(--bg);border:1px solid var(--border);border-radius:20px;padding:3px 12px;font-size:13px;font-weight:600;color:var(--text2)}
+/* ── Calendar (room queue) ── */
+.cal-head,.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.cal-head div{font-size:12px;font-weight:700;color:var(--ink3);text-align:center;padding:4px 0}
+.cell{border:1px solid var(--line);border-radius:10px;padding:8px 8px 7px;min-height:86px;background:#fff;text-align:left;display:flex;flex-direction:column;gap:5px;transition:transform .12s,box-shadow .12s}
+.cell.click:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(16,32,64,.12);cursor:pointer}
+.cell.out{opacity:.35}
+.cell.off{background:repeating-linear-gradient(135deg,#f5f7fa,#f5f7fa 6px,#eef1f6 6px,#eef1f6 12px);color:var(--ink3)}
+.cell.today{outline:2px solid var(--brand)}
+.cell.sel{box-shadow:0 0 0 3px var(--brand-lt);border-color:var(--brand)}
+.cell .d{font-size:13px;font-weight:700;display:flex;justify-content:space-between}
+.cell .d small{font-weight:600;font-size:10.5px}
+.bar{height:7px;border-radius:99px;background:var(--line2);overflow:hidden}
+.bar i{display:block;height:100%;border-radius:99px}
+.cell .t{font-size:11.5px;color:var(--ink2);font-weight:600}
+.lv-0 i{background:var(--green)}.lv-1 i{background:var(--amber)}.lv-2 i{background:var(--red)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--ink2);margin-top:12px}
+.legend span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.lg0::before{background:var(--green)}.lg1::before{background:var(--amber)}.lg2::before{background:var(--red)}.lg3::before{background:#dfe5ee}
 
-/* ── Chart grids ── */
-.chart-grid-3{display:grid;grid-template-columns:2fr 1fr 1fr;gap:16px}
-.chart-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.chart-grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
-@media(max-width:960px){.chart-grid-3{grid-template-columns:1fr}}
-@media(max-width:720px){.chart-grid-2,.chart-grid-4{grid-template-columns:1fr 1fr}}
-@media(max-width:480px){.chart-grid-4{grid-template-columns:1fr 1fr}}
-.chart-wrap{position:relative;height:230px}
-.chart-wrap.tall{height:290px}
+.slots{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.slot{border-radius:10px;padding:9px 11px;border:1px solid var(--line);font-size:12.5px}
+.slot b{display:block;font-size:14px}
+.slot.free{background:var(--green-lt);border-color:#b4e6cd;color:#0d6c45}
+.slot.busy{background:#fff}
+.slot.busy .who{color:var(--ink2)}
+.nf{display:flex;flex-wrap:wrap;gap:8px}
+.nf span{background:var(--brand-lt);color:var(--brand-dk);border-radius:10px;padding:7px 11px;font-size:13px;font-weight:600}
+.tips{list-style:none;display:grid;gap:8px}
+.tips li{background:var(--line2);border-radius:10px;padding:10px 12px;font-size:13.5px}
 
-/* ── Table ── */
-.tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
-table{width:100%;border-collapse:collapse;font-size:15px}
-thead tr{border-bottom:2px solid var(--border)}
-th{padding:12px 14px;text-align:left;font-size:12px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;background:var(--bg)}
-th:first-child{border-radius:8px 0 0 8px}
-th:last-child{border-radius:0 8px 8px 0}
-td{padding:13px 14px;border-bottom:1px solid var(--border2);vertical-align:middle;font-size:14px}
-tr:last-child td{border-bottom:none}
-tr:hover td{background:#f8fafc}
-.status{display:inline-flex;align-items:center;gap:4px;padding:5px 12px;border-radius:20px;font-size:13px;font-weight:700;white-space:nowrap}
-.status-done{background:var(--green-lt);color:#065f46}
-.status-upcoming{background:var(--blue-lt);color:#1e3a5f}
-.status-cancelled{background:var(--red-lt);color:#7f1d1d}
-.proc-tag{display:inline-block;padding:4px 11px;border-radius:6px;font-size:12px;font-weight:700;background:var(--blue-lt);color:var(--blue)}
-.proc-tag.pleuro{background:var(--orange-lt);color:#92400e}
-.empty-row td{text-align:center;padding:44px 20px;color:var(--text3);font-size:16px}
-.empty-icon{font-size:44px;margin-bottom:8px}
+/* ── Tables ── */
+.tbl-wrap{overflow:auto;max-height:520px;border:1px solid var(--line);border-radius:12px}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{position:sticky;top:0;background:#f6f9fd;text-align:left;padding:10px 12px;font-size:12px;color:var(--ink2);font-weight:700;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:10px 12px;border-bottom:1px solid var(--line2);vertical-align:top}
+tr:hover td{background:#fafcff}
+.empty{text-align:center;color:var(--ink3);padding:36px 0}
+.tag{display:inline-block;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700}
+.t-done{background:var(--green-lt);color:#0d6c45}.t-up{background:var(--brand-lt);color:var(--brand-dk)}.t-can{background:var(--red-lt);color:#a1242d}
+.t-b{background:var(--brand-lt);color:var(--brand-dk)}.t-p{background:var(--violet-lt);color:#5030b5}.t-w{background:var(--amber-lt);color:#8a5a06}
+.tbl-tools{display:flex;gap:10px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
+.tbl-tools .ctl{flex:1;max-width:320px}
+.ch{position:relative;height:270px}
 
-/* Mobile table cards */
-@media(max-width:640px){
-  thead{display:none}
-  table,tbody,tr,td{display:block;width:100%}
-  tr{background:white;border:1px solid var(--border);border-radius:var(--r);margin-bottom:8px;padding:4px 0}
-  td{padding:10px 14px;border:none;display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
-  td::before{content:attr(data-label);font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;flex-shrink:0;width:80px;padding-top:2px}
+#busy{position:fixed;inset:0;background:rgba(243,246,251,.7);backdrop-filter:blur(2px);display:grid;place-items:center;z-index:90}
+.spin{width:44px;height:44px;border:4px solid #cfe0ea;border-top-color:var(--brand);border-radius:50%;animation:sp .7s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.fade{animation:fd .35s ease both}@keyframes fd{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+@media(max-width:720px){
+  .wrap{padding:12px}.top-in{padding:12px}.chip{display:none}
+  .cell{min-height:64px;padding:5px}.cell .t{display:none}.cell .d small{display:none}
+  .tabs{top:66px}
 }
-
-/* ── Print styles ── */
-@media print{
-  .topbar,.tab-bar,.filter-card,.btn-refresh,.btn-export-csv,.btn-export-pdf,.btn-apply{display:none!important}
-  .panel{box-shadow:none;border:1px solid #ddd}
-  body{background:white}
-  .tab-content{display:block!important}
-}
-
-/* Animations */
-.fade-up{animation:fadeUp .4s ease both}
-.d1{animation-delay:.05s}.d2{animation-delay:.10s}.d3{animation-delay:.15s}.d4{animation-delay:.20s}
-@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@media print{.top,.tabs,.filters,.btn,.tbl-tools{display:none!important}body{background:#fff}.card{box-shadow:none;border:1px solid #ddd}}
 </style>
 </head>
 <body>
+<div id="busy" class="hidden"><div class="spin"></div></div>
 
-<!-- Loading -->
-<div id="loading-overlay">
-  <div class="spinner"></div>
-  <div class="loading-text">กำลังโหลดข้อมูล...</div>
-</div>
-
-<!-- Topbar -->
-<header class="topbar">
-  <div class="topbar-inner">
-    <div class="topbar-icon">🫁</div>
-    <div>
-      <div class="topbar-title">ห้องส่องกล้องหลอดลม</div>
-      <div class="topbar-sub">Dashboard</div>
-    </div>
-    <div class="topbar-right">
-      <div class="clock-badge" id="clock">—</div>
-      <button class="btn-refresh" onclick="fetchAll(false)">⟳ รีเฟรช</button>
-    </div>
+<header class="top"><div class="top-in">
+  <div class="logo">🫁</div>
+  <div><h1>ห้องส่องกล้องหลอดลม</h1><div class="sub">Dashboard · <span id="who">—</span></div></div>
+  <div class="top-r">
+    <div class="chip" id="clock">—</div>
+    <button class="btn-ref" onclick="refresh(false)">⟳ รีเฟรช</button>
   </div>
-</header>
+</div></header>
 
-<!-- Tab Bar -->
-<div class="tab-bar">
-  <div class="tab-bar-inner">
-    <button class="tab-btn active" id="tab-booking" onclick="switchTab('booking')">
-      📅 การจองห้อง
-    </button>
-    <button class="tab-btn" id="tab-procedure" onclick="switchTab('procedure')">
-      📋 บันทึกการส่องกล้อง
-    </button>
-  </div>
-</div>
+<nav class="tabs"><div class="tabs-in">
+  <button class="tab active" id="tab-queue"     onclick="switchTab('queue')">🗓 คิวห้อง</button>
+  <button class="tab"        id="tab-booking"   onclick="switchTab('booking')">📅 การจอง</button>
+  <button class="tab"        id="tab-procedure" onclick="switchTab('procedure')">📋 บันทึกหัตถการ</button>
+</div></nav>
 
-<!-- ══════════════════════════════════════════════════════ -->
-<!--  TAB 1: BOOKING                                        -->
-<!-- ══════════════════════════════════════════════════════ -->
-<div id="content-booking" class="tab-content">
-<main class="main">
-
-  <!-- Filter -->
-  <div class="filter-card fade-up">
-    <div class="filter-title">🔍 ตัวกรอง — การจองห้อง</div>
-    <div class="period-row">
-      <button class="pill" id="b-pill-day"   onclick="bSetPeriod('day')">📅 วันนี้</button>
-      <button class="pill" id="b-pill-week"  onclick="bSetPeriod('week')">📆 สัปดาห์นี้</button>
-      <button class="pill active" id="b-pill-month" onclick="bSetPeriod('month')">🗓 เดือนนี้</button>
-      <button class="pill" id="b-pill-year"  onclick="bSetPeriod('year')">📊 ปีนี้</button>
-      <button class="pill" id="b-pill-custom" onclick="bSetPeriod('custom')">✏️ กำหนดเอง</button>
+<!-- ═══════════ TAB: ROOM QUEUE ═══════════ -->
+<main class="wrap" id="c-queue">
+  <div class="filters">
+    <div class="pills" id="q-pills">
+      <button class="pill" data-p="week">สัปดาห์นี้</button>
+      <button class="pill active" data-p="month">เดือนนี้</button>
+      <button class="pill" data-p="next">เดือนหน้า</button>
+      <button class="pill" data-p="ahead">60 วันข้างหน้า</button>
     </div>
-    <div class="filter-row">
-      <div class="filter-group" id="b-grp-from" style="display:none">
-        <label class="filter-label">📅 จากวันที่</label>
-        <input type="date" id="b-date-from" class="filter-ctrl">
-      </div>
-      <div class="filter-group" id="b-grp-to" style="display:none">
-        <label class="filter-label">📅 ถึงวันที่</label>
-        <input type="date" id="b-date-to" class="filter-ctrl">
-      </div>
-      <div class="filter-group">
-        <label class="filter-label">👨‍⚕️ แพทย์</label>
-        <select id="b-filter-doctor" class="filter-ctrl">
-          <option value="all">แพทย์ทั้งหมด</option>
-        </select>
-      </div>
-      <div class="filter-group">
-        <label class="filter-label">🔬 หัตถการ</label>
-        <select id="b-filter-proc" class="filter-ctrl">
-          <option value="all">ทั้งหมด</option>
-          <option value="Bronchoscopy">Bronchoscopy</option>
-          <option value="Pleuroscopy">Pleuroscopy</option>
-        </select>
-      </div>
-      <button class="btn-apply" onclick="fetchBooking()">🔍 แสดงผล</button>
-      <button class="btn-export-csv" onclick="exportBookingCSV()">⬇ CSV</button>
-    </div>
+    <span class="sp"></span>
+    <span style="font-size:12.5px;color:var(--ink3)">1 วัน = 12 slot (09:00–12:00, 13:00–16:00 · slot ละ 30 นาที)</span>
   </div>
 
-  <!-- KPI -->
-  <div class="kpi-row">
-    <div class="kpi fade-up d1" style="--accent:var(--teal);--accent-lt:var(--teal-lt)">
-      <div class="kpi-bar"></div><div class="kpi-icon">📋</div>
-      <div class="kpi-value" id="b-kpi-total">—</div>
-      <div class="kpi-label">จองทั้งหมด</div><div class="kpi-sub">ในช่วงที่เลือก</div>
-    </div>
-    <div class="kpi fade-up d2" style="--accent:var(--green);--accent-lt:var(--green-lt)">
-      <div class="kpi-bar"></div><div class="kpi-icon">✅</div>
-      <div class="kpi-value" id="b-kpi-done">—</div>
-      <div class="kpi-label">ทำหัตถการแล้ว</div><div class="kpi-sub">Completed</div>
-    </div>
-    <div class="kpi fade-up d3" style="--accent:var(--blue);--accent-lt:var(--blue-lt)">
-      <div class="kpi-bar"></div><div class="kpi-icon">🕐</div>
-      <div class="kpi-value" id="b-kpi-upcoming">—</div>
-      <div class="kpi-label">รอทำหัตถการ</div><div class="kpi-sub">Upcoming</div>
-    </div>
-    <div class="kpi fade-up d4" style="--accent:var(--red);--accent-lt:var(--red-lt)">
-      <div class="kpi-bar"></div><div class="kpi-icon">❌</div>
-      <div class="kpi-value" id="b-kpi-cancelled">—</div>
-      <div class="kpi-label">ยกเลิก</div><div class="kpi-sub">Cancelled</div>
-    </div>
+  <div class="grid g-kpi">
+    <div class="card kpi"><div class="ic ic-b">🗓</div><div><div class="v" id="q-open">0</div><div class="l">วันทำการ</div><div class="n" id="q-total">— slot ทั้งหมด</div></div></div>
+    <div class="card kpi"><div class="ic ic-a">🔬</div><div><div class="v" id="q-used">0</div><div class="l">slot ที่ใช้แล้ว / จองแล้ว</div></div></div>
+    <div class="card kpi"><div class="ic ic-g">✅</div><div><div class="v" id="q-free">0</div><div class="l">slot ว่างที่ยังจองได้</div><div class="n">นับจากเวลาปัจจุบันเป็นต้นไป</div></div></div>
+    <div class="card kpi"><div class="ic ic-v">📈</div><div><div class="v"><span id="q-util">0</span>%</div><div class="l">อัตราการใช้ห้อง</div></div></div>
   </div>
 
-  <!-- Charts Row 1 -->
-  <div class="chart-grid-3 fade-up">
-    <div class="panel">
-      <div class="panel-head">
-        <div class="panel-title">📈 จำนวนการจองตามวัน</div>
-        <span class="badge" id="b-timeline-badge">—</span>
-      </div>
-      <div class="chart-wrap tall"><canvas id="b-chart-timeline"></canvas></div>
-    </div>
-    <div class="panel">
-      <div class="panel-head"><div class="panel-title">🔬 สัดส่วนหัตถการ</div></div>
-      <div class="chart-wrap"><canvas id="b-chart-proc"></canvas></div>
-    </div>
-    <div class="panel">
-      <div class="panel-head"><div class="panel-title">📊 สถานะการจอง</div></div>
-      <div class="chart-wrap"><canvas id="b-chart-status"></canvas></div>
-    </div>
+  <div class="card fade" style="margin-bottom:16px">
+    <h3>ปฏิทินการใช้ห้อง <span class="badge" id="q-range">—</span></h3>
+    <div class="cal-head"><div>จ.</div><div>อ.</div><div>พ.</div><div>พฤ.</div><div>ศ.</div><div>ส.</div><div>อา.</div></div>
+    <div class="cal" id="q-cal"></div>
+    <div class="legend"><span class="lg0">ว่างมาก (&lt;60%)</span><span class="lg1">ค่อนข้างเต็ม (60–89%)</span><span class="lg2">เกือบเต็ม/เต็ม (≥90%)</span><span class="lg3">ปิดทำการ (เสาร์-อาทิตย์/วันหยุด)</span></div>
   </div>
 
-  <!-- Charts Row 2 -->
-  <div class="chart-grid-2 fade-up">
-    <div class="panel">
-      <div class="panel-head"><div class="panel-title">👨‍⚕️ จำนวนการจองรายแพทย์</div></div>
-      <div class="chart-wrap"><canvas id="b-chart-doctor"></canvas></div>
-    </div>
-    <div class="panel">
-      <div class="panel-head">
-        <div class="panel-title">🩺 Bronchoscopy — หัตถการย่อย</div>
-        <span class="panel-sub">นับรายครั้ง</span>
-      </div>
-      <div class="chart-wrap"><canvas id="b-chart-subproc"></canvas></div>
-    </div>
+  <div class="card fade" id="q-detail" style="margin-bottom:16px">
+    <h3 id="q-detail-title">รายละเอียดรายวัน <span class="badge" id="q-detail-badge">—</span></h3>
+    <div class="slots" id="q-slots"><div class="empty" style="grid-column:1/-1">แตะวันที่ในปฏิทินเพื่อดูว่าใช้ slot ไหนบ้าง</div></div>
   </div>
 
-  <!-- Table -->
-  <div class="panel fade-up">
-    <div class="panel-head">
-      <div class="panel-title">📋 รายการการจอง <span class="badge" id="b-table-badge">—</span></div>
-    </div>
-    <div class="tbl-wrap">
-      <table>
-        <thead><tr>
-          <th>วันที่ / เวลา</th><th>แพทย์</th><th>หัตถการ</th>
-          <th>HN</th><th>ชื่อผู้ป่วย</th><th>สถานะ</th>
-        </tr></thead>
-        <tbody id="b-table-body">
-          <tr class="empty-row"><td colspan="6"><div class="empty-icon">⏳</div>กำลังโหลด...</td></tr>
-        </tbody>
-      </table>
-    </div>
+  <div class="grid g-2">
+    <div class="card"><h3>อัตราการใช้ห้องตามวันในสัปดาห์</h3><div class="ch"><canvas id="ch-wd"></canvas></div></div>
+    <div class="card"><h3>ช่วงเวลาที่มีการจองมาก</h3><div class="ch"><canvas id="ch-hr"></canvas></div></div>
   </div>
 
+  <div class="grid g-2">
+    <div class="card"><h3>🟢 slot ว่างที่ใกล้ที่สุด</h3><div class="nf" id="q-next"></div></div>
+    <div class="card"><h3>💡 ข้อสังเกตจากข้อมูล</h3><ul class="tips" id="q-tips"></ul></div>
+  </div>
 </main>
-</div>
 
-<!-- ══════════════════════════════════════════════════════ -->
-<!--  TAB 2: PROCEDURE RECORD                               -->
-<!-- ══════════════════════════════════════════════════════ -->
-<div id="content-procedure" class="tab-content hidden">
-<main class="main">
-
-  <!-- Filter -->
-  <div class="filter-card fade-up">
-    <div class="filter-title">🔍 ตัวกรอง — บันทึกการส่องกล้อง</div>
-    <div class="period-row">
-      <button class="pill" id="p-pill-day"   onclick="pSetPeriod('day')">📅 วันนี้</button>
-      <button class="pill" id="p-pill-week"  onclick="pSetPeriod('week')">📆 สัปดาห์นี้</button>
-      <button class="pill active" id="p-pill-month" onclick="pSetPeriod('month')">🗓 เดือนนี้</button>
-      <button class="pill" id="p-pill-year"  onclick="pSetPeriod('year')">📊 ปีนี้</button>
-      <button class="pill" id="p-pill-custom" onclick="pSetPeriod('custom')">✏️ กำหนดเอง</button>
+<!-- ═══════════ TAB: BOOKING ═══════════ -->
+<main class="wrap hidden" id="c-booking">
+  <div class="filters">
+    <div class="pills" id="b-pills">
+      <button class="pill" data-p="day">วันนี้</button>
+      <button class="pill" data-p="week">สัปดาห์นี้</button>
+      <button class="pill active" data-p="month">เดือนนี้</button>
+      <button class="pill" data-p="year">ปีนี้</button>
+      <button class="pill" data-p="custom">กำหนดเอง</button>
     </div>
-    <div class="filter-row">
-      <div class="filter-group" id="p-grp-from" style="display:none">
-        <label class="filter-label">📅 จากวันที่</label>
-        <input type="date" id="p-date-from" class="filter-ctrl">
-      </div>
-      <div class="filter-group" id="p-grp-to" style="display:none">
-        <label class="filter-label">📅 ถึงวันที่</label>
-        <input type="date" id="p-date-to" class="filter-ctrl">
-      </div>
-      <div class="filter-group">
-        <label class="filter-label">👨‍⚕️ แพทย์</label>
-        <select id="p-filter-doctor" class="filter-ctrl">
-          <option value="all">แพทย์ทั้งหมด</option>
-        </select>
-      </div>
-      <div class="filter-group">
-        <label class="filter-label">🔬 หัตถการ</label>
-        <select id="p-filter-proc" class="filter-ctrl">
-          <option value="all">ทั้งหมด</option>
-          <option value="Bronchoscopy">Bronchoscopy</option>
-          <option value="Pleuroscopy">Pleuroscopy</option>
-        </select>
-      </div>
-      <button class="btn-apply" onclick="fetchProcedure()">🔍 แสดงผล</button>
-      <button class="btn-export-csv" onclick="exportProcedureCSV()">⬇ CSV</button>
-      <button class="btn-export-pdf" onclick="exportPDF()">🖨 PDF</button>
-    </div>
+    <div class="fg hidden" id="b-fg-from"><label>จากวันที่</label><input type="date" id="b-from" class="ctl"></div>
+    <div class="fg hidden" id="b-fg-to"><label>ถึงวันที่</label><input type="date" id="b-to" class="ctl"></div>
+    <div class="fg"><label>แพทย์</label><select id="b-doc" class="ctl"><option value="all">ทั้งหมด</option></select></div>
+    <div class="fg"><label>หัตถการ</label><select id="b-proc" class="ctl"><option value="all">ทั้งหมด</option><option>Bronchoscopy</option><option>Pleuroscopy</option></select></div>
+    <button class="btn btn-p" onclick="loadBooking()">แสดงผล</button>
+    <button class="btn btn-o" onclick="csvBooking()">⬇ CSV</button>
   </div>
-
-  <!-- KPI -->
-  <div class="kpi-row">
-    <div class="kpi fade-up d1" style="--accent:var(--teal);--accent-lt:var(--teal-lt)">
-      <div class="kpi-bar"></div><div class="kpi-icon">🔬</div>
-      <div class="kpi-value" id="p-kpi-cases">—</div>
-      <div class="kpi-label">จำนวน Case</div><div class="kpi-sub">ในช่วงที่เลือก</div>
-    </div>
-    <div class="kpi fade-up d2" style="--accent:var(--green);--accent-lt:var(--green-lt)">
-      <div class="kpi-bar"></div><div class="kpi-icon">💰</div>
-      <div class="kpi-value" id="p-kpi-revenue">—</div>
-      <div class="kpi-label">รายได้รวม (บาท)</div><div class="kpi-sub">Total Revenue</div>
-    </div>
-    <div class="kpi fade-up d3" style="--accent:var(--orange);--accent-lt:var(--orange-lt)">
-      <div class="kpi-bar"></div><div class="kpi-icon">⏱</div>
-      <div class="kpi-value" id="p-kpi-duration">—</div>
-      <div class="kpi-label">เวลาเฉลี่ย (นาที)</div><div class="kpi-sub">Avg Duration</div>
-    </div>
-    <div class="kpi fade-up d4" style="--accent:var(--purple);--accent-lt:var(--purple-lt)">
-      <div class="kpi-bar"></div><div class="kpi-icon">🔭</div>
-      <div class="kpi-value" id="p-kpi-fluoro">—</div>
-      <div class="kpi-label">ใช้ Fluoroscope</div><div class="kpi-sub">ครั้ง</div>
-    </div>
+  <div class="grid g-kpi">
+    <div class="card kpi"><div class="ic ic-b">📅</div><div><div class="v" id="b-k-total">0</div><div class="l">การจองทั้งหมด</div></div></div>
+    <div class="card kpi"><div class="ic ic-g">✅</div><div><div class="v" id="b-k-done">0</div><div class="l">ทำแล้ว</div></div></div>
+    <div class="card kpi"><div class="ic ic-a">🕐</div><div><div class="v" id="b-k-up">0</div><div class="l">รอทำ</div></div></div>
+    <div class="card kpi"><div class="ic ic-r">❌</div><div><div class="v" id="b-k-can">0</div><div class="l">ยกเลิก</div></div></div>
+    <div class="card kpi"><div class="ic ic-v">📝</div><div><div class="v" id="b-k-wait">0</div><div class="l">รอบันทึกหัตถการ</div><div class="n">ทำแล้วแต่ยังไม่มีบันทึก</div></div></div>
   </div>
-
-  <!-- Charts Row 1 -->
-  <div class="chart-grid-3 fade-up">
-    <div class="panel">
-      <div class="panel-head">
-        <div class="panel-title">📈 จำนวน Case ตามวัน</div>
-        <span class="badge" id="p-timeline-badge">—</span>
-      </div>
-      <div class="chart-wrap tall"><canvas id="p-chart-timeline"></canvas></div>
-    </div>
-    <div class="panel">
-      <div class="panel-head"><div class="panel-title">🔬 สัดส่วนหัตถการ</div></div>
-      <div class="chart-wrap"><canvas id="p-chart-proc"></canvas></div>
-    </div>
-    <div class="panel">
-      <div class="panel-head"><div class="panel-title">💉 Anesthesic Mode</div></div>
-      <div class="chart-wrap"><canvas id="p-chart-anesthesia"></canvas></div>
-    </div>
+  <div class="grid g-2">
+    <div class="card"><h3>จำนวนการจองรายวัน <span class="badge" id="b-range">—</span></h3><div class="ch"><canvas id="b-ch-time"></canvas></div></div>
+    <div class="card"><h3>สัดส่วนหัตถการ</h3><div class="ch"><canvas id="b-ch-proc"></canvas></div></div>
+    <div class="card"><h3>สถานะการจอง</h3><div class="ch"><canvas id="b-ch-stat"></canvas></div></div>
+    <div class="card"><h3>การจองตามแพทย์</h3><div class="ch"><canvas id="b-ch-doc"></canvas></div></div>
   </div>
-
-  <!-- Charts Row 2 -->
-  <div class="chart-grid-2 fade-up">
-    <div class="panel">
-      <div class="panel-head"><div class="panel-title">👨‍⚕️ จำนวน Case รายแพทย์</div></div>
-      <div class="chart-wrap"><canvas id="p-chart-doctor"></canvas></div>
-    </div>
-    <div class="panel">
-      <div class="panel-head">
-        <div class="panel-title">💰 รายได้ตามวัน</div>
-        <span class="panel-sub">บาท</span>
-      </div>
-      <div class="chart-wrap"><canvas id="p-chart-revenue"></canvas></div>
-    </div>
+  <div class="card">
+    <h3>รายการจอง <span class="badge" id="b-count">0 รายการ</span></h3>
+    <div class="tbl-tools"><input class="ctl" id="b-search" placeholder="ค้นหา HN / ชื่อ / แพทย์ / หัตถการ" oninput="renderBookingTable()"></div>
+    <div class="tbl-wrap"><table><thead><tr><th>วันที่/เวลา</th><th>แพทย์</th><th>หัตถการ</th><th>HN</th><th>ผู้ป่วย</th><th>สถานะ</th></tr></thead><tbody id="b-body"></tbody></table></div>
   </div>
-
-  <!-- Procedure Table -->
-  <div class="panel fade-up" id="p-table-panel">
-    <div class="panel-head">
-      <div class="panel-title">📋 รายการการส่องกล้อง <span class="badge" id="p-table-badge">—</span></div>
-    </div>
-    <div class="tbl-wrap">
-      <table>
-        <thead><tr>
-          <th>วันที่</th><th>HN</th><th>ชื่อผู้ป่วย</th>
-          <th>Operation</th><th>แพทย์</th>
-          <th>เวลา</th><th>ราคา</th><th>Fluoroscope</th><th>กล้อง</th>
-        </tr></thead>
-        <tbody id="p-table-body">
-          <tr class="empty-row"><td colspan="9"><div class="empty-icon">⏳</div>กำลังโหลด...</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
 </main>
-</div>
+
+<!-- ═══════════ TAB: PROCEDURE ═══════════ -->
+<main class="wrap hidden" id="c-procedure">
+  <div class="filters">
+    <div class="pills" id="p-pills">
+      <button class="pill" data-p="day">วันนี้</button>
+      <button class="pill" data-p="week">สัปดาห์นี้</button>
+      <button class="pill active" data-p="month">เดือนนี้</button>
+      <button class="pill" data-p="year">ปีนี้</button>
+      <button class="pill" data-p="custom">กำหนดเอง</button>
+    </div>
+    <div class="fg hidden" id="p-fg-from"><label>จากวันที่</label><input type="date" id="p-from" class="ctl"></div>
+    <div class="fg hidden" id="p-fg-to"><label>ถึงวันที่</label><input type="date" id="p-to" class="ctl"></div>
+    <div class="fg"><label>แพทย์</label><select id="p-doc" class="ctl"><option value="all">ทั้งหมด</option></select></div>
+    <div class="fg"><label>หัตถการ</label><select id="p-proc" class="ctl"><option value="all">ทั้งหมด</option><option>Bronchoscopy</option><option>Pleuroscopy</option></select></div>
+    <button class="btn btn-p" onclick="loadProcedure()">แสดงผล</button>
+    <button class="btn btn-o" onclick="csvProcedure()">⬇ CSV</button>
+    <button class="btn btn-o" onclick="pdfProcedure()">🖨 PDF</button>
+  </div>
+  <div class="grid g-kpi">
+    <div class="card kpi"><div class="ic ic-b">🔬</div><div><div class="v" id="p-k-cases">0</div><div class="l">จำนวน Case</div></div></div>
+    <div class="card kpi"><div class="ic ic-g">💰</div><div><div class="v" id="p-k-rev">0</div><div class="l">รายได้รวม (บาท)</div></div></div>
+    <div class="card kpi"><div class="ic ic-a">⏱</div><div><div class="v" id="p-k-dur">0</div><div class="l">เวลาเฉลี่ย (นาที)</div><div class="n">เฉพาะ case ที่บันทึกเวลา</div></div></div>
+    <div class="card kpi"><div class="ic ic-v">🔭</div><div><div class="v" id="p-k-fl">0</div><div class="l">ใช้ Fluoroscope</div></div></div>
+  </div>
+  <div class="grid g-2">
+    <div class="card"><h3>จำนวน Case รายวัน <span class="badge" id="p-range">—</span></h3><div class="ch"><canvas id="p-ch-time"></canvas></div></div>
+    <div class="card"><h3>รายได้รายวัน (บาท)</h3><div class="ch"><canvas id="p-ch-rev"></canvas></div></div>
+    <div class="card"><h3>สัดส่วนหัตถการ</h3><div class="ch"><canvas id="p-ch-proc"></canvas></div></div>
+    <div class="card"><h3>Anesthesia</h3><div class="ch"><canvas id="p-ch-an"></canvas></div></div>
+    <div class="card"><h3>Case ตามแพทย์</h3><div class="ch"><canvas id="p-ch-doc"></canvas></div></div>
+  </div>
+  <div class="card">
+    <h3>รายการบันทึกหัตถการ <span class="badge" id="p-count">0 รายการ</span></h3>
+    <div class="tbl-tools"><input class="ctl" id="p-search" placeholder="ค้นหา HN / ชื่อ / แพทย์ / หัตถการ" oninput="renderProcedureTable()"></div>
+    <div class="tbl-wrap"><table><thead><tr><th>วันที่</th><th>HN</th><th>ผู้ป่วย</th><th>Operation</th><th>แพทย์</th><th>เวลา</th><th>ราคา</th><th>Fluoro</th><th>กล้อง</th></tr></thead><tbody id="p-body"></tbody></table></div>
+  </div>
+</main>
 
 <script>
-// ══════════════════════════════════════════════════════
-//  CONFIG
-// ══════════════════════════════════════════════════════
 const { esc, csvSafe } = Broncho;
+const PAL = ['#0b7fa8','#12945f','#d98a0b','#6d4ad6','#d6343f','#19a6c9','#7aa412','#c2569c'];
+const TH_DOW = ['อา','จ','อ','พ','พฤ','ศ','ส'];
+const TH_MON = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+const St = { tab:'queue', q:'month', b:'month', p:'month', qData:null, bData:null, pData:null, selDay:null };
+const charts = {};
 
-// ══════════════════════════════════════════════════════
-//  STATE
-// ══════════════════════════════════════════════════════
-let charts      = {};
-let bPeriod     = 'month';
-let pPeriod     = 'month';
-let bRawData    = null;
-let pRawData    = null;
-let currentTab  = 'booking';
-const PAL       = ['#0891b2','#059669','#1d6fa4','#d97706','#7c3aed','#e11d48','#06b6d4','#84cc16'];
+/* ───────── helpers ───────── */
+const ymd = d => d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const fmtDay = iso => { const [y,m,d]=iso.split('-').map(Number); return d+' '+TH_MON[m-1]+' '+(y+543); };
+function busy(v){ document.getElementById('busy').classList.toggle('hidden', !v); }
+function setText(id, v){ document.getElementById(id).textContent = v; }
+function tick(){ setText('clock', new Date().toLocaleString('th-TH',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})); }
+setInterval(tick, 30000); tick();
 
-// ══════════════════════════════════════════════════════
-//  CLOCK
-// ══════════════════════════════════════════════════════
-function updateClock() {
-  document.getElementById('clock').textContent =
-    new Date().toLocaleString('th-TH',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
-}
-setInterval(updateClock,1000); updateClock();
-
-// ══════════════════════════════════════════════════════
-//  TAB
-// ══════════════════════════════════════════════════════
-function switchTab(tab) {
-  currentTab = tab;
-  ['booking','procedure'].forEach(t => {
-    document.getElementById('tab-'+t).classList.toggle('active', t===tab);
-    document.getElementById('content-'+t).classList.toggle('hidden', t!==tab);
-  });
-  if (tab === 'procedure' && !pRawData) fetchProcedure();
+function rangeFor(period, fromId, toId){
+  const now=new Date(), y=now.getFullYear(), m=now.getMonth();
+  if (period==='day')   return { from:ymd(now), to:ymd(now) };
+  if (period==='week')  { const d=new Date(now); d.setDate(d.getDate()-((d.getDay()+6)%7)); const a=ymd(d); d.setDate(d.getDate()+6); return { from:a, to:ymd(d) }; }
+  if (period==='month') return { from:ymd(new Date(y,m,1)),   to:ymd(new Date(y,m+1,0)) };
+  if (period==='next')  return { from:ymd(new Date(y,m+1,1)), to:ymd(new Date(y,m+2,0)) };
+  if (period==='ahead') { const e=new Date(now); e.setDate(e.getDate()+59); return { from:ymd(now), to:ymd(e) }; }
+  if (period==='year')  return { from:y+'-01-01', to:y+'-12-31' };
+  return { from:document.getElementById(fromId).value, to:document.getElementById(toId).value };
 }
 
-// ══════════════════════════════════════════════════════
-//  DATE HELPERS
-// ══════════════════════════════════════════════════════
-function localDateStr(d) {
-  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
-}
-
-function getDateRange(period, fromId, toId) {
-  const now = new Date(), today = localDateStr(now);
-  if (period==='day')  return {from:today, to:today};
-  if (period==='week') {
-    const d=new Date(now); d.setDate(d.getDate()-((d.getDay()+6)%7));
-    const mon=localDateStr(d); d.setDate(d.getDate()+6);
-    return {from:mon, to:localDateStr(d)};
-  }
-  if (period==='month') {
-    const y=now.getFullYear(), m=now.getMonth();
-    return {from:localDateStr(new Date(y,m,1)), to:localDateStr(new Date(y,m+1,0))};
-  }
-  if (period==='year') return {from:now.getFullYear()+'-01-01', to:now.getFullYear()+'-12-31'};
-  return {from:document.getElementById(fromId).value||'', to:document.getElementById(toId).value||''};
-}
-
-// ══════════════════════════════════════════════════════
-//  API
-// ══════════════════════════════════════════════════════
-const callServer = Broncho.api;
-
-// ══════════════════════════════════════════════════════
-//  PERIOD SETTERS
-// ══════════════════════════════════════════════════════
-function bSetPeriod(p) {
-  bPeriod = p;
-  document.querySelectorAll('[id^="b-pill-"]').forEach(el => el.classList.remove('active'));
-  document.getElementById('b-pill-'+p)?.classList.add('active');
-  document.getElementById('b-grp-from').style.display = p==='custom'?'':'none';
-  document.getElementById('b-grp-to').style.display   = p==='custom'?'':'none';
-  if (p!=='custom') fetchBooking();
-}
-
-function pSetPeriod(p) {
-  pPeriod = p;
-  document.querySelectorAll('[id^="p-pill-"]').forEach(el => el.classList.remove('active'));
-  document.getElementById('p-pill-'+p)?.classList.add('active');
-  document.getElementById('p-grp-from').style.display = p==='custom'?'':'none';
-  document.getElementById('p-grp-to').style.display   = p==='custom'?'':'none';
-  if (p!=='custom') fetchProcedure();
-}
-
-// ══════════════════════════════════════════════════════
-//  LOAD DOCTORS
-// ══════════════════════════════════════════════════════
-async function loadDoctors() {
-  try {
-    const r = await callServer('getDoctorList',{});
-    if (!r.success) return;
-    ['b-filter-doctor','p-filter-doctor'].forEach(selId => {
-      const sel = document.getElementById(selId);
-      r.doctors.forEach(d => {
-        const name = typeof d==='object' ? d.name : d;
-        const o = document.createElement('option');
-        o.value=name; o.textContent=name; sel.appendChild(o);
-      });
-    });
-  } catch(_){}
-}
-
-// ══════════════════════════════════════════════════════
-//  FETCH — BOOKING
-// ══════════════════════════════════════════════════════
-async function fetchBooking(silent) {
-  if (!silent) setLoading(true);
-  const {from,to} = getDateRange(bPeriod,'b-date-from','b-date-to');
-  const doctor    = document.getElementById('b-filter-doctor').value;
-  const procedure = document.getElementById('b-filter-proc').value;
-  try {
-    const r = await callServer('getDashboardData',{from,to,doctor,procedure});
-    if (!r.success) throw new Error(r.error);
-    bRawData = r;
-    renderBooking(r,from,to);
-  } catch(err) { Broncho.toast('โหลดข้อมูลไม่สำเร็จ: '+Broncho.errorText(err), true); }
-  finally { setLoading(false); }
-}
-
-// ══════════════════════════════════════════════════════
-//  FETCH — PROCEDURE
-// ══════════════════════════════════════════════════════
-async function fetchProcedure(silent) {
-  if (!silent) setLoading(true);
-  const {from,to} = getDateRange(pPeriod,'p-date-from','p-date-to');
-  const doctor    = document.getElementById('p-filter-doctor').value;
-  const procedure = document.getElementById('p-filter-proc').value;
-  try {
-    const r = await callServer('getProcedureData',{from,to,doctor,procedure});
-    if (!r.success) throw new Error(r.error);
-    pRawData = r;
-    renderProcedure(r,from,to);
-  } catch(err) { Broncho.toast('โหลดข้อมูลไม่สำเร็จ: '+Broncho.errorText(err), true); }
-  finally { setLoading(false); }
-}
-
-async function fetchAll(silent) {
-  if (currentTab==='booking')   await fetchBooking(silent);
-  if (currentTab==='procedure') await fetchProcedure(silent);
-}
-
-function setLoading(v) {
-  document.getElementById('loading-overlay').classList.toggle('hidden',!v);
-}
-
-// ══════════════════════════════════════════════════════
-//  RENDER — BOOKING
-// ══════════════════════════════════════════════════════
-function renderBooking(data,from,to) {
-  const {summary,bookings,charts:c} = data;
-  animNum('b-kpi-total',    summary.total);
-  animNum('b-kpi-done',     summary.done);
-  animNum('b-kpi-upcoming', summary.upcoming);
-  animNum('b-kpi-cancelled',summary.cancelled);
-  const fmt=d=>d?new Date(d).toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'numeric'}):'—';
-  document.getElementById('b-timeline-badge').textContent = fmt(from)+' – '+fmt(to);
-  document.getElementById('b-table-badge').textContent    = bookings.length+' รายการ';
-  mkBar('b-chart-timeline', c.timeline.map(t=>new Date(t.date).toLocaleDateString('th-TH',{day:'numeric',month:'short'})), c.timeline.map(t=>t.count),'จำนวนการจอง','rgba(8,145,178,.15)','#0891b2');
-  mkDoughnut('b-chart-proc', Object.keys(c.byProcedure), Object.values(c.byProcedure));
-  mkDoughnut('b-chart-status',['ทำแล้ว','รอทำ','ยกเลิก'],[summary.done,summary.upcoming,summary.cancelled],['#059669','#1d6fa4','#dc2626']);
-  mkHBar('b-chart-doctor', Object.keys(c.byDoctor), Object.values(c.byDoctor));
-  mkBar('b-chart-subproc',['BAL','TBBx','EBUS TBNA'],[c.subProcMap.BAL||0,c.subProcMap.TBBx||0,c.subProcMap['EBUS TBNA']||0],'ครั้ง',['rgba(29,111,164,.7)','rgba(124,58,237,.7)','rgba(217,119,6,.7)'],['#1d6fa4','#7c3aed','#d97706']);
-  renderBookingTable(bookings);
-}
-
-function renderBookingTable(bookings) {
-  const tbody = document.getElementById('b-table-body');
-  if (!bookings.length) { tbody.innerHTML='<tr class="empty-row"><td colspan="6"><div class="empty-icon">📭</div>ไม่มีข้อมูล</td></tr>'; return; }
-  const sm={done:['status-done','✅ ทำแล้ว'],upcoming:['status-upcoming','🕐 รอทำ'],cancelled:['status-cancelled','❌ ยกเลิก']};
-  tbody.innerHTML = bookings.map(b=>{
-    const [cls,lbl]=sm[b.status]||['',''];
-    return `<tr>
-      <td data-label="วันที่/เวลา" style="font-weight:600;white-space:nowrap">${esc(b.dateTime)}</td>
-      <td data-label="แพทย์">${esc(b.doctor)}</td>
-      <td data-label="หัตถการ"><span class="proc-tag ${b.procedure.includes('Bronchoscopy')?'':'pleuro'}">${esc(b.procedure)}</span></td>
-      <td data-label="HN" style="font-weight:600">${esc(b.hn)}</td>
-      <td data-label="ชื่อผู้ป่วย">${esc(b.patientName)}</td>
-      <td data-label="สถานะ"><span class="status ${cls}">${lbl}</span></td>
-    </tr>`;
-  }).join('');
-}
-
-// ══════════════════════════════════════════════════════
-//  RENDER — PROCEDURE
-// ══════════════════════════════════════════════════════
-function renderProcedure(data,from,to) {
-  const {summary,records,charts:c} = data;
-  animNum('p-kpi-cases',    summary.totalCases);
-  animNum('p-kpi-revenue',  summary.totalRevenue, true);
-  animNum('p-kpi-duration', summary.avgDuration);
-  animNum('p-kpi-fluoro',   summary.fluoroUsed);
-  const fmt=d=>d?new Date(d).toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'numeric'}):'—';
-  document.getElementById('p-timeline-badge').textContent = fmt(from)+' – '+fmt(to);
-  document.getElementById('p-table-badge').textContent    = records.length+' รายการ';
-  mkBar('p-chart-timeline', c.caseTimeline.map(t=>new Date(t.date).toLocaleDateString('th-TH',{day:'numeric',month:'short'})), c.caseTimeline.map(t=>t.count),'จำนวน Case','rgba(8,145,178,.15)','#0891b2');
-  mkDoughnut('p-chart-proc', Object.keys(c.byProcedure), Object.values(c.byProcedure));
-  mkDoughnut('p-chart-anesthesia',['MAC','GA'],[c.byAnesthesia.MAC||0,c.byAnesthesia.GA||0],['#0891b2','#7c3aed']);
-  mkHBar('p-chart-doctor', Object.keys(c.byDoctor), Object.values(c.byDoctor));
-  mkBar('p-chart-revenue', c.revenueTimeline.map(t=>new Date(t.date).toLocaleDateString('th-TH',{day:'numeric',month:'short'})), c.revenueTimeline.map(t=>t.revenue),'รายได้ (บาท)','rgba(5,150,105,.15)','#059669');
-  renderProcedureTable(records);
-}
-
-function renderProcedureTable(records) {
-  const tbody = document.getElementById('p-table-body');
-  if (!records.length) { tbody.innerHTML='<tr class="empty-row"><td colspan="9"><div class="empty-icon">📭</div>ไม่มีข้อมูล</td></tr>'; return; }
-  tbody.innerHTML = records.map(r=>`<tr>
-    <td data-label="วันที่" style="white-space:nowrap;font-weight:600">${esc(r.procedureDate)}</td>
-    <td data-label="HN" style="font-weight:600">${esc(r.hn)}</td>
-    <td data-label="ชื่อผู้ป่วย">${esc(r.namePrefix)}${esc(r.patientName)}</td>
-    <td data-label="Operation"><span class="proc-tag ${r.operation.includes('Bronchoscopy')?'':'pleuro'}">${esc(r.operation)}</span></td>
-    <td data-label="แพทย์">${esc(r.doctor)}</td>
-    <td data-label="เวลา" style="white-space:nowrap">${esc(r.timeStart||'—')} – ${esc(r.timeEnd||'—')}</td>
-    <td data-label="ราคา" style="font-weight:700;color:var(--green)">${r.price?r.price.toLocaleString():'—'}</td>
-    <td data-label="Fluoroscope">${esc(r.fluoroscope||'—')}</td>
-    <td data-label="กล้อง">${esc(r.bronchoscope||'—')}</td>
-  </tr>`).join('');
-}
-
-// ══════════════════════════════════════════════════════
-//  CHART HELPERS
-// ══════════════════════════════════════════════════════
-function mkChart(id,config) {
+function mkChart(id, cfg){
   if (charts[id]) charts[id].destroy();
-  Chart.defaults.font.family="'Sarabun',sans-serif";
-  Chart.defaults.font.size=13;
-  Chart.defaults.color='#3d5166';
-  charts[id]=new Chart(document.getElementById(id).getContext('2d'),config);
+  Chart.defaults.font.family="'Sarabun',sans-serif"; Chart.defaults.font.size=12.5; Chart.defaults.color='#51627a';
+  charts[id] = new Chart(document.getElementById(id).getContext('2d'), cfg);
+}
+const axes = (extra={}) => ({ x:{grid:{display:false}}, y:{beginAtZero:true, grid:{color:'#eef2f8'}, ticks:{precision:0}, ...extra} });
+function bar(id, labels, data, color, label, yExtra){
+  mkChart(id,{ type:'bar', data:{labels, datasets:[{label, data, backgroundColor:color, borderRadius:6, maxBarThickness:38}]},
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:axes(yExtra) }});
+}
+function hbar(id, labels, data){
+  mkChart(id,{ type:'bar', data:{labels, datasets:[{data, backgroundColor:PAL, borderRadius:6, maxBarThickness:26}]},
+    options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
+      scales:{ x:{beginAtZero:true, grid:{color:'#eef2f8'}, ticks:{precision:0}}, y:{grid:{display:false}} }}});
+}
+function donut(id, labels, data, colors){
+  if (!data.some(v=>v>0)) { labels=['ไม่มีข้อมูล']; data=[1]; colors=['#e3e9f2']; }
+  mkChart(id,{ type:'doughnut', data:{labels, datasets:[{data, backgroundColor:colors||PAL, borderWidth:2, borderColor:'#fff'}]},
+    options:{ responsive:true, maintainAspectRatio:false, cutout:'62%', plugins:{legend:{position:'bottom', labels:{boxWidth:12, padding:14}}} }});
+}
+function count(id, target, comma){
+  const el=document.getElementById(id), from=parseFloat(el.textContent.replace(/,/g,''))||0, t0=performance.now();
+  (function step(now){ const t=Math.min((now-t0)/600,1), v=Math.round(from+(target-from)*(1-Math.pow(1-t,3)));
+    el.textContent = comma ? v.toLocaleString() : v; if (t<1) requestAnimationFrame(step); })(t0);
+}
+const day = iso => new Date(iso+'T00:00:00');
+const shortDay = iso => { const d=day(iso); return d.getDate()+' '+TH_MON[d.getMonth()]; };
+
+/* ───────── ROOM QUEUE ───────── */
+async function loadQueue(silent){
+  const {from,to} = rangeFor(St.q);
+  if (!silent) busy(true);
+  try{
+    const r = await Broncho.api('getRoomQueue', {from, to});
+    if (!r.success) throw new Error(r.error);
+    St.qData = r; renderQueue(r, from, to);
+  }catch(e){ Broncho.toast('โหลดคิวห้องไม่สำเร็จ: '+Broncho.errorText(e), true); }
+  finally{ busy(false); }
 }
 
-function mkBar(id,labels,data,label,bg,border) {
-  const multi=Array.isArray(bg);
-  mkChart(id,{type:'bar',
-    data:{labels,datasets:[{label,data,backgroundColor:bg,borderColor:border,borderWidth:multi?0:2,borderRadius:5,hoverBackgroundColor:multi?bg:border}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
-      scales:{x:{grid:{color:'#e8eef5'},ticks:{font:{size:12}}},y:{grid:{color:'#e8eef5'},ticks:{stepSize:1,font:{size:12}},beginAtZero:true}}}});
+function renderQueue(r, from, to){
+  const s = r.summary;
+  count('q-open', s.openDays); count('q-used', s.usedSlots); count('q-free', s.futureFree); count('q-util', s.utilization);
+  setText('q-total', s.totalSlots+' slot ทั้งหมด');
+  setText('q-range', fmtDay(from)+' – '+fmtDay(to));
+
+  // calendar grid (จันทร์เป็นคอลัมน์แรก)
+  const byDate = {}; r.days.forEach(d => byDate[d.date]=d);
+  const start = day(from); start.setDate(start.getDate()-((start.getDay()+6)%7));
+  const end   = day(to);   end.setDate(end.getDate()+((7-end.getDay())%7));
+  const today = ymd(new Date());
+  let html = '';
+  for (let d=new Date(start); d<=end; d.setDate(d.getDate()+1)){
+    const k = ymd(d), info = byDate[k];
+    if (!info){ html += '<div class="cell out"><div class="d">'+d.getDate()+'</div></div>'; continue; }
+    const cls = ['cell']; if (k===today) cls.push('today'); if (k===St.selDay) cls.push('sel');
+    if (!info.open && info.used===0){
+      cls.push('off');
+      html += '<div class="'+cls.join(' ')+'"><div class="d">'+d.getDate()+(info.holiday?'<small>หยุด</small>':'')+'</div></div>';
+      continue;
+    }
+    const pct = info.total ? Math.round(info.used*100/info.total) : 0;
+    const lv = pct>=90 ? 2 : pct>=60 ? 1 : 0;
+    cls.push('click');
+    html += '<button type="button" class="'+cls.join(' ')+'" data-d="'+esc(k)+'">'
+      + '<div class="d">'+d.getDate()+'<small>'+esc(TH_DOW[d.getDay()])+'</small></div>'
+      + '<div class="bar lv-'+lv+'"><i style="width:'+pct+'%"></i></div>'
+      + '<div class="t">ใช้ '+info.used+' · ว่าง '+info.free+'</div></button>';
+  }
+  const cal = document.getElementById('q-cal'); cal.innerHTML = html;
+  cal.querySelectorAll('button[data-d]').forEach(b => b.addEventListener('click', () => pickDay(b.dataset.d)));
+
+  // charts
+  const wdNames = ['จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์'];
+  const wdPct = [1,2,3,4,5].map(i => r.byWeekday[i].total ? Math.round(r.byWeekday[i].used*100/r.byWeekday[i].total) : 0);
+  bar('ch-wd', wdNames, wdPct, wdPct.map(p => p>=90?'#d6343f':p>=60?'#d98a0b':'#12945f'), 'ใช้ห้อง (%)', {max:100, ticks:{callback:v=>v+'%'}});
+  const hrs = Object.keys(r.byHour);
+  bar('ch-hr', hrs, hrs.map(h => r.byHour[h]), '#0b7fa8', 'จำนวนการจอง');
+
+  // next free
+  const nf = document.getElementById('q-next');
+  nf.innerHTML = r.nextFree.length ? r.nextFree.map(x => '<span>'+esc(shortDay(x.date))+' · '+esc(x.t)+'</span>').join('')
+                                   : '<div class="empty" style="width:100%">ไม่มี slot ว่างในช่วงนี้</div>';
+
+  // insights
+  const tips = [];
+  const busiest = wdPct.indexOf(Math.max(...wdPct)), quiet = wdPct.indexOf(Math.min(...wdPct));
+  if (s.totalSlots) {
+    tips.push('วัน<b>'+wdNames[busiest]+'</b>มีการใช้ห้องมากที่สุด ('+wdPct[busiest]+'%) ส่วนวัน<b>'+wdNames[quiet]+'</b>ว่างสุด ('+wdPct[quiet]+'%) — แนะนำให้จัดเคสที่ยืดหยุ่นไปวันที่ว่าง');
+    const am = hrs.filter(h=>h<'12').reduce((a,h)=>a+r.byHour[h],0), pm = hrs.filter(h=>h>='13').reduce((a,h)=>a+r.byHour[h],0);
+    if (am+pm) tips.push('การจองช่วงเช้า '+am+' slot / บ่าย '+pm+' slot ('+Math.round(am*100/(am+pm))+'% เป็นช่วงเช้า)');
+    const full = r.days.filter(d => d.open && d.total && d.used===d.total && !d.past).length;
+    if (full) tips.push('มี <b>'+full+' วัน</b>ที่ slot เต็มทุกช่วง (ยังไม่ผ่าน) — พิจารณาเปิดวัน/เวลาเพิ่ม');
+    const low = r.days.filter(d => d.open && !d.past && d.total && d.used/d.total<.25).length;
+    if (low) tips.push('มี '+low+' วันข้างหน้าที่ใช้ห้องน้อยกว่า 25% — ใช้จัดเคสเร่งด่วนหรือเคสใหม่ได้');
+  }
+  if (!tips.length) tips.push('ยังไม่มีข้อมูลพอสำหรับข้อสังเกตในช่วงนี้');
+  document.getElementById('q-tips').innerHTML = tips.map(t => '<li>'+t+'</li>').join('');
+
+  if (St.selDay && byDate[St.selDay]) showDay(byDate[St.selDay]);
 }
 
-function mkHBar(id,labels,data) {
-  mkChart(id,{type:'bar',
-    data:{labels,datasets:[{label:'',data,backgroundColor:PAL,borderRadius:5,borderWidth:0}]},
-    options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},
-      scales:{x:{grid:{color:'#e8eef5'},ticks:{stepSize:1,font:{size:12}},beginAtZero:true},y:{grid:{display:false},ticks:{font:{size:14},color:'#1a2332'}}}}});
+function pickDay(k){
+  St.selDay = k;
+  document.querySelectorAll('#q-cal .cell.sel').forEach(c=>c.classList.remove('sel'));
+  const btn = document.querySelector('#q-cal button[data-d="'+k+'"]'); if (btn) btn.classList.add('sel');
+  const info = St.qData.days.find(d=>d.date===k); if (info) showDay(info);
+  document.getElementById('q-detail').scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+function showDay(d){
+  setText('q-detail-badge', fmtDay(d.date)+' · ใช้ '+d.used+' / '+(d.open?d.total:'—')+' slot');
+  document.getElementById('q-slots').innerHTML = d.slots.map(s => s.booked
+    ? '<div class="slot busy"><b>'+esc(s.t)+'</b><div>'+esc(s.procedure)+'</div><div class="who">'+esc(s.doctor)+'</div></div>'
+    : '<div class="slot free"><b>'+esc(s.t)+'</b><div>ว่าง</div></div>').join('');
 }
 
-function mkDoughnut(id,labels,data,colors) {
-  const hasData=data.some(v=>v>0);
-  mkChart(id,{type:'doughnut',
-    data:{labels:hasData?labels:['ไม่มีข้อมูล'],
-      datasets:[{data:hasData?data:[1],backgroundColor:hasData?(colors||PAL):['#e8eef5'],borderWidth:3,borderColor:'#fff',hoverOffset:8}]},
-    options:{responsive:true,maintainAspectRatio:false,cutout:'65%',
-      plugins:{legend:{position:'bottom',labels:{padding:14,boxWidth:12,font:{size:13}}}}}});
+/* ───────── BOOKING ───────── */
+async function loadBooking(silent){
+  const {from,to} = rangeFor(St.b,'b-from','b-to');
+  if (!silent) busy(true);
+  try{
+    const r = await Broncho.api('getDashboardData', { from, to, doctor:val('b-doc'), procedure:val('b-proc') });
+    if (!r.success) throw new Error(r.error);
+    St.bData = r; renderBooking(r, from, to);
+  }catch(e){ Broncho.toast('โหลดข้อมูลการจองไม่สำเร็จ: '+Broncho.errorText(e), true); }
+  finally{ busy(false); }
+}
+const val = id => document.getElementById(id).value;
+
+function renderBooking(r, from, to){
+  const s = r.summary, c = r.charts;
+  count('b-k-total', s.total); count('b-k-done', s.done); count('b-k-up', s.upcoming); count('b-k-can', s.cancelled); count('b-k-wait', s.awaitingRecord||0);
+  setText('b-range', from ? fmtDay(from)+' – '+fmtDay(to) : 'ทั้งหมด');
+  bar('b-ch-time', c.timeline.map(t=>shortDay(t.date)), c.timeline.map(t=>t.count), '#0b7fa8', 'การจอง');
+  donut('b-ch-proc', Object.keys(c.byProcedure), Object.values(c.byProcedure));
+  donut('b-ch-stat', ['ทำแล้ว','รอทำ','ยกเลิก'], [s.done,s.upcoming,s.cancelled], ['#12945f','#0b7fa8','#d6343f']);
+  hbar('b-ch-doc', Object.keys(c.byDoctor), Object.values(c.byDoctor));
+  renderBookingTable();
+}
+function renderBookingTable(){
+  if (!St.bData) return;
+  const q = val('b-search').trim().toLowerCase();
+  const rows = St.bData.bookings.filter(b => !q || [b.doctor,b.procedure,b.hn,b.patientName,b.dateTime].join(' ').toLowerCase().includes(q));
+  setText('b-count', rows.length+' รายการ');
+  const tag = {done:['t-done','ทำแล้ว'], upcoming:['t-up','รอทำ'], cancelled:['t-can','ยกเลิก']};
+  document.getElementById('b-body').innerHTML = rows.length ? rows.map(b => {
+    const [c,l] = tag[b.status]||['',''];
+    const rec = (b.status==='done' && !b.hasRecord) ? ' <span class="tag t-w">รอบันทึก</span>' : '';
+    return '<tr><td style="white-space:nowrap;font-weight:600">'+esc(b.dateTime)+'</td><td>'+esc(b.doctor)+'</td>'
+      + '<td><span class="tag '+(b.procedure.includes('Bronchoscopy')?'t-b':'t-p')+'">'+esc(b.procedure)+'</span></td>'
+      + '<td style="font-weight:600">'+esc(b.hn)+'</td><td>'+esc(b.patientName)+'</td><td><span class="tag '+c+'">'+l+'</span>'+rec+'</td></tr>';
+  }).join('') : '<tr><td colspan="6" class="empty">ไม่มีข้อมูล</td></tr>';
 }
 
-// ══════════════════════════════════════════════════════
-//  ANIMATE NUMBER
-// ══════════════════════════════════════════════════════
-function animNum(id,target,comma=false) {
-  const el=document.getElementById(id);
-  const dur=700,start=performance.now(),from=parseFloat(el.textContent.replace(/,/g,''))||0;
-  const step=now=>{
-    const t=Math.min((now-start)/dur,1);
-    const v=Math.round(from+(target-from)*(1-Math.pow(1-t,3)));
-    el.textContent=comma?v.toLocaleString():v;
-    if(t<1) requestAnimationFrame(step);
-  };
-  requestAnimationFrame(step);
+/* ───────── PROCEDURE ───────── */
+async function loadProcedure(silent){
+  const {from,to} = rangeFor(St.p,'p-from','p-to');
+  if (!silent) busy(true);
+  try{
+    const r = await Broncho.api('getProcedureData', { from, to, doctor:val('p-doc'), procedure:val('p-proc') });
+    if (!r.success) throw new Error(r.error);
+    St.pData = r; renderProcedure(r, from, to);
+  }catch(e){ Broncho.toast('โหลดบันทึกหัตถการไม่สำเร็จ: '+Broncho.errorText(e), true); }
+  finally{ busy(false); }
+}
+function renderProcedure(r, from, to){
+  const s = r.summary, c = r.charts;
+  count('p-k-cases', s.totalCases); count('p-k-rev', s.totalRevenue, true); count('p-k-dur', s.avgDuration); count('p-k-fl', s.fluoroUsed);
+  setText('p-range', from ? fmtDay(from)+' – '+fmtDay(to) : 'ทั้งหมด');
+  bar('p-ch-time', c.caseTimeline.map(t=>shortDay(t.date)), c.caseTimeline.map(t=>t.count), '#0b7fa8', 'Case');
+  bar('p-ch-rev',  c.revenueTimeline.map(t=>shortDay(t.date)), c.revenueTimeline.map(t=>t.revenue), '#12945f', 'บาท');
+  donut('p-ch-proc', Object.keys(c.byProcedure), Object.values(c.byProcedure));
+  donut('p-ch-an', ['MAC','GA'], [c.byAnesthesia.MAC||0, c.byAnesthesia.GA||0], ['#0b7fa8','#6d4ad6']);
+  hbar('p-ch-doc', Object.keys(c.byDoctor), Object.values(c.byDoctor));
+  renderProcedureTable();
+}
+function renderProcedureTable(){
+  if (!St.pData) return;
+  const q = val('p-search').trim().toLowerCase();
+  const rows = St.pData.records.filter(r => !q || [r.doctor,r.operation,r.hn,r.patientName,r.procedureDate].join(' ').toLowerCase().includes(q));
+  setText('p-count', rows.length+' รายการ');
+  document.getElementById('p-body').innerHTML = rows.length ? rows.map(r =>
+    '<tr><td style="white-space:nowrap;font-weight:600">'+esc(r.procedureDate)+'</td><td style="font-weight:600">'+esc(r.hn)+'</td>'
+    + '<td>'+esc(r.namePrefix)+esc(r.patientName)+'</td>'
+    + '<td><span class="tag '+(r.operation.includes('Bronchoscopy')?'t-b':'t-p')+'">'+esc(r.operation)+'</span></td>'
+    + '<td>'+esc(r.doctor)+'</td><td style="white-space:nowrap">'+esc(r.timeStart||'—')+' – '+esc(r.timeEnd||'—')+'</td>'
+    + '<td style="font-weight:700;color:var(--green)">'+(r.price?r.price.toLocaleString():'—')+'</td>'
+    + '<td>'+esc(r.fluoroscope||'—')+'</td><td>'+esc(r.bronchoscope||'—')+'</td></tr>').join('')
+    : '<tr><td colspan="9" class="empty">ไม่มีข้อมูล</td></tr>';
 }
 
-// ══════════════════════════════════════════════════════
-//  EXPORT — BOOKING CSV
-// ══════════════════════════════════════════════════════
-function exportBookingCSV() {
-  if (!bRawData) return;
-  const rows=[['วันที่/เวลา','แพทย์','หัตถการ','HN','ชื่อผู้ป่วย','สถานะ']];
-  bRawData.bookings.forEach(b=>rows.push([b.dateTime,b.doctor,b.procedure,b.hn,b.patientName,b.status]));
-  dlCSV(rows,'booking_'+localDateStr(new Date()));
+/* ───────── export ───────── */
+function dlCSV(rows, name){
+  const csv = rows.map(r => r.map(v => '"'+csvSafe(v==null?'':v).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const a = Object.assign(document.createElement('a'), { href:URL.createObjectURL(new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'})), download:name+'.csv' });
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href), 2000);
+}
+function csvBooking(){
+  if (!St.bData) return;
+  const rows=[['วันที่/เวลา','แพทย์','หัตถการ','HN','ชื่อผู้ป่วย','สถานะ','มีบันทึกหัตถการ']];
+  St.bData.bookings.forEach(b=>rows.push([b.dateTime,b.doctor,b.procedure,b.hn,b.patientName,b.status,b.hasRecord?'Y':'N']));
+  dlCSV(rows,'booking_'+ymd(new Date()));
+}
+function csvProcedure(){
+  if (!St.pData) return;
+  const rows=[['วันที่','HN','คำนำหน้า','ชื่อผู้ป่วย','Pre-Dx','Operation','Post-Dx','แพทย์','พยาบาล','Anesthesia','Anesth Nurse','เริ่ม','จบ','นาที','ราคา','กล้อง','Fluoroscope','ผู้ล้างกล้อง','หมายเหตุ','ผู้บันทึก']];
+  St.pData.records.forEach(r=>rows.push([r.procedureDate,r.hn,r.namePrefix,r.patientName,r.preDiagnosis,r.operation,r.postDiagnosis,r.doctor,r.nurseCount,r.anesthesicMode,r.anesthesiaNurse,r.timeStart,r.timeEnd,r.duration,r.price,r.bronchoscope,r.fluoroscope,r.scopeWasher,r.remark,r.recordedBy]));
+  dlCSV(rows,'procedure_'+ymd(new Date()));
+}
+function pdfProcedure(){
+  if (!St.pData) return;
+  const {from,to} = rangeFor(St.p,'p-from','p-to'), s = St.pData.summary;
+  const w = window.open('','_blank');
+  if (!w) { Broncho.toast('กรุณาอนุญาต popup เพื่อพิมพ์', true); return; }
+  const rows = St.pData.records.map(r => '<tr><td>'+esc(r.procedureDate)+'</td><td>'+esc(r.hn)+'</td><td>'+esc(r.namePrefix)+esc(r.patientName)+'</td><td>'+esc(r.operation)+'</td><td>'+esc(r.doctor)+'</td><td>'+esc(r.timeStart||'')+'–'+esc(r.timeEnd||'')+'</td><td>'+(r.price?r.price.toLocaleString():'')+'</td><td>'+esc(r.fluoroscope||'')+'</td></tr>').join('');
+  w.document.write('<!DOCTYPE html><html lang="th"><head><meta charset="UTF-8"><title>รายงานการส่องกล้องหลอดลม</title>'
+   + '<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">'
+   + '<style>body{font-family:Sarabun,sans-serif;font-size:13px;margin:20px;color:#152238}h1{font-size:18px}.k{display:flex;gap:12px;margin:14px 0}.k div{flex:1;border:1px solid #d1dbe8;border-radius:8px;padding:10px;text-align:center}.k b{display:block;font-size:22px;color:#0b7fa8}table{width:100%;border-collapse:collapse;font-size:12px}th{background:#f0f4f8;text-align:left}th,td{border:1px solid #d1dbe8;padding:6px 8px}</style></head><body>'
+   + '<h1>รายงานการส่องกล้องหลอดลม</h1><div>'+(from?esc(fmtDay(from))+' – '+esc(fmtDay(to)):'ทั้งหมด')+' · พิมพ์ '+esc(new Date().toLocaleString('th-TH'))+'</div>'
+   + '<div class="k"><div><b>'+s.totalCases+'</b>Case</div><div><b>'+s.totalRevenue.toLocaleString()+'</b>รายได้ (บาท)</div><div><b>'+s.avgDuration+'</b>เวลาเฉลี่ย (นาที)</div><div><b>'+s.fluoroUsed+'</b>ใช้ Fluoroscope</div></div>'
+   + '<table><tr><th>วันที่</th><th>HN</th><th>ผู้ป่วย</th><th>Operation</th><th>แพทย์</th><th>เวลา</th><th>ราคา</th><th>Fluoro</th></tr>'+rows+'</table>'
+   + '<script>window.onload=function(){window.print()}<\/script></body></html>');
+  w.document.close();
 }
 
-// ══════════════════════════════════════════════════════
-//  EXPORT — PROCEDURE CSV
-// ══════════════════════════════════════════════════════
-function exportProcedureCSV() {
-  if (!pRawData) return;
-  const rows=[['วันที่','HN','คำนำหน้า','ชื่อผู้ป่วย','Pre-Dx','Operation','Post-Dx','แพทย์',
-               'พยาบาล','Anesthesia','Anesth Nurse','เวลาเริ่ม','เวลาจบ','นาที','ราคา',
-               'กล้อง','Fluoroscope','ผู้ล้างกล้อง','หมายเหตุ','ผู้บันทึก']];
-  pRawData.records.forEach(r=>rows.push([
-    r.procedureDate,r.hn,r.namePrefix,r.patientName,r.preDiagnosis,r.operation,r.postDiagnosis,
-    r.doctor,r.nurseCount,r.anesthesicMode,r.anesthesiaNurse,r.timeStart,r.timeEnd,r.duration,
-    r.price,r.bronchoscope,r.fluoroscope,r.scopeWasher,r.remark,r.recordedBy
-  ]));
-  dlCSV(rows,'procedure_'+localDateStr(new Date()));
+/* ───────── tabs / pills / boot ───────── */
+function switchTab(t){
+  St.tab = t;
+  ['queue','booking','procedure'].forEach(x => {
+    document.getElementById('tab-'+x).classList.toggle('active', x===t);
+    document.getElementById('c-'+x).classList.toggle('hidden', x!==t);
+  });
+  if (t==='booking'   && !St.bData) loadBooking();
+  if (t==='procedure' && !St.pData) loadProcedure();
+}
+function refresh(silent){
+  if (St.tab==='queue') loadQueue(silent); else if (St.tab==='booking') loadBooking(silent); else loadProcedure(silent);
+}
+function bindPills(key, loader, fromId, toId){
+  document.querySelectorAll('#'+key+'-pills .pill').forEach(p => p.addEventListener('click', () => {
+    St[key] = p.dataset.p;
+    document.querySelectorAll('#'+key+'-pills .pill').forEach(x => x.classList.toggle('active', x===p));
+    if (fromId){ const c = St[key]==='custom'; document.getElementById(key+'-fg-from').classList.toggle('hidden', !c); document.getElementById(key+'-fg-to').classList.toggle('hidden', !c); }
+    if (St[key] !== 'custom') loader();
+  }));
+}
+bindPills('q', () => { St.selDay=null; loadQueue(); });
+bindPills('b', () => loadBooking(), true);
+bindPills('p', () => loadProcedure(), true);
+
+async function loadDoctors(){
+  try{
+    const r = await Broncho.api('getDoctorList');
+    if (!r.success) return;
+    ['b-doc','p-doc'].forEach(id => r.doctors.forEach(n => {
+      const o = document.createElement('option'); o.value = n; o.textContent = n; document.getElementById(id).appendChild(o);
+    }));
+  }catch(_){}
 }
 
-function dlCSV(rows,filename) {
-  const csv=rows.map(r=>r.map(v=>`"${csvSafe(v||'').replace(/"/g,'""')}"`).join(',')).join('\n');
-  const a=Object.assign(document.createElement('a'),{
-    href:'data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(csv),
-    download:filename+'.csv'
-  }); a.click();
-}
-
-// ══════════════════════════════════════════════════════
-//  EXPORT — PDF (print)
-// ══════════════════════════════════════════════════════
-function exportPDF() {
-  const {from,to}=getDateRange(pPeriod,'p-date-from','p-date-to');
-  const fmt=d=>d?new Date(d).toLocaleDateString('th-TH',{day:'numeric',month:'long',year:'numeric'}):'';
-  const title=`รายงานการส่องกล้องหลอดลม${from?'\nช่วงวันที่ '+fmt(from)+' – '+fmt(to):''}`;
-
-  // สร้าง print window
-  const win=window.open('','_blank');
-  if (!win) { Broncho.toast('กรุณาอนุญาต popup เพื่อพิมพ์', true); return; }
-
-  const rows=pRawData?pRawData.records:[];
-  const summary=pRawData?pRawData.summary:{totalCases:0,totalRevenue:0,avgDuration:0,fluoroUsed:0};
-
-  win.document.write(`<!DOCTYPE html><html lang="th"><head>
-  <meta charset="UTF-8">
-  <title>${title}</title>
-  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
-  <style>
-    body{font-family:'Sarabun',sans-serif;font-size:13px;color:#1a2332;margin:20px}
-    h1{font-size:18px;font-weight:800;margin-bottom:4px}
-    .sub{font-size:13px;color:#6b7c93;margin-bottom:16px}
-    .kpi-row{display:flex;gap:12px;margin-bottom:16px}
-    .kpi{flex:1;border:1px solid #d1dbe8;border-radius:8px;padding:12px;text-align:center}
-    .kv{font-size:24px;font-weight:800;color:#0891b2}
-    .kl{font-size:12px;color:#6b7c93;margin-top:3px}
-    table{width:100%;border-collapse:collapse;font-size:12px}
-    th{background:#f0f4f8;padding:8px 10px;text-align:left;border:1px solid #d1dbe8;font-weight:700}
-    td{padding:7px 10px;border:1px solid #e8eef5}
-    tr:nth-child(even) td{background:#f8fafc}
-    .footer{margin-top:20px;font-size:11px;color:#9ca3af;border-top:1px solid #e8eef5;padding-top:8px}
-    @media print{body{margin:10px}}
-  </style>
-  </head><body>
-  <h1>รายงานการส่องกล้องหลอดลม</h1>
-  <div class="sub">${from?'ช่วงวันที่ '+fmt(from)+' – '+fmt(to):''} | พิมพ์: ${new Date().toLocaleString('th-TH')}</div>
-  <div class="kpi-row">
-    <div class="kpi"><div class="kv">${summary.totalCases}</div><div class="kl">จำนวน Case</div></div>
-    <div class="kpi"><div class="kv">${summary.totalRevenue.toLocaleString()}</div><div class="kl">รายได้รวม (บาท)</div></div>
-    <div class="kpi"><div class="kv">${summary.avgDuration}</div><div class="kl">เวลาเฉลี่ย (นาที)</div></div>
-    <div class="kpi"><div class="kv">${summary.fluoroUsed}</div><div class="kl">ใช้ Fluoroscope</div></div>
-  </div>
-  <table>
-    <tr><th>วันที่</th><th>HN</th><th>ชื่อผู้ป่วย</th><th>Operation</th><th>แพทย์</th><th>เวลา</th><th>นาที</th><th>ราคา</th><th>Fluoroscope</th><th>กล้อง</th></tr>
-    ${rows.map(r=>`<tr>
-      <td>${esc(r.procedureDate)}</td>
-      <td>${esc(r.hn)}</td>
-      <td>${esc(r.namePrefix)}${esc(r.patientName)}</td>
-      <td>${esc(r.operation)}</td>
-      <td>${esc(r.doctor)}</td>
-      <td>${esc(r.timeStart||'')}–${esc(r.timeEnd||'')}</td>
-      <td>${r.duration||''}</td>
-      <td>${r.price?r.price.toLocaleString():''}</td>
-      <td>${esc(r.fluoroscope||'')}</td>
-      <td>${esc(r.bronchoscope||'')}</td>
-    </tr>`).join('')}
-  </table>
-  <div class="footer">จัดทำโดยระบบ Bronchoscopy Room Booking | ห้องหัตถการอายุรกรรม MSKH</div>
-  <script>window.onload=()=>window.print()<\/script>
-  </body></html>`);
-  win.document.close();
-}
-
-// ══════════════════════════════════════════════════════
-//  BOOT
-// ══════════════════════════════════════════════════════
-(async()=>{
-  try {
-    if (!(await Broncho.startLiff(()=>{}))) return;      // redirect ไป login
-    const auth = await callServer('checkAuth');
+(async () => {
+  busy(true);
+  try{
+    if (!(await Broncho.startLiff(() => {}))) return;
+    const auth = await Broncho.api('checkAuth');
     if (!auth.success) throw new Error(auth.error || 'SERVER_ERROR');
     if (!auth.authorized) throw new Error('UNAUTHORIZED');
-    await loadDoctors();
-    await fetchBooking();
-    // รีเฟรชเงียบๆ ทุก 5 นาที เฉพาะตอนแท็บกำลังแสดง
-    setInterval(()=>{ if (!document.hidden) fetchAll(true); }, 5*60*1000);
-  } catch(err) {
-    setLoading(false);
-    Broncho.toast(Broncho.errorText(err)+' — โหลดหน้าใหม่เพื่อลองอีกครั้ง', true);
-  }
+    setText('who', auth.name);
+    await Promise.all([loadQueue(true), loadDoctors()]);
+    setInterval(() => { if (!document.hidden) refresh(true); }, 5*60*1000);
+  }catch(e){
+    Broncho.toast(Broncho.errorText(e)+' — โหลดหน้าใหม่เพื่อลองอีกครั้ง', true);
+  }finally{ busy(false); }
 })();
 </script>
 </body>
