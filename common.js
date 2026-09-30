@@ -100,6 +100,8 @@ window.Broncho = (() => {
     NOT_YOUR_BOOKING:   'นี่ไม่ใช่การจองของคุณ',
     ALREADY_CANCELLED:  'รายการนี้ถูกยกเลิกไปแล้ว',
     DUPLICATE_RECORD:   'Case นี้บันทึกข้อมูลไปแล้ว',
+    NOT_EDITABLE:       'แก้ไขไม่ได้ (การจองผ่านเวลาไปแล้ว)',
+    SLOT_TAKEN:         'slot นี้ถูกจองไปแล้ว กรุณาเลือกเวลาอื่น',
   };
   function errorText(e) {
     const code = (e && e.message) ? e.message : String(e);

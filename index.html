@@ -294,7 +294,7 @@
 <!-- ╚══════════════════════════════════════════════════╝ -->
 <div id="view-book" class="hidden">
   <div class="header">
-    <div class="header-title">📅 จองห้องส่องกล้องหลอดลม</div>
+    <div class="header-title" id="book-title">📅 จองห้องส่องกล้องหลอดลม</div>
     <div class="header-sub" id="book-doctor-lbl"></div>
   </div>
   <div class="content">
@@ -338,6 +338,11 @@
     <!-- ─── Step 3: กรอกรายละเอียด ─────────────────── -->
     <div id="step3" class="hidden">
       <button class="btn-back" onclick="goToStep(2)">‹ เปลี่ยนเวลา</button>
+      <div id="edit-banner" class="hidden" style="background:#fff7e0;border:1px solid #f3d38a;color:#7a5200;border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:13px;line-height:1.6">
+        ✏️ กำลังแก้ไขการจอง — แก้ข้อมูลด้านล่าง หรือ
+        <a href="#" onclick="goToStep(1);return false" style="color:#7a5200;font-weight:700">เปลี่ยนวัน-เวลา</a> ·
+        <a href="#" onclick="cancelEdit();return false" style="color:#7a5200;font-weight:700">ออกจากการแก้ไข</a>
+      </div>
       <div class="card">
         <div class="card-title">🔬 รายละเอียดการจอง</div>
 
@@ -422,8 +427,8 @@
     <div id="step4" class="hidden">
       <div class="success-wrap">
         <div class="success-icon">✅</div>
-        <div class="success-title">จองสำเร็จ!</div>
-        <div class="success-sub">ระบบบันทึกการจองและแจ้ง Admin เรียบร้อยแล้ว</div>
+        <div class="success-title" id="success-title">จองสำเร็จ!</div>
+        <div class="success-sub" id="success-sub">ระบบบันทึกการจองและแจ้ง Admin เรียบร้อยแล้ว</div>
       </div>
       <div class="card" id="success-detail"></div>
       <button class="btn btn-primary" onclick="resetBook()">📅 จองเพิ่มเติม</button>
@@ -487,6 +492,7 @@ const { esc } = Broncho;
 const S = {
   prefetched:    null,    // slots ที่โหลดขนานกับ checkAuth
   myBookings:    [],
+  editTarget:    null,    // { rowIndex, origSlot } เมื่อกำลังแก้ไขการจอง
   doctorName:    null,
   weekOffset:    0,
   allSlots:      [],      // raw slot array from server
@@ -769,6 +775,8 @@ function buildProcTitle() {
 }
 
 function openBookingModal() {
+  if (!S.selectedSlot && S.editTarget) S.selectedSlot = S.editTarget.origSlot;
+  if (!S.selectedSlot) return;
   const hn      = document.getElementById('inp-hn').value.trim();
   const patient = document.getElementById('inp-patient').value.trim();
   const proc    = buildProcTitle();
@@ -796,7 +804,9 @@ async function submitBooking() {
   const patient = document.getElementById('inp-patient').value.trim();
 
   try {
-    const res = await Broncho.api('createBooking', {
+    const editing = S.editTarget;
+    const res = await Broncho.api(editing ? 'updateBooking' : 'createBooking', {
+      rowIndex:       editing ? editing.rowIndex : undefined,
       slotStart:      S.selectedSlot.startISO,
       slotEnd:        S.selectedSlot.endISO,
       procedure:      S.procedure,
@@ -823,6 +833,9 @@ async function submitBooking() {
     }
 
     // Show success
+    document.getElementById('success-title').textContent = editing ? 'แก้ไขสำเร็จ!' : 'จองสำเร็จ!';
+    document.getElementById('success-sub').textContent   = editing ? 'ระบบบันทึกการแก้ไขและแจ้ง Admin เรียบร้อยแล้ว' : 'ระบบบันทึกการจองและแจ้ง Admin เรียบร้อยแล้ว';
+    exitEditMode();
     document.getElementById('success-detail').innerHTML = `
       <div class="confirm-row"><span class="confirm-lbl">แพทย์</span>  <span class="confirm-val">${esc(res.doctorName)}</span></div>
       <div class="confirm-row"><span class="confirm-lbl">วันเวลา</span> <span class="confirm-val">${esc(res.dateTimeStr)} น.</span></div>
@@ -841,6 +854,7 @@ async function submitBooking() {
 }
 
 function resetBook() {
+  exitEditMode();
   S.selectedDate = null; S.selectedSlot = null;
   S.procedure = null; S.subProcs = [];
   document.getElementById('inp-hn').value = '';
@@ -852,6 +866,46 @@ function resetBook() {
   document.getElementById('proc-pleuro').classList.remove('selected');
   document.getElementById('sub-proc-group').classList.add('hidden');
   loadSlots(); goToStep(1);
+}
+
+// ══════════════════════════════════════════════════════
+//  EDIT BOOKING
+// ══════════════════════════════════════════════════════
+function exitEditMode() {
+  S.editTarget = null;
+  document.getElementById('edit-banner').classList.add('hidden');
+  document.getElementById('book-title').textContent = '📅 จองห้องส่องกล้องหลอดลม';
+}
+
+function cancelEdit() {
+  exitEditMode();
+  resetBook();
+  switchView('my');
+}
+
+function startEdit(b) {
+  const origSlot = { startISO: b.startISO, endISO: b.endISO, dateLabel: b.dateLabel, timeStr: b.timeStr, dateKey: b.dateKey };
+  S.editTarget   = { rowIndex: b.rowIndex, origSlot };
+  S.selectedDate = b.dateKey;
+  S.selectedSlot = origSlot;
+
+  showEl('view-book');
+  document.getElementById('book-doctor-lbl').textContent = '👨‍⚕️ ' + S.doctorName;
+  document.getElementById('book-title').textContent = '✏️ แก้ไขการจอง';
+  document.getElementById('edit-banner').classList.remove('hidden');
+  document.getElementById('slot-summary-text').textContent = '🗓 ' + b.dateLabel + '  ⏰ ' + b.timeStr;
+
+  document.getElementById('inp-hn').value        = b.hn;
+  document.getElementById('inp-patient').value   = b.patientName;
+  document.getElementById('inp-diagnosis').value = b.diagnosis || '';
+  selectProc(b.procedureBase === 'Bronchoscopy' ? 'Bronchoscopy' : 'Pleuroscopy');
+  (b.subProcedures || []).filter(x => SUB_PROCS.some(sp => sp.label === x)).forEach(toggleSub);
+  if (b.anesthesia === 'MAC' || b.anesthesia === 'GA') selectAnesthesia(b.anesthesia);
+  if (b.fluoroscope === 'จอง' || b.fluoroscope === 'ไม่จอง') selectFluoro(b.fluoroscope);
+
+  goToStep(3);
+  validateStep3();
+  loadSlots();      // เผื่อผู้ใช้กดเปลี่ยนวัน-เวลา (slot เดิมของตัวเองจะแสดงเป็น "เต็ม")
 }
 
 // ══════════════════════════════════════════════════════
@@ -887,12 +941,17 @@ async function loadMyBookings(showCancel = false) {
           ${showCancel ? `
           <button class="btn btn-danger btn-cancel-booking" data-idx="${i}" style="margin-top:10px;font-size:13px">
             ❌ ยกเลิกการจองนี้
-          </button>` : ''}
+          </button>` : `
+          <button class="btn btn-outline btn-edit-booking" data-idx="${i}" style="margin-top:10px;font-size:13px">
+            ✏️ แก้ไขการจองนี้
+          </button>`}
         </div>`;
     });
     document.getElementById('bookings-list').innerHTML = html;
     document.querySelectorAll('.btn-cancel-booking').forEach(btn =>
       btn.addEventListener('click', () => openCancelModal(S.myBookings[+btn.dataset.idx])));
+    document.querySelectorAll('.btn-edit-booking').forEach(btn =>
+      btn.addEventListener('click', () => startEdit(S.myBookings[+btn.dataset.idx])));
 
   } catch (err) {
     document.getElementById('bookings-list').innerHTML =

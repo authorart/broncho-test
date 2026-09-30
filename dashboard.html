@@ -153,9 +153,10 @@ tr:hover td{background:#fafcff}
   <div class="filters">
     <div class="pills" id="q-pills">
       <button class="pill" data-p="week">สัปดาห์นี้</button>
-      <button class="pill active" data-p="month">เดือนนี้</button>
+      <button class="pill active" data-p="w4">4 สัปดาห์</button>
+      <button class="pill" data-p="w8">8 สัปดาห์</button>
+      <button class="pill" data-p="month">เดือนนี้</button>
       <button class="pill" data-p="next">เดือนหน้า</button>
-      <button class="pill" data-p="ahead">60 วันข้างหน้า</button>
     </div>
     <span class="sp"></span>
     <span style="font-size:12.5px;color:var(--ink3)">1 วัน = 12 slot (09:00–12:00, 13:00–16:00 · slot ละ 30 นาที)</span>
@@ -271,7 +272,7 @@ const { esc, csvSafe } = Broncho;
 const PAL = ['#0b7fa8','#12945f','#d98a0b','#6d4ad6','#d6343f','#19a6c9','#7aa412','#c2569c'];
 const TH_DOW = ['อา','จ','อ','พ','พฤ','ศ','ส'];
 const TH_MON = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
-const St = { tab:'queue', q:'month', b:'month', p:'month', qData:null, bData:null, pData:null, selDay:null };
+const St = { tab:'queue', q:'w4', b:'month', p:'month', qData:null, bData:null, pData:null, selDay:null };
 const charts = {};
 
 /* ───────── helpers ───────── */
@@ -322,8 +323,22 @@ const day = iso => new Date(iso+'T00:00:00');
 const shortDay = iso => { const d=day(iso); return d.getDate()+' '+TH_MON[d.getMonth()]; };
 
 /* ───────── ROOM QUEUE ───────── */
+// ช่วงของปฏิทินคิวห้อง ปรับให้เป็นสัปดาห์เต็ม จ.–อา. เสมอ (การจองที่คาบเกี่ยวข้ามเดือนจะไม่หาย)
+function queueRange(period){
+  const now = new Date(), mon = d => { const x=new Date(d); x.setDate(x.getDate()-((x.getDay()+6)%7)); return x; };
+  const sun = d => { const x=mon(d); x.setDate(x.getDate()+6); return x; };
+  const y = now.getFullYear(), m = now.getMonth();
+  let a, b;
+  if (period==='week')       { a = mon(now); b = sun(now); }
+  else if (period==='w4')    { a = mon(now); b = new Date(a); b.setDate(b.getDate()+27); }
+  else if (period==='w8')    { a = mon(now); b = new Date(a); b.setDate(b.getDate()+55); }
+  else if (period==='next')  { a = mon(new Date(y,m+1,1)); b = sun(new Date(y,m+2,0)); }
+  else                       { a = mon(new Date(y,m,1));   b = sun(new Date(y,m+1,0)); }   // month
+  return { from: ymd(a), to: ymd(b) };
+}
+
 async function loadQueue(silent){
-  const {from,to} = rangeFor(St.q);
+  const {from,to} = queueRange(St.q);
   if (!silent) busy(true);
   try{
     const r = await Broncho.api('getRoomQueue', {from, to});
@@ -337,7 +352,7 @@ function renderQueue(r, from, to){
   const s = r.summary;
   count('q-open', s.openDays); count('q-used', s.usedSlots); count('q-free', s.futureFree); count('q-util', s.utilization);
   setText('q-total', s.totalSlots+' slot ทั้งหมด');
-  setText('q-range', fmtDay(from)+' – '+fmtDay(to));
+  setText('q-range', fmtDay(from)+' – '+fmtDay(to)+' · พบ '+(s.bookingsInRange||0)+' การจอง');
 
   // calendar grid (จันทร์เป็นคอลัมน์แรก)
   const byDate = {}; r.days.forEach(d => byDate[d.date]=d);
