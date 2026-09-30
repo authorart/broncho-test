@@ -185,6 +185,21 @@ button{cursor:pointer;font-family:inherit}
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script src="config.js"></script>
 <script src="common.js"></script>
+<style>
+.btn-cancel-case{background:#fff;color:#c62f3a;border:1.5px solid #e59aa0;border-radius:10px;padding:9px 16px;font-family:inherit;font-size:13.5px;font-weight:700;cursor:pointer}
+.btn-cancel-case:hover{background:#fdecee}
+.cc-ov{position:fixed;inset:0;background:rgba(15,25,45,.55);z-index:300;display:flex;align-items:center;justify-content:center;padding:16px}
+.cc-box{background:#fff;border-radius:16px;width:100%;max-width:460px;padding:22px 20px;max-height:92vh;overflow:auto;box-shadow:0 20px 50px rgba(0,0,0,.3)}
+.cc-box h3{font-size:17px;margin-bottom:12px}
+.cc-sum{background:#f4f7fb;border-radius:10px;padding:10px 12px;font-size:13.5px;line-height:1.6;margin-bottom:14px}
+.cc-lbl{display:block;font-size:12.5px;font-weight:700;color:#51627a;margin:10px 0 5px}
+.cc-box select,.cc-box textarea{width:100%;border:1.5px solid #dde5f0;border-radius:10px;padding:10px 12px;font-family:inherit;font-size:14.5px}
+.cc-box textarea{min-height:74px;resize:vertical}
+.cc-act{display:flex;gap:10px;margin-top:16px}
+.cc-act button{flex:1;border:0;border-radius:10px;padding:12px;font-family:inherit;font-size:14.5px;font-weight:700;cursor:pointer}
+.cc-go{background:#d6343f;color:#fff}.cc-go:disabled{opacity:.5;cursor:not-allowed}
+.cc-no{background:#eef2f8;color:#334}
+</style>
 </head>
 <body>
 
@@ -228,6 +243,9 @@ button{cursor:pointer;font-family:inherit}
           </div>
         </div>
         <div id="booking-preview" class="hidden" style="margin-top:14px"></div>
+        <div id="cancel-case-wrap" class="hidden" style="margin-top:12px">
+          <button type="button" class="btn-cancel-case" onclick="openCancelCase()">🚫 ยกเลิกเคสนี้ (ไม่ได้ทำหัตถการ)</button>
+        </div>
       </div>
     </div>
 
@@ -425,6 +443,25 @@ button{cursor:pointer;font-family:inherit}
 
 </div><!-- /page -->
 
+<!-- Modal: ยกเลิกเคส -->
+<div id="cc-modal" class="cc-ov hidden">
+  <div class="cc-box">
+    <h3>🚫 ยกเลิกเคส</h3>
+    <div class="cc-sum" id="cc-summary"></div>
+    <label class="cc-lbl" for="cc-reason">เหตุผลที่ยกเลิก <span style="color:#d6343f">*</span></label>
+    <select id="cc-reason" onchange="onCcReasonChange()"></select>
+    <div id="cc-note-wrap">
+      <label class="cc-lbl" for="cc-note" id="cc-note-lbl">รายละเอียดเพิ่มเติม (ถ้ามี)</label>
+      <textarea id="cc-note" maxlength="200" placeholder="พิมพ์เหตุผลเพิ่มเติม"></textarea>
+    </div>
+    <div style="font-size:12px;color:#8595ab;margin-top:8px">เคสจะถูกลบออกจากปฏิทินห้อง และแจ้งกลุ่ม LINE พร้อมเหตุผล — ย้อนกลับไม่ได้</div>
+    <div class="cc-act">
+      <button type="button" class="cc-no" onclick="closeCancelCase()">ปิด</button>
+      <button type="button" class="cc-go" id="cc-submit" onclick="submitCancelCase()">ยืนยันยกเลิกเคส</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // ══════════════════════════════════════════════
 //  CONFIG
@@ -459,7 +496,9 @@ async function init() {
     if (!auth.success) throw new Error(auth.error || 'SERVER_ERROR');
     if (!auth.authorized) throw new Error('UNAUTHORIZED');
 
-    document.getElementById('inp-date').value = localDate();
+    const qp = new URLSearchParams(location.search);
+    const qDate = qp.get('date'), qRef = qp.get('ref');
+    document.getElementById('inp-date').value = /^\d{4}-\d{2}-\d{2}$/.test(qDate || '') ? qDate : localDate();
 
     const [priceRes, scopeRes] = await Promise.all([api('getPriceList'), api('getBookingScopes')]);
     if (priceRes.success) S.priceList = priceRes.prices;
@@ -473,6 +512,10 @@ async function init() {
     }
 
     await onDateChange();
+    if (qRef) {                                   // เปิดเคสที่ระบุจากลิงก์ "รอบันทึก"
+      const i = S.bookings.findIndex(b => b.eventId === qRef);
+      if (i >= 0) { document.getElementById('sel-case').value = String(i); onCaseSelect(); }
+    }
 
     if (!listenersBound) {
       listenersBound = true;
@@ -506,6 +549,7 @@ async function onDateChange() {
   S.selectedCase = null; S.bookings = [];
   clearPrefill();
   document.getElementById('booking-preview').classList.add('hidden');
+  document.getElementById('cancel-case-wrap').classList.add('hidden');
   const sel = document.getElementById('sel-case');
   sel.innerHTML = '<option value="">⏳ กำลังโหลด...</option>';
   sel.disabled = true;
@@ -551,6 +595,7 @@ function onCaseSelect() {
   const idx = document.getElementById('sel-case').value;
   if (idx === '') {
     document.getElementById('booking-preview').classList.add('hidden');
+    document.getElementById('cancel-case-wrap').classList.add('hidden');
     S.selectedCase = null;
     clearPrefill();
     return;
@@ -560,6 +605,7 @@ function onCaseSelect() {
   S.selectedCase = b;
   prefillFromBooking(b);
   showBookingPreview(b);
+  document.getElementById('cancel-case-wrap').classList.remove('hidden');
   validateForm();
 }
 
@@ -778,6 +824,60 @@ function showErr(msg) {
 }
 
 // ══════════════════════════════════════════════
+//  CANCEL CASE (พร้อมเหตุผล)
+// ══════════════════════════════════════════════
+const CANCEL_OTHER = 'อื่นๆ (ระบุ)';
+const CANCEL_REASONS = ['ผู้ป่วยไม่มาตามนัด', 'ผล Lab ไม่ผ่านเกณฑ์', 'ผู้ป่วยเปลี่ยนใจ / ปฏิเสธหัตถการ',
+  'อาการผู้ป่วยไม่เหมาะสมกับหัตถการ', 'แพทย์ขอเลื่อน/ยกเลิก', 'อุปกรณ์หรือห้องไม่พร้อม', 'จองผิด / ข้อมูลซ้ำ', CANCEL_OTHER];
+
+function openCancelCase() {
+  const b = S.selectedCase;
+  if (!b) return;
+  document.getElementById('cc-summary').innerHTML =
+    '🔬 ' + esc(b.procedure) + '<br>⏰ ' + esc(b.dateTime) + ' น. · 👨‍⚕️ ' + esc(b.doctor) +
+    '<br>🏥 HN ' + esc(b.hn) + ' · 👤 ' + esc(b.patientName);
+  const sel = document.getElementById('cc-reason');
+  sel.innerHTML = '<option value="">— เลือกเหตุผล —</option>' + CANCEL_REASONS.map(r => '<option>' + esc(r) + '</option>').join('');
+  document.getElementById('cc-note').value = '';
+  onCcReasonChange();
+  document.getElementById('cc-modal').classList.remove('hidden');
+}
+function closeCancelCase() { document.getElementById('cc-modal').classList.add('hidden'); }
+
+function onCcReasonChange() {
+  const other = document.getElementById('cc-reason').value === CANCEL_OTHER;
+  document.getElementById('cc-note-lbl').textContent = other ? 'ระบุเหตุผล *' : 'รายละเอียดเพิ่มเติม (ถ้ามี)';
+  document.getElementById('cc-note').placeholder = other ? 'พิมพ์เหตุผลที่ยกเลิก' : 'พิมพ์เหตุผลเพิ่มเติม';
+}
+
+async function submitCancelCase() {
+  const b = S.selectedCase;
+  const reason = document.getElementById('cc-reason').value;
+  const note = document.getElementById('cc-note').value.trim();
+  if (!b) return;
+  if (!reason) { Broncho.toast('กรุณาเลือกเหตุผล', true); return; }
+  if (reason === CANCEL_OTHER && !note) { Broncho.toast('กรุณาระบุเหตุผลในช่อง "อื่นๆ"', true); return; }
+
+  const btn = document.getElementById('cc-submit');
+  btn.disabled = true; btn.textContent = '⏳ กำลังยกเลิก...';
+  try {
+    const r = await api('cancelCase', { rowIndex: b.rowIndex, eventId: b.eventId, reason, note });
+    if (!r.success) throw new Error(r.error);
+    closeCancelCase();
+    Broncho.toast('✅ ยกเลิกเคสเรียบร้อยแล้ว');
+    S.selectedCase = null;
+    clearPrefill();
+    document.getElementById('booking-preview').classList.add('hidden');
+    document.getElementById('cancel-case-wrap').classList.add('hidden');
+    await onDateChange();                       // โหลดรายการใหม่ (เคสที่ยกเลิกจะหายไปจากรายการ)
+  } catch (err) {
+    Broncho.toast(Broncho.errorText(err), true);
+  } finally {
+    btn.disabled = false; btn.textContent = 'ยืนยันยกเลิกเคส';
+  }
+}
+
+// ══════════════════════════════════════════════
 //  RESET
 // ══════════════════════════════════════════════
 function resetForm() {
@@ -797,6 +897,7 @@ function resetForm() {
   document.getElementById('price-val').textContent   = '—';
   document.getElementById('price-breakdown').textContent = '';
   document.getElementById('booking-preview').className = 'hidden';
+  document.getElementById('cancel-case-wrap').classList.add('hidden');
   document.getElementById('form-page').classList.remove('hidden');
   document.getElementById('success-page').classList.add('hidden');
   document.getElementById('btn-submit').disabled = true;

@@ -101,6 +101,9 @@ window.Broncho = (() => {
     ALREADY_CANCELLED:  'รายการนี้ถูกยกเลิกไปแล้ว',
     DUPLICATE_RECORD:   'Case นี้บันทึกข้อมูลไปแล้ว',
     NOT_EDITABLE:       'แก้ไขไม่ได้ (การจองผ่านเวลาไปแล้ว)',
+    ALREADY_RECORDED:   'เคสนี้บันทึกหัตถการแล้ว ยกเลิกไม่ได้',
+    REASON_REQUIRED:    'กรุณาระบุเหตุผลในช่อง "อื่นๆ"',
+    ROW_MISMATCH:       'ข้อมูลการจองเปลี่ยนไป กรุณาโหลดหน้าใหม่แล้วลองอีกครั้ง',
     SLOT_TAKEN:         'slot นี้ถูกจองไปแล้ว กรุณาเลือกเวลาอื่น',
   };
   function errorText(e) {

@@ -224,7 +224,11 @@ tr:hover td{background:#fafcff}
   </div>
   <div class="card">
     <h3>รายการจอง <span class="badge" id="b-count">0 รายการ</span></h3>
-    <div class="tbl-tools"><input class="ctl" id="b-search" placeholder="ค้นหา HN / ชื่อ / แพทย์ / หัตถการ" oninput="renderBookingTable()"></div>
+    <div class="tbl-tools"><input class="ctl" id="b-search" placeholder="ค้นหา HN / ชื่อ / แพทย์ / หัตถการ" oninput="renderBookingTable()">
+      <select class="ctl" id="b-status" style="max-width:190px;min-width:150px" onchange="renderBookingTable()">
+        <option value="all">ทุกสถานะ</option><option value="wait">รอบันทึกหัตถการ</option><option value="done">ทำแล้ว</option>
+        <option value="upcoming">รอทำ</option><option value="cancelled">ยกเลิก</option>
+      </select></div>
     <div class="tbl-wrap"><table><thead><tr><th>วันที่/เวลา</th><th>แพทย์</th><th>หัตถการ</th><th>HN</th><th>ผู้ป่วย</th><th>สถานะ</th></tr></thead><tbody id="b-body"></tbody></table></div>
   </div>
 </main>
@@ -450,15 +454,19 @@ function renderBooking(r, from, to){
 function renderBookingTable(){
   if (!St.bData) return;
   const q = val('b-search').trim().toLowerCase();
-  const rows = St.bData.bookings.filter(b => !q || [b.doctor,b.procedure,b.hn,b.patientName,b.dateTime].join(' ').toLowerCase().includes(q));
+  const sf = val('b-status');
+  const rows = St.bData.bookings.filter(b => (!q || [b.doctor,b.procedure,b.hn,b.patientName,b.dateTime].join(' ').toLowerCase().includes(q))
+    && (sf==='all' || (sf==='wait' ? (b.status==='done' && !b.hasRecord) : b.status===sf)));
   setText('b-count', rows.length+' รายการ');
   const tag = {done:['t-done','ทำแล้ว'], upcoming:['t-up','รอทำ'], cancelled:['t-can','ยกเลิก']};
   document.getElementById('b-body').innerHTML = rows.length ? rows.map(b => {
     const [c,l] = tag[b.status]||['',''];
-    const rec = (b.status==='done' && !b.hasRecord) ? ' <span class="tag t-w">รอบันทึก</span>' : '';
+    const rec = (b.status==='done' && !b.hasRecord)
+      ? ' <a class="tag t-w" style="text-decoration:none" title="เปิดหน้าบันทึกหัตถการของเคสนี้" href="record.html?date='+encodeURIComponent(b.dateISO)+'&ref='+encodeURIComponent(b.eventId||'')+'">รอบันทึก ›</a>' : '';
+    const why = (b.status==='cancelled' && b.cancelReason) ? '<div style="font-size:11.5px;color:var(--ink3);margin-top:3px">'+esc(b.cancelReason)+'</div>' : '';
     return '<tr><td style="white-space:nowrap;font-weight:600">'+esc(b.dateTime)+'</td><td>'+esc(b.doctor)+'</td>'
       + '<td><span class="tag '+(b.procedure.includes('Bronchoscopy')?'t-b':'t-p')+'">'+esc(b.procedure)+'</span></td>'
-      + '<td style="font-weight:600">'+esc(b.hn)+'</td><td>'+esc(b.patientName)+'</td><td><span class="tag '+c+'">'+l+'</span>'+rec+'</td></tr>';
+      + '<td style="font-weight:600">'+esc(b.hn)+'</td><td>'+esc(b.patientName)+'</td><td><span class="tag '+c+'">'+l+'</span>'+rec+why+'</td></tr>';
   }).join('') : '<tr><td colspan="6" class="empty">ไม่มีข้อมูล</td></tr>';
 }
 
