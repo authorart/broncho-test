@@ -617,8 +617,9 @@ async function loadSlots() {
 function updateWeekLabel() {
   const w = S.weekOffset;
   document.getElementById('week-label').textContent =
-    w === 0 ? '4 สัปดาห์ถัดไป' : `ล่วงหน้า ${w*4+1}–${(w+1)*4} สัปดาห์`;
+    w === 0 ? '2 สัปดาห์ถัดไป' : `ล่วงหน้า ${w*2+1}–${(w+1)*2} สัปดาห์`;
   document.getElementById('btn-prev-week').disabled = w <= 0;
+  document.getElementById('btn-next-week').disabled = w >= 7;
 }
 
 function changeWeek(d) {
