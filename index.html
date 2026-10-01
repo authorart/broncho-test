@@ -7,6 +7,7 @@
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <script src="config.js"></script>
   <script src="common.js"></script>
+  <script src="program.js"></script>
   <style>
     /* ── Design Tokens ─────────────────────────────────────── */
     :root {
@@ -485,6 +486,7 @@
 
 <script>
 const { esc } = Broncho;
+const PROGRAM = new URLSearchParams(location.search).get('mode') === 'program';
 
 // ══════════════════════════════════════════════════════
 //  STATE
@@ -521,9 +523,13 @@ async function init() {
   document.getElementById('load-spinner').classList.remove('hidden');
   document.getElementById('btn-retry').classList.add('hidden');
   try {
-    if (!(await Broncho.startLiff(status))) return;      // กำลัง redirect ไป login
-    const goPage = Broncho.getPage();
-    if (goPage === 'record' || goPage === 'dashboard') { status('กำลังเปิดหน้า...'); location.replace(goPage + '.html'); return; }
+    if (PROGRAM) {                                       // เปิดจากโปรแกรม: login ด้วย username/password (ไม่ใช้ LIFF)
+      await Broncho.programStart({ page: Broncho.getPage() === 'book' ? 'book' : 'my' });
+    } else {
+      if (!(await Broncho.startLiff(status))) return;    // กำลัง redirect ไป login
+      const goPage = Broncho.getPage();
+      if (goPage === 'record' || goPage === 'dashboard') { status('กำลังเปิดหน้า...'); location.replace(goPage + '.html'); return; }
+    }
     status('กำลังตรวจสอบสิทธิ์และโหลดตาราง...');
     const slowTimer = setTimeout(() => status('เซิร์ฟเวอร์กำลังเริ่มทำงาน ครั้งแรกอาจใช้เวลาถึง 30–40 วินาที กรุณารอสักครู่...'), 8000);
     const page = Broncho.getPage();

@@ -63,8 +63,22 @@ window.Broncho = (() => {
     } finally { clearTimeout(t); }
   }
 
+  // ── session ของโปรแกรม (login ด้วย username/password) ใช้ร่วมกันทุกหน้า: login ครั้งเดียว ──
+  const SKEY = 'bp_session';
+  let programMode = false, memSession = null;
+  function getSession() {
+    let s = memSession;
+    if (!s) { try { s = JSON.parse(localStorage.getItem(SKEY)); } catch (_) {} }
+    return (s && s.token && s.exp > Date.now()) ? s : null;
+  }
+  function setSession(token, expiresAt, user) {
+    memSession = { token, exp: expiresAt, user };
+    try { localStorage.setItem(SKEY, JSON.stringify(memSession)); } catch (_) {}
+  }
+  function clearSession() { memSession = null; try { localStorage.removeItem(SKEY); } catch (_) {} }
+
   const READS = ['checkAuth', 'getAvailableSlots', 'getUserBookings', 'getBookingsByDate',
-                 'getPriceList', 'getBookingScopes', 'getDashboardData', 'getProcedureData', 'getDoctorList', 'getRoomQueue'];
+                 'getPriceList', 'getBookingScopes', 'getDashboardData', 'getProcedureData', 'getDoctorList', 'getRoomQueue', 'listUsers', 'me'];
 
   // คืน JSON จาก server (อาจเป็น {success:false,error}); throw เมื่อเครือข่าย/timeout/โทเคนหมดอายุ
   async function api(action, params = {}) {
@@ -73,11 +87,15 @@ window.Broncho = (() => {
     let lastErr;
     for (let i = 0; i < attempts; i++) {
       try {
-        const data = await fetchJson({ action, params: { ...params, idToken: liff.getIDToken() } }, 45000);   // Apps Script cold start อาจนาน 30+ วินาที
+        const sess = programMode ? getSession() : null;
+        const auth = programMode ? { sessionToken: sess ? sess.token : '' } : { idToken: liff.getIDToken() };
+        const data = await fetchJson({ action, params: { ...params, ...auth } }, 45000);   // Apps Script cold start อาจนาน 30+ วินาที
         if (data && (data.error === 'TOKEN_EXPIRED' || data.error === 'TOKEN_INVALID' || data.error === 'TOKEN_MISSING')) {
-          if (!liff.isInClient()) { liff.logout(); liff.login({ redirectUri: location.href }); }
+          if (programMode) { clearSession(); setTimeout(() => location.reload(), 1200); }   // กลับไปหน้า login
+          else if (!liff.isInClient()) { liff.logout(); liff.login({ redirectUri: location.href }); }
           throw new Error('SESSION_EXPIRED');
         }
+        if (programMode && data && data.error === 'PASSWORD_CHANGE_REQUIRED') { setTimeout(() => location.reload(), 800); }
         return data;
       } catch (e) {
         lastErr = e;
@@ -91,7 +109,20 @@ window.Broncho = (() => {
   const MESSAGES = {
     TIMEOUT:            'เซิร์ฟเวอร์ตอบช้าเกินไป (เกิน 45 วินาที) กรุณากด "ลองใหม่" — ครั้งถัดไปมักเร็วขึ้น',
     SERVER_404:         'ไม่พบเซิร์ฟเวอร์ (404) — ตรวจสอบ SCRIPT_URL / การ deploy ของ Apps Script',
-    SESSION_EXPIRED:    'เซสชันหมดอายุ กรุณาปิดแล้วเปิดหน้านี้ใหม่จาก LINE',
+    SESSION_EXPIRED:    'เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่ (หน้านี้จะโหลดใหม่อัตโนมัติ)',
+    INVALID_LOGIN:      'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง',
+    TOO_MANY_ATTEMPTS:  'ใส่ผิดหลายครั้ง ระบบล็อกชั่วคราว 15 นาที (ผู้ดูแลรีเซ็ตรหัสผ่านให้ได้)',
+    ACCOUNT_INACTIVE:   'บัญชีนี้ยังไม่เปิดใช้งาน หรือถูกปิดการใช้งาน',
+    FORBIDDEN:          'บัญชีของคุณไม่มีสิทธิ์ใช้งานส่วนนี้',
+    SESSION_REQUIRED:   'ต้องเข้าสู่ระบบด้วยชื่อผู้ใช้/รหัสผ่านก่อน',
+    PASSWORD_CHANGE_REQUIRED: 'ต้องเปลี่ยนรหัสผ่านก่อนใช้งาน',
+    PASSWORD_WEAK:      'รหัสผ่านต้องมีอย่างน้อย 8 ตัว และมีตัวพิมพ์เล็ก ตัวพิมพ์ใหญ่ และตัวเลข',
+    PASSWORD_SAME:      'รหัสผ่านใหม่ต้องไม่ซ้ำกับรหัสเดิม/รหัสเริ่มต้น',
+    WRONG_PASSWORD:     'รหัสผ่านปัจจุบันไม่ถูกต้อง',
+    USERNAME_TAKEN:     'ชื่อผู้ใช้นี้ถูกใช้แล้ว',
+    NAME_TAKEN:         'ชื่อนี้มีอยู่แล้ว',
+    LAST_ADMIN:         'ต้องมีผู้ดูแลระบบ (admin) ที่ใช้งานได้อย่างน้อย 1 คน',
+    NO_USERNAME:        'ผู้ใช้นี้ยังไม่มีชื่อผู้ใช้ (username)',
     SCRIPT_URL_NOT_SET: 'ยังไม่ได้ตั้งค่า SCRIPT_URL ใน config.js',
     LIFF_SDK_MISSING:   'โหลด LINE SDK ไม่สำเร็จ ตรวจสอบอินเทอร์เน็ตแล้วลองใหม่',
     UNAUTHORIZED:       'ไม่มีสิทธิ์ใช้งาน',
@@ -129,5 +160,6 @@ window.Broncho = (() => {
     clearTimeout(toastTimer); toastTimer = setTimeout(() => { el.style.display = 'none'; }, 5000);
   }
 
-  return { esc, csvSafe, getPage, startLiff, api, errorText, toast, stripAuthParams };
+  return { esc, csvSafe, getPage, startLiff, api, errorText, toast, stripAuthParams,
+           getSession, setSession, clearSession, enterProgramMode: () => { programMode = true; }, fetchJson };
 })();

@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bronchoscopy Program — จัดการผู้ใช้</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="config.js"></script>
+<script src="common.js"></script>
+<script src="program.js"></script>
+<style>
+:root{--bg:#f3f6fb;--surface:#fff;--line:#e3e9f2;--line2:#eef2f8;--ink:#152238;--ink2:#51627a;--ink3:#8595ab;
+  --brand:#0b7fa8;--brand-dk:#075f80;--brand-lt:#e3f4fa;--green:#12945f;--green-lt:#dcf5e9;--amber:#d98a0b;--amber-lt:#fdf0d6;
+  --red:#d6343f;--red-lt:#fde5e7;--violet:#6d4ad6;--violet-lt:#ece7fb;--shadow:0 1px 2px rgba(16,32,64,.05),0 6px 20px rgba(16,32,64,.06)}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Sarabun',-apple-system,'Segoe UI',sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.45}
+.hidden{display:none!important}
+button{font-family:inherit;cursor:pointer}
+.wrap{max-width:1100px;margin:0 auto;padding:18px 16px 60px}
+.head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.head h1{font-size:22px;font-weight:700}
+.head .sub{color:var(--ink2);font-size:13px}
+.btn{border:0;border-radius:10px;padding:10px 16px;font-size:14px;font-weight:700}
+.btn-pri{background:var(--brand);color:#fff}.btn-pri:disabled{opacity:.5;cursor:not-allowed}
+.btn-ghost{background:#eef2f8;color:#334}
+.btn-sm{padding:6px 11px;font-size:12.5px;border-radius:8px;font-weight:600}
+.btn-warn{background:var(--amber-lt);color:#8a5a00}
+.btn-ok{background:var(--green-lt);color:#0b6e47}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:14px}
+.kpi{background:var(--surface);border-radius:14px;box-shadow:var(--shadow);padding:12px 14px}
+.kpi b{display:block;font-size:24px;font-weight:700}
+.kpi span{font-size:12.5px;color:var(--ink2)}
+.tools{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.tools input,.tools select{border:1.5px solid #d1dbe8;border-radius:10px;padding:9px 12px;font:inherit;font-size:14px;background:#fff;outline:none}
+.tools input{flex:1;min-width:180px}
+.card{background:var(--surface);border-radius:14px;box-shadow:var(--shadow);overflow:hidden}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{background:#f0f4f8;text-align:left;padding:10px 12px;font-size:12.5px;color:var(--ink2);white-space:nowrap}
+td{padding:10px 12px;border-top:1px solid var(--line2);vertical-align:middle}
+tr.pending td{background:#fffaf0}
+.badge{display:inline-block;border-radius:999px;padding:2px 10px;font-size:12px;font-weight:700;white-space:nowrap}
+.b-admin{background:var(--violet-lt);color:var(--violet)}.b-doctor{background:var(--brand-lt);color:var(--brand-dk)}.b-user{background:var(--green-lt);color:#0b6e47}
+.s-Active{background:var(--green-lt);color:#0b6e47}.s-Pending{background:var(--amber-lt);color:#8a5a00}.s-Inactive{background:#eceff3;color:#667}
+.mut{color:var(--ink3);font-size:12.5px}
+.acts{display:flex;gap:6px;flex-wrap:wrap}
+.empty{padding:34px;text-align:center;color:var(--ink3)}
+.info{background:var(--brand-lt);color:var(--brand-dk);border-radius:12px;padding:12px 14px;font-size:13px;line-height:1.7;margin-bottom:14px}
+.ov{position:fixed;inset:0;background:rgba(15,25,45,.55);z-index:300;display:flex;align-items:center;justify-content:center;padding:16px;overflow:auto}
+.modal{background:#fff;border-radius:16px;width:100%;max-width:440px;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.modal h2{font-size:18px;margin-bottom:12px}
+.modal label{display:block;font-size:13px;font-weight:600;margin:11px 0 4px;color:#334}
+.modal input,.modal select{width:100%;border:1.5px solid #d1dbe8;border-radius:10px;padding:10px 12px;font:inherit;font-size:15px;outline:none;background:#fff}
+.modal input:focus,.modal select:focus{border-color:var(--brand)}
+.hint{font-size:12px;color:var(--ink3);margin-top:4px;line-height:1.5}
+.warn{background:#fff7e0;border:1px solid #f3d38a;color:#7a5200;border-radius:10px;padding:8px 10px;font-size:12.5px;margin-top:10px;line-height:1.55}
+.err{color:var(--red);font-size:13px;min-height:18px;margin-top:10px}
+.mact{display:flex;gap:10px;margin-top:14px}.mact .btn{flex:1}
+.pwbox{background:var(--green-lt);color:#0b6e47;border-radius:10px;padding:12px;font-size:14px;line-height:1.7;margin-top:6px}
+.pwbox code{background:#fff;border-radius:6px;padding:2px 8px;font-size:15px;font-weight:700;color:var(--ink)}
+@media(max-width:720px){.hide-m{display:none}th,td{padding:9px 8px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head">
+    <div><h1>👥 จัดการผู้ใช้</h1><div class="sub">เพิ่ม/แก้ไขผู้ใช้ กำหนดสิทธิ์ อนุมัติเพื่อนใหม่จาก LINE และรีเซ็ตรหัสผ่าน</div></div>
+    <button class="btn btn-pri" style="margin-left:auto" id="btn-add">+ เพิ่มผู้ใช้</button>
+  </div>
+
+  <div class="info">
+    <b>สิทธิ์การใช้งาน</b> —
+    <b>Admin</b>: ทุกเมนู + จัดการผู้ใช้ ·
+    <b>Doctor (แพทย์)</b>: Dashboard + จองคิว/แก้ไข/ยกเลิกการจองของตนเอง ·
+    <b>User (พยาบาล)</b>: Dashboard + บันทึกส่องกล้อง/ยกเลิกเคส.<br>
+    ผู้ใช้ใหม่ได้รหัสผ่านเริ่มต้นและต้องเปลี่ยนเมื่อเข้าสู่ระบบครั้งแรก · เพื่อนใหม่จาก LINE จะอยู่สถานะ <b>Pending</b> — กด "อนุมัติ" แล้วกำหนด username/สิทธิ์
+  </div>
+
+  <div class="kpis" id="kpis"></div>
+
+  <div class="tools">
+    <input id="q" placeholder="ค้นหาชื่อ / username">
+    <select id="f-status"><option value="">ทุกสถานะ</option><option>Active</option><option>Pending</option><option>Inactive</option></select>
+    <select id="f-role"><option value="">ทุกสิทธิ์</option><option value="admin">Admin</option><option value="doctor">Doctor</option><option value="user">User</option></select>
+  </div>
+
+  <div class="card" id="list"><div class="empty">กำลังโหลด...</div></div>
+</div>
+
+<div class="ov hidden" id="ov-edit"><div class="modal">
+  <h2 id="m-title">เพิ่มผู้ใช้</h2>
+  <label for="m-name">ชื่อ-นามสกุล (ใช้เป็นชื่อแพทย์ในการจอง)</label>
+  <input id="m-name" maxlength="100" autocomplete="off">
+  <div class="warn hidden" id="m-namewarn">⚠️ การเปลี่ยนชื่อมีผลต่อการจองเดิม — เจ้าของการจองอ้างอิงจากชื่อ การจองเก่าในชื่อเดิมจะแก้/ยกเลิกเองไม่ได้</div>
+  <label for="m-user">ชื่อผู้ใช้ (username) — a-z 0-9 . _ - ยาว 3–30 ตัว</label>
+  <input id="m-user" maxlength="30" autocapitalize="none" autocorrect="off" spellcheck="false" autocomplete="off">
+  <div class="hint" id="m-userhint"></div>
+  <label for="m-role">สิทธิ์ (Role)</label>
+  <select id="m-role"><option value="doctor">Doctor — แพทย์ (จองคิว)</option><option value="user">User — พยาบาล (บันทึกส่องกล้อง)</option><option value="admin">Admin — ผู้ดูแลระบบ</option></select>
+  <label for="m-status">สถานะ</label>
+  <select id="m-status"><option value="Active">Active — ใช้งานได้</option><option value="Pending">Pending — รออนุมัติ</option><option value="Inactive">Inactive — ปิดการใช้งาน</option></select>
+  <div class="err" id="m-err" role="alert"></div>
+  <div class="mact"><button class="btn btn-ghost" id="m-cancel" type="button">ยกเลิก</button><button class="btn btn-pri" id="m-save" type="button">บันทึก</button></div>
+</div></div>
+
+<div class="ov hidden" id="ov-reset"><div class="modal">
+  <h2>🔑 รีเซ็ตรหัสผ่าน</h2>
+  <p id="r-text" style="font-size:14px;line-height:1.7"></p>
+  <div class="err" id="r-err" role="alert"></div>
+  <div class="mact"><button class="btn btn-ghost" id="r-cancel" type="button">ยกเลิก</button><button class="btn btn-pri" id="r-go" type="button">รีเซ็ต</button></div>
+</div></div>
+
+<div class="ov hidden" id="ov-done"><div class="modal">
+  <h2 id="d-title">เรียบร้อย</h2>
+  <div class="pwbox" id="d-body"></div>
+  <div class="mact"><button class="btn btn-pri" id="d-ok" type="button">ปิด</button></div>
+</div></div>
+
+<script>
+const { esc } = Broncho;
+const $ = id => document.getElementById(id);
+const ROLE = { admin: 'Admin', doctor: 'Doctor', user: 'User' };
+const St = { users: [], me: null, edit: null, reset: null };
+
+function fmtLogin(s) { return s ? esc(s) : '<span class="mut">ยังไม่เคย</span>'; }
+
+function render() {
+  const all = St.users;
+  const cnt = f => all.filter(f).length;
+  $('kpis').innerHTML = [
+    ['ทั้งหมด', all.length], ['Active', cnt(u => u.status === 'Active')], ['รออนุมัติ (Pending)', cnt(u => u.status === 'Pending')],
+    ['Admin', cnt(u => u.role === 'admin')], ['Doctor', cnt(u => u.role === 'doctor')], ['User', cnt(u => u.role === 'user')],
+  ].map(k => `<div class="kpi"><b>${k[1]}</b><span>${k[0]}</span></div>`).join('');
+
+  const q = $('q').value.trim().toLowerCase(), fs = $('f-status').value, fr = $('f-role').value;
+  const rows = all.filter(u => (!fs || u.status === fs) && (!fr || u.role === fr) &&
+    (!q || u.name.toLowerCase().includes(q) || u.username.includes(q)));
+  if (!rows.length) { $('list').innerHTML = '<div class="empty">ไม่พบผู้ใช้</div>'; return; }
+  $('list').innerHTML = '<table><thead><tr><th>ชื่อ</th><th>Username</th><th>สิทธิ์</th><th>สถานะ</th><th class="hide-m">LINE</th><th class="hide-m">เข้าล่าสุด</th><th></th></tr></thead><tbody>' +
+    rows.map(u => {
+      const i = all.indexOf(u);
+      return `<tr class="${u.status === 'Pending' ? 'pending' : ''}">
+        <td><b>${esc(u.name)}</b>${u.mustChange && u.hasPassword ? '<div class="mut">ยังไม่เปลี่ยนรหัสเริ่มต้น</div>' : ''}</td>
+        <td>${u.username ? esc(u.username) : '<span class="mut">— ยังไม่ตั้ง —</span>'}</td>
+        <td><span class="badge b-${esc(u.role)}">${esc(ROLE[u.role] || u.role)}</span></td>
+        <td><span class="badge s-${esc(u.status)}">${esc(u.status)}</span></td>
+        <td class="hide-m">${u.hasLine ? '✅ เชื่อมแล้ว' : '<span class="mut">—</span>'}</td>
+        <td class="hide-m">${fmtLogin(u.lastLogin)}</td>
+        <td><div class="acts">
+          ${u.status === 'Pending' ? `<button class="btn btn-sm btn-ok" data-a="approve" data-i="${i}">อนุมัติ</button>` : ''}
+          <button class="btn btn-sm btn-ghost" data-a="edit" data-i="${i}">✏️ แก้ไข</button>
+          ${u.username ? `<button class="btn btn-sm btn-warn" data-a="reset" data-i="${i}">🔑 รีเซ็ตรหัส</button>` : ''}
+        </div></td></tr>`;
+    }).join('') + '</tbody></table>';
+}
+
+async function load() {
+  try {
+    const r = await Broncho.api('listUsers');
+    if (!r.success) throw new Error(r.error || 'SERVER_ERROR');
+    St.users = r.users;
+    render();
+  } catch (e) {
+    $('list').innerHTML = '<div class="empty">⚠️ ' + esc(Broncho.errorText(e)) + ' <br><br><button class="btn btn-pri" onclick="load()">ลองใหม่</button></div>';
+  }
+}
+
+// ── เพิ่ม / แก้ไข ───────────────────────────────────────────
+function openEdit(u, approve) {
+  St.edit = u || null;
+  $('m-title').textContent = u ? (approve ? 'อนุมัติผู้ใช้' : 'แก้ไขผู้ใช้') : 'เพิ่มผู้ใช้';
+  $('m-name').value   = u ? u.name : '';
+  $('m-user').value   = u ? u.username : '';
+  $('m-role').value   = u ? u.role : 'doctor';
+  $('m-status').value = approve ? 'Active' : (u ? u.status : 'Active');
+  $('m-err').textContent = '';
+  $('m-namewarn').classList.add('hidden');
+  $('m-userhint').textContent = (u && !u.username)
+    ? 'ผู้ใช้นี้ยังไม่มี username — ตั้งแล้วระบบจะให้รหัสผ่านเริ่มต้น (ต้องเปลี่ยนเมื่อเข้าครั้งแรก)'
+    : (u ? 'เปลี่ยน username ได้ — ผู้ใช้ต้องเข้าสู่ระบบใหม่ด้วยชื่อใหม่' : 'ผู้ใช้ใหม่จะได้รหัสผ่านเริ่มต้น และต้องเปลี่ยนเมื่อเข้าสู่ระบบครั้งแรก');
+  $('ov-edit').classList.remove('hidden');
+  $('m-name').focus();
+}
+$('m-name').addEventListener('input', () => {
+  $('m-namewarn').classList.toggle('hidden', !(St.edit && $('m-name').value.trim() !== St.edit.name));
+});
+$('m-cancel').onclick = () => $('ov-edit').classList.add('hidden');
+$('btn-add').onclick  = () => openEdit(null);
+
+$('m-save').onclick = async () => {
+  const btn = $('m-save'), err = $('m-err');
+  err.textContent = ''; btn.disabled = true; btn.textContent = 'กำลังบันทึก...';
+  try {
+    const r = await Broncho.api('saveUser', {
+      row: St.edit ? St.edit.row : 0, expectName: St.edit ? St.edit.name : '',
+      name: $('m-name').value, username: $('m-user').value, role: $('m-role').value, status: $('m-status').value,
+    });
+    if (!r.success) throw new Error(r.error || 'SERVER_ERROR');
+    $('ov-edit').classList.add('hidden');
+    await load();
+    if (r.defaultPassword) showDone('สร้างบัญชีเรียบร้อย',
+      'ชื่อผู้ใช้: <code>' + esc($('m-user').value.trim().toLowerCase()) + '</code><br>รหัสผ่านเริ่มต้น: <code>' + esc(r.defaultPassword) +
+      '</code><br><span style="font-size:12.5px">แจ้งผู้ใช้ให้ทราบ — ต้องเปลี่ยนรหัสผ่านเมื่อเข้าสู่ระบบครั้งแรก</span>');
+    else Broncho.toast('บันทึกเรียบร้อย');
+  } catch (e) { err.textContent = Broncho.errorText(e); }
+  finally { btn.disabled = false; btn.textContent = 'บันทึก'; }
+};
+
+// ── รีเซ็ตรหัสผ่าน ─────────────────────────────────────────
+$('r-cancel').onclick = () => $('ov-reset').classList.add('hidden');
+$('r-go').onclick = async () => {
+  const btn = $('r-go'), u = St.reset;
+  $('r-err').textContent = ''; btn.disabled = true; btn.textContent = 'กำลังรีเซ็ต...';
+  try {
+    const r = await Broncho.api('resetPassword', { row: u.row, expectName: u.name });
+    if (!r.success) throw new Error(r.error || 'SERVER_ERROR');
+    $('ov-reset').classList.add('hidden');
+    await load();
+    showDone('รีเซ็ตรหัสผ่านแล้ว', 'ผู้ใช้: <b>' + esc(u.name) + '</b><br>รหัสผ่านเริ่มต้น: <code>' + esc(r.defaultPassword) +
+      '</code><br><span style="font-size:12.5px">ต้องเปลี่ยนรหัสผ่านเมื่อเข้าสู่ระบบครั้งถัดไป · เซสชันเดิมถูกยกเลิกแล้ว</span>');
+  } catch (e) { $('r-err').textContent = Broncho.errorText(e); }
+  finally { btn.disabled = false; btn.textContent = 'รีเซ็ต'; }
+};
+
+function showDone(title, html) { $('d-title').textContent = title; $('d-body').innerHTML = html; $('ov-done').classList.remove('hidden'); }
+$('d-ok').onclick = () => $('ov-done').classList.add('hidden');
+
+$('list').addEventListener('click', ev => {
+  const b = ev.target.closest('button[data-a]');
+  if (!b) return;
+  const u = St.users[+b.dataset.i];
+  if (!u) return;
+  if (b.dataset.a === 'edit')    openEdit(u, false);
+  if (b.dataset.a === 'approve') openEdit(u, true);
+  if (b.dataset.a === 'reset') {
+    St.reset = u;
+    $('r-text').innerHTML = 'ตั้งรหัสผ่านของ <b>' + esc(u.name) + '</b> กลับเป็นรหัสเริ่มต้น และบังคับให้เปลี่ยนใหม่เมื่อเข้าสู่ระบบครั้งถัดไป — ใช้เมื่อผู้ใช้ลืมรหัสผ่านหรือถูกล็อก';
+    $('r-err').textContent = '';
+    $('ov-reset').classList.remove('hidden');
+  }
+});
+['q', 'f-status', 'f-role'].forEach(id => $(id).addEventListener('input', render));
+
+(async () => {
+  try {
+    St.me = await Broncho.programStart({ page: 'users' });
+    await load();
+  } catch (e) { $('list').innerHTML = '<div class="empty">⚠️ ' + esc(Broncho.errorText(e)) + '</div>'; }
+})();
+</script>
+</body>
+</html>

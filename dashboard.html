@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dashboard — ห้องส่องกล้องหลอดลม</title>
+<title>Bronchoscopy Program — Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script src="config.js"></script>
 <script src="common.js"></script>
+<script src="program.js"></script>
 <style>
 :root{
   --bg:#f3f6fb; --surface:#fff; --line:#e3e9f2; --line2:#eef2f8;
@@ -135,7 +135,7 @@ tr:hover td{background:#fafcff}
 
 <header class="top"><div class="top-in">
   <div class="logo">🫁</div>
-  <div><h1>ห้องส่องกล้องหลอดลม</h1><div class="sub">Dashboard · <span id="who">—</span></div></div>
+  <div><h1>Dashboard ห้องส่องกล้องหลอดลม</h1><div class="sub">Bronchoscopy Program · <span id="who">—</span></div></div>
   <div class="top-r">
     <div class="chip" id="clock">—</div>
     <button class="btn-ref" onclick="refresh(false)">⟳ รีเฟรช</button>
@@ -579,11 +579,8 @@ async function loadDoctors(){
 (async () => {
   busy(true);
   try{
-    if (!(await Broncho.startLiff(() => {}))) return;
-    const auth = await Broncho.api('checkAuth');
-    if (!auth.success) throw new Error(auth.error || 'SERVER_ERROR');
-    if (!auth.authorized) throw new Error('UNAUTHORIZED');
-    setText('who', auth.name);
+    const user = await Broncho.programStart({ page: 'dashboard' });
+    setText('who', user.name);
     await Promise.all([loadQueue(true), loadDoctors()]);
     setInterval(() => { if (!document.hidden) refresh(true); }, 5*60*1000);
   }catch(e){
