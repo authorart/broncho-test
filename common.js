@@ -83,7 +83,7 @@ window.Broncho = (() => {
   // คืน JSON จาก server (อาจเป็น {success:false,error}); throw เมื่อเครือข่าย/timeout/โทเคนหมดอายุ
   async function api(action, params = {}) {
     const isRead   = READS.includes(action);
-    const attempts = isRead ? 2 : 1;              // retry เฉพาะ action อ่านอย่างเดียว (กันจอง/บันทึกซ้ำ)
+    const attempts = isRead ? 3 : 1;              // retry เฉพาะ action อ่านอย่างเดียว (กันจอง/บันทึกซ้ำ)
     let lastErr;
     for (let i = 0; i < attempts; i++) {
       try {
@@ -99,10 +99,12 @@ window.Broncho = (() => {
         return data;
       } catch (e) {
         lastErr = e;
-        if (e.message === 'SESSION_EXPIRED' || e.message === 'SERVER_404' || i === attempts - 1) break;
-        await new Promise(r => setTimeout(r, 800));
+        if (e.message === 'SESSION_EXPIRED' || i === attempts - 1) break;
+        // Apps Script บางครั้งตอบ 404 ชั่วคราวทั้งที่ deploy ปกติ (ลองซ้ำได้เฉพาะ action อ่าน)
+        await new Promise(r => setTimeout(r, e.message === 'SERVER_404' ? 1800 : 800));
       }
     }
+    if (lastErr && typeof lastErr === 'object') lastErr.action = action;
     throw lastErr;
   }
 
@@ -139,7 +141,8 @@ window.Broncho = (() => {
   };
   function errorText(e) {
     const code = (e && e.message) ? e.message : String(e);
-    if (MESSAGES[code]) return MESSAGES[code];
+    const tag = (e && e.action) ? ' [' + e.action + ']' : '';
+    if (MESSAGES[code]) return MESSAGES[code] + (code === 'SERVER_404' ? tag : '');
     if (code.indexOf('INVALID_INPUT') === 0) return 'ข้อมูลไม่ถูกต้อง (' + code.split(':')[1] + ')';
     if (code.indexOf('HTTP_') === 0 || code === 'BAD_RESPONSE' || /Failed to fetch|NetworkError/i.test(code))
       return 'เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ (' + code + ')';
