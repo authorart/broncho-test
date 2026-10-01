@@ -308,6 +308,7 @@
 
     <!-- ─── Step 1: เลือกวันที่ ─────────────────────── -->
     <div id="step1">
+      <button class="btn-back edit-only hidden" onclick="keepOriginalSlot()">↩ ไม่เปลี่ยนวัน-เวลา (กลับไปแก้รายละเอียด)</button>
       <div class="card">
         <div class="card-title">🗓 เลือกวันที่</div>
         <div class="week-nav">
@@ -326,6 +327,7 @@
     <!-- ─── Step 2: เลือกเวลา ───────────────────────── -->
     <div id="step2" class="hidden">
       <button class="btn-back" onclick="goToStep(1)">‹ เปลี่ยนวันที่</button>
+      <button class="btn-back edit-only hidden" onclick="keepOriginalSlot()">↩ ไม่เปลี่ยนวัน-เวลา (กลับไปแก้รายละเอียด)</button>
       <div class="card">
         <div class="card-title">🕐 เลือกเวลา</div>
         <div id="selected-date-label" style="font-size:15px;font-weight:700;margin-bottom:12px"></div>
@@ -421,6 +423,9 @@
 
       <button class="btn btn-primary" id="btn-show-confirm" onclick="openBookingModal()" disabled>
         ตรวจสอบและยืนยัน →
+      </button>
+      <button class="btn btn-danger edit-only hidden" id="btn-edit-cancel" onclick="cancelFromEdit()" style="margin-top:10px">
+        ❌ ยกเลิกการจองนี้
       </button>
     </div>
 
@@ -589,7 +594,25 @@ function goToStep(n) {
     if (i < n)      el.classList.add('done');
     else if (i === n) el.classList.add('active');
   });
+  document.querySelectorAll('.edit-only').forEach(el => el.classList.toggle('hidden', !S.editTarget));
   if (n === 2 && S.selectedDate) renderSlotGrid();
+}
+
+// โหมดแก้ไข: เปลี่ยนใจไม่เปลี่ยนวัน-เวลา → คืนค่าวัน-เวลาเดิมแล้วกลับไปหน้ารายละเอียด
+function keepOriginalSlot() {
+  if (!S.editTarget) return;
+  const o = S.editTarget.origSlot;
+  S.selectedDate = o.dateKey;
+  S.selectedSlot = o;
+  document.getElementById('slot-summary-text').textContent = '🗓 ' + o.dateLabel + '  ⏰ ' + o.timeStr;
+  goToStep(3);
+  validateStep3();
+}
+
+// โหมดแก้ไข: ยกเลิกการจองจากหน้าแก้ไขเลย (ใช้ modal ยืนยันเดิม)
+function cancelFromEdit() {
+  if (!S.editTarget) return;
+  openCancelModal(S.editTarget.booking);
 }
 
 // ══════════════════════════════════════════════════════
@@ -892,7 +915,7 @@ function cancelEdit() {
 
 function startEdit(b) {
   const origSlot = { startISO: b.startISO, endISO: b.endISO, dateLabel: b.dateLabel, timeStr: b.timeStr, dateKey: b.dateKey };
-  S.editTarget   = { rowIndex: b.rowIndex, origSlot };
+  S.editTarget   = { rowIndex: b.rowIndex, origSlot, booking: b };
   S.selectedDate = b.dateKey;
   S.selectedSlot = origSlot;
 
@@ -987,7 +1010,8 @@ async function doCancel() {
     closeModal('modal-cancel');
     if (res.success) {
       Broncho.toast('✅ ยกเลิกการจองสำเร็จ');
-      loadMyBookings(true);
+      if (S.editTarget) { resetBook(); switchView('my'); }     // ยกเลิกจากหน้าแก้ไข → กลับรายการการจองของฉัน
+      else loadMyBookings(true);
     } else {
       Broncho.toast(Broncho.errorText(new Error(res.error)), true);
     }
