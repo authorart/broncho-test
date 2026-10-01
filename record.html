@@ -410,7 +410,8 @@ button{cursor:pointer;font-family:inherit}
           </div>
           <div class="form-group span2">
             <label class="form-label">👩‍⚕️ ผู้บันทึก <span class="req">*</span></label>
-            <input type="text" id="inp-recorder" class="form-input" placeholder="ชื่อพยาบาลผู้บันทึก">
+            <input type="text" id="inp-recorder" class="form-input" placeholder="ชื่อพยาบาลผู้บันทึก" autocomplete="off">
+            <div class="form-hint">ระบบจำค่าล่าสุดในเครื่องนี้ให้อัตโนมัติ · <a href="#" onclick="memClear();return false">ล้างค่าที่จำไว้</a></div>
           </div>
         </div>
       </div>
@@ -508,6 +509,7 @@ async function init() {
       });
     }
 
+    memApply();                                   // เติมค่าที่จำไว้ (ผู้ล้างกล้อง/ผู้บันทึก ฯลฯ)
     await onDateChange();
     if (qRef) {                                   // เปิดเคสที่ระบุจากลิงก์ "รอบันทึก"
       const i = S.bookings.findIndex(b => b.eventId === qRef);
@@ -798,6 +800,7 @@ async function submitRecord() {
     });
 
     if (r.success) {
+      memRemember();
       const pname = document.getElementById('inp-patient').value.trim();
       const hn    = document.getElementById('inp-hn').value.trim();
       document.getElementById('success-detail').textContent =
@@ -901,7 +904,52 @@ function resetForm() {
 
   // Reset date to today and reload bookings
   document.getElementById('inp-date').value = localDate();
+  memApply();
   onDateChange();
+}
+
+// ══════════════════════════════════════════════
+//  จำค่าที่กรอกบ่อย (เก็บในเครื่องนี้ แยกตามผู้ใช้): ผู้ล้างกล้อง / ผู้บันทึก / พยาบาลวิสัญญี / จำนวนพยาบาล / กล้อง
+//  ไม่จำข้อมูลผู้ป่วย (HN/ชื่อ/Dx/เวลา/ราคา/หมายเหตุ)
+// ══════════════════════════════════════════════
+const MEM = { recorder: 'inp-recorder', washer: 'inp-washer', anesthNurse: 'inp-anesth-nurse', nurses: 'inp-nurses', scope: 'inp-scope' };
+const MEM_HIST = ['recorder', 'washer', 'anesthNurse'];     // มีรายการชื่อเก่าให้เลือก
+function memKey() { const s = Broncho.getSession(); return 'rec_mem_' + (s && s.user ? s.user.username : 'anon'); }
+function memLoad() { try { return JSON.parse(localStorage.getItem(memKey())) || {}; } catch (_) { return {}; } }
+function memSave(m) { try { localStorage.setItem(memKey(), JSON.stringify(m)); } catch (_) {} }
+
+function memApply() {
+  const m = memLoad(), last = m.last || {}, hist = m.hist || {};
+  Object.keys(MEM).forEach(k => {
+    const el = document.getElementById(MEM[k]);
+    if (!el) return;
+    if (last[k] !== undefined && last[k] !== '') el.value = last[k];
+    if (MEM_HIST.includes(k)) {
+      let dl = document.getElementById('dl-' + k);
+      if (!dl) { dl = document.createElement('datalist'); dl.id = 'dl-' + k; document.body.appendChild(dl); el.setAttribute('list', dl.id); }
+      dl.innerHTML = '';
+      (hist[k] || []).forEach(v => { const o = document.createElement('option'); o.value = v; dl.appendChild(o); });
+    }
+  });
+  if (typeof validateForm === 'function') validateForm();
+}
+
+function memRemember() {
+  const m = memLoad(); m.last = m.last || {}; m.hist = m.hist || {};
+  Object.keys(MEM).forEach(k => {
+    const v = (document.getElementById(MEM[k]).value || '').trim();
+    if (!v) return;
+    m.last[k] = v;
+    if (MEM_HIST.includes(k)) m.hist[k] = [v].concat((m.hist[k] || []).filter(x => x !== v)).slice(0, 8);
+  });
+  memSave(m);
+}
+
+function memClear() {
+  try { localStorage.removeItem(memKey()); } catch (_) {}
+  Object.keys(MEM).forEach(k => { const el = document.getElementById(MEM[k]); if (el) el.value = (k === 'nurses') ? '2' : ''; });
+  MEM_HIST.forEach(k => { const dl = document.getElementById('dl-' + k); if (dl) dl.innerHTML = ''; });
+  Broncho.toast('ล้างค่าที่จำไว้แล้ว');
 }
 
 // ══════════════════════════════════════════════
