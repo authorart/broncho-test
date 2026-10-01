@@ -28,6 +28,15 @@
   .bp-menu .who{padding:8px 10px;font-size:12.5px;color:#51627a;border-bottom:1px solid #eef2f8;margin-bottom:4px;line-height:1.5}
   .bp-menu button{display:block;width:100%;text-align:left;background:none;border:0;padding:9px 10px;border-radius:8px;font:inherit;font-size:14px;cursor:pointer;color:#152238}
   .bp-menu button:hover{background:#f0f4f8}
+  .bp-tabs{min-width:0}
+  @media(max-width:720px){
+    .bp-nav-in{flex-wrap:wrap;padding:0 10px;row-gap:0;min-height:0}
+    .bp-brand{order:1;font-size:14px;padding:10px 0;margin-right:0}
+    .bp-user{order:2;margin-left:auto}
+    .bp-tabs{order:3;flex:1 0 100%;border-top:1px solid rgba(255,255,255,.14);margin:0 -10px;padding:0 6px}
+    .bp-tab{flex:1 0 auto;text-align:center;padding:11px 10px;font-size:13.5px}
+    .bp-ubtn{max-width:150px;padding:6px 10px}
+  }
   .bp-ov{position:fixed;inset:0;z-index:10000;background:linear-gradient(135deg,#063e57,#0b7fa8 65%,#19a6c9);display:flex;align-items:center;justify-content:center;padding:16px;font-family:'Sarabun',-apple-system,'Segoe UI',sans-serif;overflow:auto}
   .bp-ov.light{background:rgba(15,25,45,.6)}
   .bp-card{background:#fff;color:#152238;border-radius:18px;width:100%;max-width:380px;padding:26px 24px;box-shadow:0 20px 60px rgba(0,0,0,.35)}
