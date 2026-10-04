@@ -5,21 +5,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>จองห้องส่องกล้องหลอดลม</title>
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="config.js"></script>
   <script src="common.js"></script>
   <script src="program.js"></script>
   <style>
     /* ── Design Tokens ─────────────────────────────────────── */
     :root {
-      --blue:         #0078d4;
-      --blue-light:   #e8f4fd;
-      --blue-dark:    #005a9e;
-      --green:        #107c10;
-      --green-light:  #dff0d8;
+      --blue:         #0056D2;
+      --blue-light:   #E0F2F1;
+      --blue-dark:    #00429F;
+      --green:        #00695C;
+      --green-light:  #E0F2F1;
       --red:          #d32f2f;
       --red-light:    #fdecea;
-      --orange:       #e65100;
-      --grey-bg:      #f3f6fa;
+      --orange:       #FF9800;
+      --grey-bg:      #F5F7FA;
       --grey-border:  #dde3ea;
       --text:         #1a2332;
       --text-light:   #6b7c93;
@@ -32,7 +33,7 @@
     /* ── Reset ──────────────────────────────────────────────── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: -apple-system, 'Sarabun', BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-family: 'Inter', 'Sarabun', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       background: var(--grey-bg);
       color: var(--text);
       min-height: 100vh;
@@ -57,11 +58,11 @@
 
     /* ── Header ─────────────────────────────────────────────── */
     .header {
-      background: linear-gradient(135deg, var(--blue-dark) 0%, var(--blue) 100%);
+      background: linear-gradient(135deg, var(--blue) 0%, #00A3FF 100%);
       color: #fff;
       padding: 18px 16px 14px;
       position: sticky; top: 0; z-index: 50;
-      box-shadow: 0 2px 8px rgba(0,120,212,.25);
+      box-shadow: 0 2px 8px rgba(0,86,210,.25);
     }
     .header-title { font-size: 16px; font-weight: 700; }
     .header-sub   { font-size: 12px; opacity: .80; margin-top: 3px; }
@@ -135,9 +136,9 @@
       transition: all .2s;
     }
     .slot-btn .slot-sub { font-size: 10px; font-weight: 400; margin-top: 3px; display: block; }
-    .slot-btn.available  { border-color: #2e7d32; color: #1b5e20; background: var(--green-light); }
+    .slot-btn.available  { border-color: #00695C; color: #004D40; background: var(--green-light); }
     .slot-btn.available:hover,
-    .slot-btn.available.selected { background: #2e7d32; color: white; border-color: #2e7d32; }
+    .slot-btn.available.selected { background: #00695C; color: white; border-color: #00695C; }
     .slot-btn.booked     { border-color: #ffcdd2; color: #b71c1c; background: var(--red-light); cursor: not-allowed; opacity: .65; }
 
     /* ── Back button ────────────────────────────────────────── */

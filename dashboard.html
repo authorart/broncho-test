@@ -4,29 +4,29 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Bronchoscopy Program — Dashboard</title>
-<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="config.js"></script>
 <script src="common.js"></script>
 <script src="program.js"></script>
 <style>
 :root{
-  --bg:#f3f6fb; --surface:#fff; --line:#e3e9f2; --line2:#eef2f8;
+  --bg:#F5F7FA; --surface:#fff; --line:#e3e9f2; --line2:#eef2f8;
   --ink:#152238; --ink2:#51627a; --ink3:#8595ab;
-  --brand:#0b7fa8; --brand-dk:#075f80; --brand-lt:#e3f4fa;
-  --green:#12945f; --green-lt:#dcf5e9; --amber:#d98a0b; --amber-lt:#fdf0d6;
-  --red:#d6343f; --red-lt:#fde5e7; --violet:#6d4ad6; --violet-lt:#ece7fb;
+  --brand:#0056D2; --brand-dk:#00429F; --brand-lt:#E0F2FF;
+  --green:#00695C; --green-lt:#E0F2F1; --amber:#FF9800; --amber-lt:#FFF3E0;
+  --red:#D32F2F; --red-lt:#FDECEA; --violet:#6d4ad6; --violet-lt:#ece7fb;
   --shadow:0 1px 2px rgba(16,32,64,.05),0 6px 20px rgba(16,32,64,.06);
   --r:14px;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
-body{font-family:'Sarabun',-apple-system,'Segoe UI',sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased}
+body{font-family:'Inter','Sarabun',-apple-system,'Segoe UI',sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased}
 .hidden{display:none!important}
 button{font-family:inherit;cursor:pointer}
 
 /* ── Header ── */
-.top{background:linear-gradient(120deg,#063e57 0%,#0b7fa8 60%,#19a6c9 100%);color:#fff;position:sticky;top:0;z-index:40;box-shadow:0 4px 18px rgba(6,62,87,.25)}
+.top{background:linear-gradient(120deg,#00306E 0%,#0056D2 60%,#00A3FF 100%);color:#fff;position:sticky;top:0;z-index:40;box-shadow:0 4px 18px rgba(6,62,87,.25)}
 .top-in{max-width:1280px;margin:0 auto;padding:14px 20px;display:flex;align-items:center;gap:14px}
 .logo{width:42px;height:42px;border-radius:12px;background:rgba(255,255,255,.16);display:grid;place-items:center;font-size:22px}
 .top h1{font-size:18px;font-weight:700;letter-spacing:.2px}
@@ -95,7 +95,7 @@ button{font-family:inherit;cursor:pointer}
 .slots{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
 .slot{border-radius:10px;padding:9px 11px;border:1px solid var(--line);font-size:12.5px}
 .slot b{display:block;font-size:14px}
-.slot.free{background:var(--green-lt);border-color:#b4e6cd;color:#0d6c45}
+.slot.free{background:var(--green-lt);border-color:#A7D7CF;color:#004D40}
 .slot.busy{background:#fff}
 .slot.busy .who{color:var(--ink2)}
 .nf{display:flex;flex-wrap:wrap;gap:8px}
@@ -111,8 +111,8 @@ td{padding:10px 12px;border-bottom:1px solid var(--line2);vertical-align:top}
 tr:hover td{background:#fafcff}
 .empty{text-align:center;color:var(--ink3);padding:36px 0}
 .tag{display:inline-block;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700}
-.t-done{background:var(--green-lt);color:#0d6c45}.t-up{background:var(--brand-lt);color:var(--brand-dk)}.t-can{background:var(--red-lt);color:#a1242d}
-.t-b{background:var(--brand-lt);color:var(--brand-dk)}.t-p{background:var(--violet-lt);color:#5030b5}.t-w{background:var(--amber-lt);color:#8a5a06}
+.t-done{background:var(--green-lt);color:#004D40}.t-up{background:var(--brand-lt);color:var(--brand-dk)}.t-can{background:var(--red-lt);color:#B71C1C}
+.t-b{background:var(--brand-lt);color:var(--brand-dk)}.t-p{background:var(--violet-lt);color:#5030b5}.t-w{background:var(--amber-lt);color:#8A5300}
 .tbl-tools{display:flex;gap:10px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
 .tbl-tools .ctl{flex:1;max-width:320px}
 .ch{position:relative;height:270px}
@@ -159,21 +159,23 @@ tr:hover td{background:#fafcff}
       <button class="pill" data-p="next">เดือนหน้า</button>
     </div>
     <span class="sp"></span>
-    <span style="font-size:12.5px;color:var(--ink3)">1 วัน = 12 slot (09:00–12:00, 13:00–16:00 · slot ละ 30 นาที)</span>
+    <span style="font-size:12.5px;color:var(--ink3)">นับเฉพาะช่วงหลัก: พฤหัสบ่าย · ศุกร์เช้า · ศุกร์บ่าย (slot ละ 30 นาที) — ช่วงอื่นจองได้สำหรับเคสเร่งด่วน</span>
   </div>
+  <div class="filters" style="margin-top:-6px"><span style="font-size:13px;color:var(--ink2);font-weight:600">มุมมอง:</span>
+    <div class="pills" id="q-scope"></div></div>
 
   <div class="grid g-kpi">
-    <div class="card kpi"><div class="ic ic-b">🗓</div><div><div class="v" id="q-open">0</div><div class="l">วันทำการ</div><div class="n" id="q-total">— slot ทั้งหมด</div></div></div>
-    <div class="card kpi"><div class="ic ic-a">🔬</div><div><div class="v" id="q-used">0</div><div class="l">slot ที่ใช้แล้ว / จองแล้ว</div></div></div>
-    <div class="card kpi"><div class="ic ic-g">✅</div><div><div class="v" id="q-free">0</div><div class="l">slot ว่างที่ยังจองได้</div><div class="n">นับจากเวลาปัจจุบันเป็นต้นไป</div></div></div>
-    <div class="card kpi"><div class="ic ic-v">📈</div><div><div class="v"><span id="q-util">0</span>%</div><div class="l">อัตราการใช้ห้อง</div></div></div>
+    <div class="card kpi"><div class="ic ic-b">🗓</div><div><div class="v" id="q-open">0</div><div class="l">วันที่มีช่วงหลัก</div><div class="n" id="q-total">— slot ทั้งหมด</div></div></div>
+    <div class="card kpi"><div class="ic ic-a">🔬</div><div><div class="v" id="q-used">0</div><div class="l">slot ช่วงหลักที่จองแล้ว</div><div class="n" id="q-other"></div></div></div>
+    <div class="card kpi"><div class="ic ic-g">✅</div><div><div class="v" id="q-free">0</div><div class="l">slot ช่วงหลักที่ยังว่าง</div><div class="n">นับจากเวลาปัจจุบันเป็นต้นไป</div></div></div>
+    <div class="card kpi"><div class="ic ic-v">📈</div><div><div class="v"><span id="q-util">0</span>%</div><div class="l">อัตราการใช้กล้อง (ช่วงหลัก)</div><div class="n" id="q-utilsub"></div></div></div>
   </div>
 
   <div class="card fade" style="margin-bottom:16px">
     <h3>ปฏิทินการใช้ห้อง <span class="badge" id="q-range">—</span></h3>
     <div class="cal-head"><div>จ.</div><div>อ.</div><div>พ.</div><div>พฤ.</div><div>ศ.</div><div>ส.</div><div>อา.</div></div>
     <div class="cal" id="q-cal"></div>
-    <div class="legend"><span class="lg0">ว่างมาก (&lt;60%)</span><span class="lg1">ค่อนข้างเต็ม (60–89%)</span><span class="lg2">เกือบเต็ม/เต็ม (≥90%)</span><span class="lg3">ปิดทำการ (เสาร์-อาทิตย์/วันหยุด)</span></div>
+    <div class="legend"><span class="lg0">ว่างมาก (&lt;60%)</span><span class="lg1">ค่อนข้างเต็ม (60–89%)</span><span class="lg2">เกือบเต็ม/เต็ม (≥90%)</span><span class="lg3">ไม่มีช่วงหลัก / วันหยุด</span></div>
   </div>
 
   <div class="card fade" id="q-detail" style="margin-bottom:16px">
@@ -182,8 +184,8 @@ tr:hover td{background:#fafcff}
   </div>
 
   <div class="grid g-2">
-    <div class="card"><h3>อัตราการใช้ห้องตามวันในสัปดาห์</h3><div class="ch"><canvas id="ch-wd"></canvas></div></div>
-    <div class="card"><h3>ช่วงเวลาที่มีการจองมาก</h3><div class="ch"><canvas id="ch-hr"></canvas></div></div>
+    <div class="card"><h3>การใช้ช่วงหลักแยกตามเจ้าของช่วง (slot)</h3><div class="ch"><canvas id="ch-wd"></canvas></div></div>
+    <div class="card"><h3>การจองในช่วงหลักแยกตามเวลา</h3><div class="ch"><canvas id="ch-hr"></canvas></div></div>
   </div>
 
   <div class="grid g-2">
@@ -273,10 +275,10 @@ tr:hover td{background:#fafcff}
 
 <script>
 const { esc, csvSafe } = Broncho;
-const PAL = ['#0b7fa8','#12945f','#d98a0b','#6d4ad6','#d6343f','#19a6c9','#7aa412','#c2569c'];
+const PAL = ['#0056D2','#00695C','#FF9800','#6d4ad6','#D32F2F','#00A3FF','#7aa412','#c2569c'];
 const TH_DOW = ['อา','จ','อ','พ','พฤ','ศ','ส'];
 const TH_MON = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
-const St = { tab:'queue', q:'w4', b:'month', p:'month', qData:null, bData:null, pData:null, selDay:null };
+const St = { scope:'all', user:null, tab:'queue', q:'w4', b:'month', p:'month', qData:null, bData:null, pData:null, selDay:null };
 const charts = {};
 
 /* ───────── helpers ───────── */
@@ -347,66 +349,153 @@ async function loadQueue(silent){
   try{
     const r = await Broncho.api('getRoomQueue', {from, to});
     if (!r.success) throw new Error(r.error);
-    St.qData = r; renderQueue(r, from, to);
+    St.qData = prepQueue(r); renderQueue(r, from, to);
   }catch(e){ Broncho.toast('โหลดคิวห้องไม่สำเร็จ: '+Broncho.errorText(e), true); }
   finally{ busy(false); }
 }
 
+// ───── ช่วงหลัก (primary windows) ─────
+// กำหนดซ้ำฝั่งหน้าเว็บ เพื่อให้ทำงานได้แม้ Code.gs บน server ยังเป็นเวอร์ชันเก่า (ไม่ส่ง windows/owner มา)
+const PRIMARY_WINDOWS = [
+  { key:'thu_pm', owner:'พ.ศิโรตม์',   match:'ศิโรตม์',   dow:4, from:'13:00', to:'15:30', label:'พฤหัสบ่าย' },
+  { key:'fri_am', owner:'พ.ปภังกร',    match:'ปภังกร',    dow:5, from:'09:00', to:'11:30', label:'ศุกร์เช้า' },
+  { key:'fri_pm', owner:'พ.ธิดารัตน์', match:'ธิดารัตน์', dow:5, from:'13:00', to:'15:30', label:'ศุกร์บ่าย' },
+];
+function ownerOf(dateIso, t){
+  const dow = day(dateIso).getDay();
+  const w = PRIMARY_WINDOWS.find(x => x.dow===dow && t>=x.from && t<=x.to);
+  return w ? w.key : null;
+}
+// เติม owner ให้ทุก slot ของวันทำการ (ไม่พึ่ง server)
+function prepQueue(r){
+  r.windows = PRIMARY_WINDOWS;
+  r.days.forEach(d => d.slots.forEach(s => { s.owner = d.open ? ownerOf(d.date, s.t) : null; }));
+  return r;
+}
+// มุมมอง: 'all' = ภาพรวมทุกช่วงหลัก, หรือ key ของช่วง (thu_pm/fri_am/fri_pm)
+function myWindows(){
+  const n = (St.user && St.user.name) || '';
+  return ((St.qData && St.qData.windows) || []).filter(w => n.indexOf(w.match) >= 0).map(w => w.key);
+}
+function scopeKeys(){
+  return St.scope==='all' ? ((St.qData && St.qData.windows) || []).map(w => w.key) : [St.scope];
+}
+function renderScope(){
+  const ws = St.qData.windows || [], mine = myWindows();
+  const isAdmin = St.user && St.user.role==='admin';
+  const opts = [{k:'all', t:'ภาพรวม'}];
+  ws.forEach(w => {
+    const own = mine.indexOf(w.key)>=0;
+    if (isAdmin || own) opts.push({k:w.key, t:(own?'ของฉัน · ':'')+w.owner+' ('+w.label+')'});
+  });
+  if (!opts.some(o => o.k===St.scope)) St.scope = 'all';
+  const el = document.getElementById('q-scope');
+  el.innerHTML = opts.map(o => '<button class="pill'+(o.k===St.scope?' active':'')+'" data-s="'+esc(o.k)+'">'+esc(o.t)+'</button>').join('');
+  el.querySelectorAll('button').forEach(bt => bt.addEventListener('click', () => { St.scope = bt.dataset.s; renderQueue(St.qData, St.qFrom, St.qTo); }));
+}
+// สรุปของวันเดียวเฉพาะ slot ช่วงหลักตาม scope
+function dayStat(d, keys){
+  const inScope = s => s.owner && keys.indexOf(s.owner)>=0;
+  const ps = d.slots.filter(inScope);
+  const used = ps.filter(s => s.booked).length;
+  return { total:ps.length, used, free:ps.length-used, other:d.slots.filter(s => s.booked && !s.owner).length };
+}
+function slotStart(dateIso, t){ const d = day(dateIso); d.setHours(+t.slice(0,2), +t.slice(3), 0, 0); return d; }
+
 function renderQueue(r, from, to){
-  const s = r.summary;
-  count('q-open', s.openDays); count('q-used', s.usedSlots); count('q-free', s.futureFree); count('q-util', s.utilization);
-  setText('q-total', s.totalSlots+' slot ทั้งหมด');
-  setText('q-range', fmtDay(from)+' – '+fmtDay(to)+' · พบ '+(s.bookingsInRange||0)+' การจอง');
+  St.qFrom = from; St.qTo = to;
+  // เปิดหน้าครั้งแรก: ถ้าผู้ใช้เป็นเจ้าของช่วงหลัก ให้เริ่มที่ "ของฉัน"
+  if (!St.scopeInit){ St.scopeInit = true; const m = myWindows(); if (m.length===1) St.scope = m[0]; }
+  renderScope();
+  const keys = scopeKeys(), now = Date.now() + 30*60000;
+  const stats = {}; r.days.forEach(d => { stats[d.date] = dayStat(d, keys); });
+
+  let total = 0, used = 0, free = 0, other = 0, days = 0;
+  const perWin = {}; (r.windows || []).forEach(w => { perWin[w.key] = {w, total:0, used:0, own:0, oth:0}; });
+  const byHour = {}, nextFree = [];
+  r.days.forEach(d => {
+    const st = stats[d.date]; other += st.other;
+    if (!st.total) return;
+    days++; total += st.total; used += st.used;
+    d.slots.forEach(s => {
+      if (!s.owner || keys.indexOf(s.owner)<0) return;
+      perWin[s.owner].total++;
+      if (s.booked){ perWin[s.owner].used++; (String(s.doctor).indexOf(perWin[s.owner].w.match)>=0 ? perWin[s.owner].own++ : perWin[s.owner].oth++); byHour[s.t] = (byHour[s.t]||0) + 1; }
+      else if (slotStart(d.date, s.t) > now){ free++; if (nextFree.length<6) nextFree.push({date:d.date, t:s.t}); }
+    });
+  });
+  const util = total ? Math.round(used*100/total) : 0;
+  count('q-open', days); count('q-used', used); count('q-free', free); count('q-util', util);
+  setText('q-total', total+' slot ช่วงหลักทั้งหมด');
+  setText('q-other', other ? '+ '+other+' การจองนอกช่วงหลัก (เคสเร่งด่วน)' : '');
+  setText('q-utilsub', used+' / '+total+' slot');
+  setText('q-range', fmtDay(from)+' – '+fmtDay(to)+' · พบ '+used+' การจองในช่วงหลัก');
 
   // calendar grid (จันทร์เป็นคอลัมน์แรก)
-  const byDate = {}; r.days.forEach(d => byDate[d.date]=d);
+  const byDate = {}; r.days.forEach(d => { byDate[d.date] = d; });
   const start = day(from); start.setDate(start.getDate()-((start.getDay()+6)%7));
   const end   = day(to);   end.setDate(end.getDate()+((7-end.getDay())%7));
   const today = ymd(new Date());
   let html = '';
   for (let d=new Date(start); d<=end; d.setDate(d.getDate()+1)){
-    const k = ymd(d), info = byDate[k];
+    const k = ymd(d), info = byDate[k], st = info && stats[k];
     if (!info){ html += '<div class="cell out"><div class="d">'+d.getDate()+'</div></div>'; continue; }
     const cls = ['cell']; if (k===today) cls.push('today'); if (k===St.selDay) cls.push('sel');
-    if (!info.open && info.used===0){
+    if (!st.total && !st.other){
       cls.push('off');
       html += '<div class="'+cls.join(' ')+'"><div class="d">'+d.getDate()+(info.holiday?'<small>หยุด</small>':'')+'</div></div>';
       continue;
     }
-    const pct = info.total ? Math.round(info.used*100/info.total) : 0;
-    const lv = pct>=90 ? 2 : pct>=60 ? 1 : 0;
     cls.push('click');
+    if (!st.total){   // ไม่มีช่วงหลักแต่มีเคสนอกช่วง (urgent)
+      html += '<button type="button" class="'+cls.join(' ')+'" data-d="'+esc(k)+'">'
+        + '<div class="d">'+d.getDate()+'<small>'+esc(TH_DOW[d.getDay()])+'</small></div>'
+        + '<div class="t">นอกช่วงหลัก '+st.other+'</div></button>';
+      continue;
+    }
+    const pct = Math.round(st.used*100/st.total);
+    const lv = pct>=90 ? 2 : pct>=60 ? 1 : 0;
     html += '<button type="button" class="'+cls.join(' ')+'" data-d="'+esc(k)+'">'
       + '<div class="d">'+d.getDate()+'<small>'+esc(TH_DOW[d.getDay()])+'</small></div>'
       + '<div class="bar lv-'+lv+'"><i style="width:'+pct+'%"></i></div>'
-      + '<div class="t">ใช้ '+info.used+' · ว่าง '+info.free+'</div></button>';
+      + '<div class="t">ใช้ '+st.used+' · ว่าง '+st.free+'</div></button>';
   }
   const cal = document.getElementById('q-cal'); cal.innerHTML = html;
   cal.querySelectorAll('button[data-d]').forEach(b => b.addEventListener('click', () => pickDay(b.dataset.d)));
 
   // charts
-  const wdNames = ['จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์'];
-  const wdPct = [1,2,3,4,5].map(i => r.byWeekday[i].total ? Math.round(r.byWeekday[i].used*100/r.byWeekday[i].total) : 0);
-  bar('ch-wd', wdNames, wdPct, wdPct.map(p => p>=90?'#d6343f':p>=60?'#d98a0b':'#12945f'), 'ใช้ห้อง (%)', {max:100, ticks:{callback:v=>v+'%'}});
-  const hrs = Object.keys(r.byHour);
-  bar('ch-hr', hrs, hrs.map(h => r.byHour[h]), '#0b7fa8', 'จำนวนการจอง');
+  const wlist = Object.keys(perWin).map(k => perWin[k]).filter(x => keys.indexOf(x.w.key)>=0);
+  const wPct = wlist.map(x => x.total ? Math.round(x.used*100/x.total) : 0);
+  mkChart('ch-wd', { type:'bar', data:{ labels: wlist.map(x => x.w.label+' ('+x.w.owner+')'),
+    datasets:[ {label:'เจ้าของช่วงจองเอง', data:wlist.map(x=>x.own), backgroundColor:'#0056D2'},
+               {label:'แพทย์อื่นใช้ช่วงนี้', data:wlist.map(x=>x.oth), backgroundColor:'#00A3FF'},
+               {label:'ว่าง', data:wlist.map(x=>x.total-x.used), backgroundColor:'#E0F2F1'} ] },
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'bottom'}},
+      scales:{ x:{stacked:true, grid:{display:false}}, y:{stacked:true, beginAtZero:true, grid:{color:'#eef2f8'}, ticks:{precision:0}, title:{display:true, text:'slot'}} } }});
+  const hrs = ['09:00','09:30','10:00','10:30','11:00','11:30','13:00','13:30','14:00','14:30','15:00','15:30']
+    .filter(h => wlist.some(x => h>=x.w.from && h<=x.w.to));
+  bar('ch-hr', hrs, hrs.map(h => byHour[h]||0), '#0056D2', 'จำนวนการจอง');
 
   // next free
-  const nf = document.getElementById('q-next');
-  nf.innerHTML = r.nextFree.length ? r.nextFree.map(x => '<span>'+esc(shortDay(x.date))+' · '+esc(x.t)+'</span>').join('')
-                                   : '<div class="empty" style="width:100%">ไม่มี slot ว่างในช่วงนี้</div>';
+  document.getElementById('q-next').innerHTML = nextFree.length
+    ? nextFree.map(x => '<span>'+esc(shortDay(x.date))+' · '+esc(x.t)+'</span>').join('')
+    : '<div class="empty" style="width:100%">ไม่มี slot ช่วงหลักว่างในช่วงนี้</div>';
 
   // insights
   const tips = [];
-  const busiest = wdPct.indexOf(Math.max(...wdPct)), quiet = wdPct.indexOf(Math.min(...wdPct));
-  if (s.totalSlots) {
-    tips.push('วัน<b>'+wdNames[busiest]+'</b>มีการใช้ห้องมากที่สุด ('+wdPct[busiest]+'%) ส่วนวัน<b>'+wdNames[quiet]+'</b>ว่างสุด ('+wdPct[quiet]+'%) — แนะนำให้จัดเคสที่ยืดหยุ่นไปวันที่ว่าง');
-    const am = hrs.filter(h=>h<'12').reduce((a,h)=>a+r.byHour[h],0), pm = hrs.filter(h=>h>='13').reduce((a,h)=>a+r.byHour[h],0);
-    if (am+pm) tips.push('การจองช่วงเช้า '+am+' slot / บ่าย '+pm+' slot ('+Math.round(am*100/(am+pm))+'% เป็นช่วงเช้า)');
-    const full = r.days.filter(d => d.open && d.total && d.used===d.total && !d.past).length;
-    if (full) tips.push('มี <b>'+full+' วัน</b>ที่ slot เต็มทุกช่วง (ยังไม่ผ่าน) — พิจารณาเปิดวัน/เวลาเพิ่ม');
-    const low = r.days.filter(d => d.open && !d.past && d.total && d.used/d.total<.25).length;
-    if (low) tips.push('มี '+low+' วันข้างหน้าที่ใช้ห้องน้อยกว่า 25% — ใช้จัดเคสเร่งด่วนหรือเคสใหม่ได้');
+  if (total){
+    tips.push('อัตราการใช้กล้องช่วงหลัก <b>'+util+'%</b> ('+used+' จาก '+total+' slot)'+(St.scope==='all' ? '' : ' — เฉพาะช่วง'+esc(wlist[0].w.label)+' '+esc(wlist[0].w.owner)));
+    wlist.forEach(x => { if (x.total) tips.push('<b>'+esc(x.w.owner)+'</b> ('+esc(x.w.label)+') ใช้ช่วงของตนเอง <b>'+Math.round(x.own*100/x.total)+'%</b> ('+x.own+'/'+x.total+' slot)'
+      +(x.oth ? ' · แพทย์อื่นใช้ '+x.oth+' slot' : '')+' · ว่าง '+(x.total-x.used)+' slot — ใช้ช่วงรวม '+Math.round(x.used*100/x.total)+'%'); });
+    if (St.scope==='all' && wlist.length>1){
+      const ranked = wlist.map((x,i) => ({x, p:wPct[i]})).sort((a,b) => b.p-a.p);
+      tips.push('ช่วง<b>'+esc(ranked[0].x.w.label)+'</b> ใช้มากที่สุด ('+ranked[0].p+'%) ส่วน<b>'+esc(ranked[ranked.length-1].x.w.label)+'</b> ว่างที่สุด ('+ranked[ranked.length-1].p+'%)');
+    }
+    const fullDays = r.days.filter(d => !d.past && stats[d.date].total && stats[d.date].free===0).length;
+    if (fullDays) tips.push('มี <b>'+fullDays+' วัน</b>ที่ช่วงหลักเต็มแล้ว (ยังไม่ผ่าน)');
+    const low = r.days.filter(d => !d.past && stats[d.date].total && stats[d.date].used/stats[d.date].total<.25).length;
+    if (low) tips.push('มี '+low+' วันข้างหน้าที่ช่วงหลักถูกใช้น้อยกว่า 25%');
+    if (other) tips.push('มี '+other+' การจองนอกช่วงหลัก (เคสเร่งด่วน/ฉุกเฉิน) ซึ่งไม่ถูกนับในอัตราการใช้');
   }
   if (!tips.length) tips.push('ยังไม่มีข้อมูลพอสำหรับข้อสังเกตในช่วงนี้');
   document.getElementById('q-tips').innerHTML = tips.map(t => '<li>'+t+'</li>').join('');
@@ -422,10 +511,16 @@ function pickDay(k){
   document.getElementById('q-detail').scrollIntoView({behavior:'smooth', block:'nearest'});
 }
 function showDay(d){
-  setText('q-detail-badge', fmtDay(d.date)+' · ใช้ '+d.used+' / '+(d.open?d.total:'—')+' slot');
-  document.getElementById('q-slots').innerHTML = d.slots.map(s => s.booked
-    ? '<div class="slot busy"><b>'+esc(s.t)+'</b><div>'+esc(s.procedure)+'</div><div class="who">'+esc(s.doctor)+'</div></div>'
-    : '<div class="slot free"><b>'+esc(s.t)+'</b><div>ว่าง</div></div>').join('');
+  const keys = scopeKeys(), st = dayStat(d, keys);
+  setText('q-detail-badge', fmtDay(d.date)+' · ช่วงหลักใช้ '+st.used+' / '+st.total+' slot'+(st.other?' · นอกช่วงหลัก '+st.other:''));
+  document.getElementById('q-slots').innerHTML = d.slots.map(s => {
+    const prim = s.owner && keys.indexOf(s.owner)>=0;
+    const tag = prim ? '' : '<div class="who" style="opacity:.7">นอกช่วงหลัก</div>';
+    const dim = prim ? '' : ' style="opacity:.55"';
+    return s.booked
+      ? '<div class="slot busy"'+dim+'><b>'+esc(s.t)+'</b><div>'+esc(s.procedure)+'</div><div class="who">'+esc(s.doctor)+'</div>'+tag+'</div>'
+      : '<div class="slot free"'+dim+'><b>'+esc(s.t)+'</b><div>ว่าง</div>'+tag+'</div>';
+  }).join('');
 }
 
 /* ───────── BOOKING ───────── */
@@ -445,9 +540,9 @@ function renderBooking(r, from, to){
   const s = r.summary, c = r.charts;
   count('b-k-total', s.total); count('b-k-done', s.done); count('b-k-up', s.upcoming); count('b-k-can', s.cancelled); count('b-k-wait', s.awaitingRecord||0);
   setText('b-range', from ? fmtDay(from)+' – '+fmtDay(to) : 'ทั้งหมด');
-  bar('b-ch-time', c.timeline.map(t=>shortDay(t.date)), c.timeline.map(t=>t.count), '#0b7fa8', 'การจอง');
+  bar('b-ch-time', c.timeline.map(t=>shortDay(t.date)), c.timeline.map(t=>t.count), '#0056D2', 'การจอง');
   donut('b-ch-proc', Object.keys(c.byProcedure), Object.values(c.byProcedure));
-  donut('b-ch-stat', ['ทำแล้ว','รอทำ','ยกเลิก'], [s.done,s.upcoming,s.cancelled], ['#12945f','#0b7fa8','#d6343f']);
+  donut('b-ch-stat', ['ทำแล้ว','รอทำ','ยกเลิก'], [s.done,s.upcoming,s.cancelled], ['#00695C','#0056D2','#D32F2F']);
   hbar('b-ch-doc', Object.keys(c.byDoctor), Object.values(c.byDoctor));
   renderBookingTable();
 }
@@ -485,10 +580,10 @@ function renderProcedure(r, from, to){
   const s = r.summary, c = r.charts;
   count('p-k-cases', s.totalCases); count('p-k-rev', s.totalRevenue, true); count('p-k-dur', s.avgDuration); count('p-k-fl', s.fluoroUsed);
   setText('p-range', from ? fmtDay(from)+' – '+fmtDay(to) : 'ทั้งหมด');
-  bar('p-ch-time', c.caseTimeline.map(t=>shortDay(t.date)), c.caseTimeline.map(t=>t.count), '#0b7fa8', 'Case');
-  bar('p-ch-rev',  c.revenueTimeline.map(t=>shortDay(t.date)), c.revenueTimeline.map(t=>t.revenue), '#12945f', 'บาท');
+  bar('p-ch-time', c.caseTimeline.map(t=>shortDay(t.date)), c.caseTimeline.map(t=>t.count), '#0056D2', 'Case');
+  bar('p-ch-rev',  c.revenueTimeline.map(t=>shortDay(t.date)), c.revenueTimeline.map(t=>t.revenue), '#00695C', 'บาท');
   donut('p-ch-proc', Object.keys(c.byProcedure), Object.values(c.byProcedure));
-  donut('p-ch-an', ['MAC','GA'], [c.byAnesthesia.MAC||0, c.byAnesthesia.GA||0], ['#0b7fa8','#6d4ad6']);
+  donut('p-ch-an', ['MAC','GA'], [c.byAnesthesia.MAC||0, c.byAnesthesia.GA||0], ['#0056D2','#6d4ad6']);
   hbar('p-ch-doc', Object.keys(c.byDoctor), Object.values(c.byDoctor));
   renderProcedureTable();
 }
@@ -532,8 +627,8 @@ function pdfProcedure(){
   if (!w) { Broncho.toast('กรุณาอนุญาต popup เพื่อพิมพ์', true); return; }
   const rows = St.pData.records.map(r => '<tr><td>'+esc(r.procedureDate)+'</td><td>'+esc(r.hn)+'</td><td>'+esc(r.namePrefix)+esc(r.patientName)+'</td><td>'+esc(r.operation)+'</td><td>'+esc(r.doctor)+'</td><td>'+esc(r.timeStart||'')+'–'+esc(r.timeEnd||'')+'</td><td>'+(r.price?r.price.toLocaleString():'')+'</td><td>'+esc(r.fluoroscope||'')+'</td></tr>').join('');
   w.document.write('<!DOCTYPE html><html lang="th"><head><meta charset="UTF-8"><title>รายงานการส่องกล้องหลอดลม</title>'
-   + '<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">'
-   + '<style>body{font-family:Sarabun,sans-serif;font-size:13px;margin:20px;color:#152238}h1{font-size:18px}.k{display:flex;gap:12px;margin:14px 0}.k div{flex:1;border:1px solid #d1dbe8;border-radius:8px;padding:10px;text-align:center}.k b{display:block;font-size:22px;color:#0b7fa8}table{width:100%;border-collapse:collapse;font-size:12px}th{background:#f0f4f8;text-align:left}th,td{border:1px solid #d1dbe8;padding:6px 8px}</style></head><body>'
+   + '<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">'
+   + '<style>body{font-family:Sarabun,sans-serif;font-size:13px;margin:20px;color:#152238}h1{font-size:18px}.k{display:flex;gap:12px;margin:14px 0}.k div{flex:1;border:1px solid #d1dbe8;border-radius:8px;padding:10px;text-align:center}.k b{display:block;font-size:22px;color:#0056D2}table{width:100%;border-collapse:collapse;font-size:12px}th{background:#F5F7FA;text-align:left}th,td{border:1px solid #d1dbe8;padding:6px 8px}</style></head><body>'
    + '<h1>รายงานการส่องกล้องหลอดลม</h1><div>'+(from?esc(fmtDay(from))+' – '+esc(fmtDay(to)):'ทั้งหมด')+' · พิมพ์ '+esc(new Date().toLocaleString('th-TH'))+'</div>'
    + '<div class="k"><div><b>'+s.totalCases+'</b>Case</div><div><b>'+s.totalRevenue.toLocaleString()+'</b>รายได้ (บาท)</div><div><b>'+s.avgDuration+'</b>เวลาเฉลี่ย (นาที)</div><div><b>'+s.fluoroUsed+'</b>ใช้ Fluoroscope</div></div>'
    + '<table><tr><th>วันที่</th><th>HN</th><th>ผู้ป่วย</th><th>Operation</th><th>แพทย์</th><th>เวลา</th><th>ราคา</th><th>Fluoro</th></tr>'+rows+'</table>'
@@ -580,7 +675,7 @@ async function loadDoctors(){
   busy(true);
   try{
     const user = await Broncho.programStart({ page: 'dashboard' });
-    setText('who', user.name);
+    St.user = user; setText('who', user.name);
     await Promise.all([loadQueue(true), loadDoctors()]);
     setInterval(() => { if (!document.hidden) refresh(true); }, 5*60*1000);
   }catch(e){
