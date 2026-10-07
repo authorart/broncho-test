@@ -13,7 +13,7 @@
   const ROLE_LABEL = { admin: 'Admin', doctor: 'แพทย์ (Doctor)', user: 'พยาบาล/ผู้ใช้ (User)' };
 
   const CSS = `
-  .bp-nav{background:#052f43;color:#fff;position:relative;z-index:60;font-family:'Sarabun',-apple-system,'Segoe UI',sans-serif}
+  .bp-nav{background:#052f43;color:#fff;position:sticky;top:0;z-index:200;font-family:'Sarabun',-apple-system,'Segoe UI',sans-serif}
   .bp-nav-in{max-width:1280px;margin:0 auto;padding:0 14px;display:flex;align-items:center;gap:6px;min-height:46px}
   .bp-brand{font-weight:700;font-size:15px;white-space:nowrap;margin-right:8px;display:flex;align-items:center;gap:6px}
   .bp-tabs{display:flex;gap:2px;overflow-x:auto;flex:1;scrollbar-width:none}
@@ -182,6 +182,10 @@
         </div>
       </div></div>`;
     document.body.insertBefore(nav, document.body.firstChild);
+    // หน้าอื่นที่มีแถบ sticky ของตัวเอง ใช้ --bpnav-h เพื่อเรียงต่อใต้แถบเมนูนี้
+    const setH = () => document.documentElement.style.setProperty('--bpnav-h', nav.offsetHeight + 'px');
+    setH(); window.addEventListener('resize', setH);
+    if (window.ResizeObserver) new ResizeObserver(setH).observe(nav);
     const menu = $('bp-menu');
     $('bp-ubtn').onclick = e => { e.stopPropagation(); menu.classList.toggle('open'); };
     document.addEventListener('click', () => menu.classList.remove('open'));
