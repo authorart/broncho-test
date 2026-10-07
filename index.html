@@ -572,7 +572,9 @@ function switchView(page) {
     showEl('view-book');
     document.getElementById('book-doctor-lbl').textContent = '👨‍⚕️ ' + S.doctorName;
     goToStep(1);
-    loadSlots();
+    const pf = prefillFromUrl();
+    if (pf) S.weekOffset = pf.weekOffset;
+    loadSlots().then(() => { if (pf) applyPrefill(pf); });
   } else {
     const isCancel = page === 'cancel';
     showEl('view-my-bookings');
@@ -636,6 +638,26 @@ async function loadSlots() {
       `<div style="text-align:center;padding:20px"><p style="color:var(--red)">${esc(Broncho.errorText(err))}</p>
        <button class="btn btn-outline" style="max-width:200px" onclick="loadSlots()">🔄 ลองใหม่</button></div>`;
   }
+}
+
+// เปิดจากปุ่ม slot ว่างใน Dashboard: ?date=yyyy-MM-dd&time=HH:mm → เลือกวัน/เวลาให้แล้วไปขั้นกรอกรายละเอียด
+function prefillFromUrl() {
+  const q = new URLSearchParams(location.search);
+  const date = q.get('date'), time = q.get('time');
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date || '') || !/^\d{2}:\d{2}$/.test(time || '')) return null;
+  const now = new Date(), today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const days = Math.floor((new Date(date + 'T00:00:00') - today) / 86400000);
+  if (days < 0) return null;
+  return { date, time, weekOffset: Math.min(7, Math.floor(days / 14)) };
+}
+function applyPrefill(pf) {
+  if (S.weekOffset !== pf.weekOffset) return;
+  const day = S.allSlots.filter(s => s.dateKey === pf.date);
+  const idx = day.findIndex(s => s.timeStr.slice(0, 5) === pf.time);
+  if (idx < 0 || !day[idx].available) { Broncho.toast('slot ' + pf.time + ' วันที่เลือกไม่ว่างแล้ว กรุณาเลือกใหม่'); if (day.length) pickDate(pf.date); return; }
+  pickDate(pf.date);
+  pickSlot(idx);
+  goToStep(3);
 }
 
 function updateWeekLabel() {

@@ -97,6 +97,9 @@ button{font-family:inherit;cursor:pointer}
 .slot b{display:block;font-size:14px}
 .slot.free{background:var(--green-lt);border-color:#A7D7CF;color:#004D40}
 .slot.busy{background:#fff}
+a.slot.free.book{display:block;text-decoration:none;cursor:pointer;transition:transform .12s,box-shadow .12s}
+a.slot.free.book:hover{transform:translateY(-1px);box-shadow:0 3px 10px rgba(0,77,64,.18);border-color:#00897B}
+a.slot.free.book .go{font-size:11.5px;font-weight:700;margin-top:2px}
 .slot.busy .who{color:var(--ink2)}
 .nf{display:flex;flex-wrap:wrap;gap:8px}
 .nf span{background:var(--brand-lt);color:var(--brand-dk);border-radius:10px;padding:7px 11px;font-size:13px;font-weight:600}
@@ -180,7 +183,7 @@ tr:hover td{background:#fafcff}
 
   <div class="card fade" id="q-detail" style="margin-bottom:16px">
     <h3 id="q-detail-title">รายละเอียดรายวัน <span class="badge" id="q-detail-badge">—</span></h3>
-    <div class="slots" id="q-slots"><div class="empty" style="grid-column:1/-1">แตะวันที่ในปฏิทินเพื่อดูว่าใช้ slot ไหนบ้าง</div></div>
+    <div class="slots" id="q-slots"><div class="empty" style="grid-column:1/-1">แตะวันที่ในปฏิทินเพื่อดูว่าใช้ slot ไหนบ้าง (แพทย์แตะ slot ว่างเพื่อจองได้เลย)</div></div>
   </div>
 
   <div class="grid g-2">
@@ -510,6 +513,11 @@ function pickDay(k){
   const info = St.qData.days.find(d=>d.date===k); if (info) showDay(info);
   document.getElementById('q-detail').scrollIntoView({behavior:'smooth', block:'nearest'});
 }
+// แพทย์/admin จอง slot ว่างได้ทั้งช่วงหลักและนอกช่วงหลัก (วันทำการที่ยังไม่ถึงเวลา)
+function canBook(d, s){
+  const role = St.user && St.user.role;
+  return (role==='admin' || role==='doctor') && d.open && slotStart(d.date, s.t) > Date.now() + 30*60000;
+}
 function showDay(d){
   const keys = scopeKeys(), st = dayStat(d, keys);
   setText('q-detail-badge', fmtDay(d.date)+' · ช่วงหลักใช้ '+st.used+' / '+st.total+' slot'+(st.other?' · นอกช่วงหลัก '+st.other:''));
@@ -517,6 +525,7 @@ function showDay(d){
     const prim = s.owner && keys.indexOf(s.owner)>=0;
     const tag = prim ? '' : '<div class="who" style="opacity:.7">นอกช่วงหลัก</div>';
     const dim = prim ? '' : ' style="opacity:.55"';
+    if (!s.booked && canBook(d, s)) return '<a class="slot free book" href="index.html?mode=program&page=book&date='+encodeURIComponent(d.date)+'&time='+encodeURIComponent(s.t)+'"'+dim+'><b>'+esc(s.t)+'</b><div>ว่าง</div>'+tag+'<div class="go">+ จอง slot นี้</div></a>';
     return s.booked
       ? '<div class="slot busy"'+dim+'><b>'+esc(s.t)+'</b><div>'+esc(s.procedure)+'</div><div class="who">'+esc(s.doctor)+'</div>'+tag+'</div>'
       : '<div class="slot free"'+dim+'><b>'+esc(s.t)+'</b><div>ว่าง</div>'+tag+'</div>';
