@@ -4,7 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Bronchoscopy Program — จัดการผู้ใช้</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta name="referrer" content="no-referrer">
 <script src="config.js"></script>
 <script src="common.js"></script>
 <script src="program.js"></script>
@@ -59,11 +60,12 @@ tr.pending td{background:#fffaf0}
 .pwbox code{background:#fff;border-radius:6px;padding:2px 8px;font-size:15px;font-weight:700;color:var(--ink)}
 @media(max-width:720px){.hide-m{display:none}th,td{padding:9px 8px}}
 </style>
+<link rel="stylesheet" href="theme.css">
 </head>
 <body>
 <div class="wrap">
   <div class="head">
-    <div><h1>👥 จัดการผู้ใช้</h1><div class="sub">เพิ่ม/แก้ไขผู้ใช้ กำหนดสิทธิ์ อนุมัติเพื่อนใหม่จาก LINE และรีเซ็ตรหัสผ่าน</div></div>
+    <div><h1>จัดการผู้ใช้</h1><div class="sub">เพิ่ม/แก้ไขผู้ใช้ กำหนดสิทธิ์ อนุมัติเพื่อนใหม่จาก LINE และรีเซ็ตรหัสผ่าน</div></div>
     <button class="btn btn-pri" style="margin-left:auto" id="btn-add">+ เพิ่มผู้ใช้</button>
   </div>
 
@@ -90,7 +92,7 @@ tr.pending td{background:#fffaf0}
   <h2 id="m-title">เพิ่มผู้ใช้</h2>
   <label for="m-name">ชื่อ-นามสกุล (ใช้เป็นชื่อแพทย์ในการจอง)</label>
   <input id="m-name" maxlength="100" autocomplete="off">
-  <div class="warn hidden" id="m-namewarn">⚠️ การเปลี่ยนชื่อมีผลต่อการจองเดิม — เจ้าของการจองอ้างอิงจากชื่อ การจองเก่าในชื่อเดิมจะแก้/ยกเลิกเองไม่ได้</div>
+  <div class="warn hidden" id="m-namewarn">การเปลี่ยนชื่อมีผลต่อการจองเดิม — เจ้าของการจองอ้างอิงจากชื่อ การจองเก่าในชื่อเดิมจะแก้/ยกเลิกเองไม่ได้</div>
   <label for="m-user">ชื่อผู้ใช้ (username) — a-z 0-9 . _ - ยาว 3–30 ตัว</label>
   <input id="m-user" maxlength="30" autocapitalize="none" autocorrect="off" spellcheck="false" autocomplete="off">
   <div class="hint" id="m-userhint"></div>
@@ -103,7 +105,7 @@ tr.pending td{background:#fffaf0}
 </div></div>
 
 <div class="ov hidden" id="ov-reset"><div class="modal">
-  <h2>🔑 รีเซ็ตรหัสผ่าน</h2>
+  <h2>รีเซ็ตรหัสผ่าน</h2>
   <p id="r-text" style="font-size:14px;line-height:1.7"></p>
   <div class="err" id="r-err" role="alert"></div>
   <div class="mact"><button class="btn btn-ghost" id="r-cancel" type="button">ยกเลิก</button><button class="btn btn-pri" id="r-go" type="button">รีเซ็ต</button></div>
@@ -121,7 +123,7 @@ const $ = id => document.getElementById(id);
 const ROLE = { admin: 'Admin', doctor: 'Doctor', user: 'User' };
 const St = { users: [], me: null, edit: null, reset: null };
 
-function fmtLogin(s) { return s ? esc(s) : '<span class="mut">ยังไม่เคย</span>'; }
+function fmtLogin(s) { return s ? esc(Broncho.thDate(s)) : '<span class="mut">ยังไม่เคย</span>'; }
 
 function render() {
   const all = St.users;
@@ -143,12 +145,12 @@ function render() {
         <td>${u.username ? esc(u.username) : '<span class="mut">— ยังไม่ตั้ง —</span>'}</td>
         <td><span class="badge b-${esc(u.role)}">${esc(ROLE[u.role] || u.role)}</span></td>
         <td><span class="badge s-${esc(u.status)}">${esc(u.status)}</span></td>
-        <td class="hide-m">${u.hasLine ? '✅ เชื่อมแล้ว' : '<span class="mut">—</span>'}</td>
+        <td class="hide-m">${u.hasLine ? 'เชื่อมแล้ว' : '<span class="mut">—</span>'}</td>
         <td class="hide-m">${fmtLogin(u.lastLogin)}</td>
         <td><div class="acts">
           ${u.status === 'Pending' ? `<button class="btn btn-sm btn-ok" data-a="approve" data-i="${i}">อนุมัติ</button>` : ''}
-          <button class="btn btn-sm btn-ghost" data-a="edit" data-i="${i}">✏️ แก้ไข</button>
-          ${u.username ? `<button class="btn btn-sm btn-warn" data-a="reset" data-i="${i}">🔑 รีเซ็ตรหัส</button>` : ''}
+          <button class="btn btn-sm btn-ghost" data-a="edit" data-i="${i}">แก้ไข</button>
+          ${u.username ? `<button class="btn btn-sm btn-warn" data-a="reset" data-i="${i}">รีเซ็ตรหัส</button>` : ''}
         </div></td></tr>`;
     }).join('') + '</tbody></table>';
 }
@@ -160,7 +162,7 @@ async function load() {
     St.users = r.users;
     render();
   } catch (e) {
-    $('list').innerHTML = '<div class="empty">⚠️ ' + esc(Broncho.errorText(e)) + ' <br><br><button class="btn btn-pri" onclick="load()">ลองใหม่</button></div>';
+    $('list').innerHTML = '<div class="empty">' + esc(Broncho.errorText(e)) + ' <br><br><button class="btn btn-pri" onclick="load()">ลองใหม่</button></div>';
   }
 }
 
@@ -244,7 +246,7 @@ $('list').addEventListener('click', ev => {
   try {
     St.me = await Broncho.programStart({ page: 'users' });
     await load();
-  } catch (e) { $('list').innerHTML = '<div class="empty">⚠️ ' + esc(Broncho.errorText(e)) + '</div>'; }
+  } catch (e) { $('list').innerHTML = '<div class="empty">' + esc(Broncho.errorText(e)) + '</div>'; }
 })();
 </script>
 </body>

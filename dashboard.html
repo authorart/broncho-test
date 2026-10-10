@@ -3,9 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Bronchoscopy Program — Dashboard</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<title>Dashboard — Bronchoscopy Program โรงพยาบาลมหาสารคาม</title>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta name="referrer" content="no-referrer">
+<script src="vendor/chart.umd.min.js"></script>
 <script src="config.js"></script>
 <script src="common.js"></script>
 <script src="program.js"></script>
@@ -132,23 +133,23 @@ tr:hover td{background:#fafcff}
 }
 @media print{.top,.tabs,.filters,.btn,.tbl-tools{display:none!important}body{background:#fff}.card{box-shadow:none;border:1px solid #ddd}}
 </style>
+<link rel="stylesheet" href="theme.css">
 </head>
 <body>
 <div id="busy" class="hidden"><div class="spin"></div></div>
 
 <header class="top"><div class="top-in">
-  <div class="logo">🫁</div>
-  <div><h1>Dashboard ห้องส่องกล้องหลอดลม</h1><div class="sub">Bronchoscopy Program · <span id="who">—</span></div></div>
+  <div><h1>Dashboard ห้องส่องกล้องหลอดลม</h1><div class="sub">ผู้ใช้งาน: <span id="who">—</span></div></div>
   <div class="top-r">
     <div class="chip" id="clock">—</div>
-    <button class="btn-ref" onclick="refresh(false)">⟳ รีเฟรช</button>
+    <button class="btn-ref" onclick="refresh(false)"><span data-ic="refresh" data-size="18"></span> รีเฟรช</button>
   </div>
 </div></header>
 
-<nav class="tabs"><div class="tabs-in">
-  <button class="tab active" id="tab-queue"     onclick="switchTab('queue')">🗓 คิวห้อง</button>
-  <button class="tab"        id="tab-booking"   onclick="switchTab('booking')">📅 การจอง</button>
-  <button class="tab"        id="tab-procedure" onclick="switchTab('procedure')">📋 บันทึกหัตถการ</button>
+<nav class="tabs" aria-label="หมวดข้อมูล"><div class="tabs-in">
+  <button class="tab active" id="tab-queue"     onclick="switchTab('queue')">คิวห้อง</button>
+  <button class="tab"        id="tab-booking"   onclick="switchTab('booking')">การจอง</button>
+  <button class="tab"        id="tab-procedure" onclick="switchTab('procedure')">บันทึกหัตถการ</button>
 </div></nav>
 
 <!-- ═══════════ TAB: ROOM QUEUE ═══════════ -->
@@ -162,16 +163,16 @@ tr:hover td{background:#fafcff}
       <button class="pill" data-p="next">เดือนหน้า</button>
     </div>
     <span class="sp"></span>
-    <span style="font-size:12.5px;color:var(--ink3)">นับเฉพาะช่วงหลัก: พฤหัสบ่าย · ศุกร์เช้า · ศุกร์บ่าย (slot ละ 30 นาที) — ช่วงอื่นจองได้สำหรับเคสเร่งด่วน</span>
+    <span style="font-size:14px;color:var(--ink2)">นับเฉพาะช่วงหลัก: พฤหัสบ่าย · ศุกร์เช้า · ศุกร์บ่าย (slot ละ 30 นาที) — ช่วงอื่นจองได้สำหรับเคสเร่งด่วน</span>
   </div>
-  <div class="filters" style="margin-top:-6px"><span style="font-size:13px;color:var(--ink2);font-weight:600">มุมมอง:</span>
+  <div class="filters" style="margin-top:-6px"><span style="font-size:15px;color:var(--ink2);font-weight:600">มุมมอง:</span>
     <div class="pills" id="q-scope"></div></div>
 
   <div class="grid g-kpi">
-    <div class="card kpi"><div class="ic ic-b">🗓</div><div><div class="v" id="q-open">0</div><div class="l">วันที่มีช่วงหลัก</div><div class="n" id="q-total">— slot ทั้งหมด</div></div></div>
-    <div class="card kpi"><div class="ic ic-a">🔬</div><div><div class="v" id="q-used">0</div><div class="l">slot ช่วงหลักที่จองแล้ว</div><div class="n" id="q-other"></div></div></div>
-    <div class="card kpi"><div class="ic ic-g">✅</div><div><div class="v" id="q-free">0</div><div class="l">slot ช่วงหลักที่ยังว่าง</div><div class="n">นับจากเวลาปัจจุบันเป็นต้นไป</div></div></div>
-    <div class="card kpi"><div class="ic ic-v">📈</div><div><div class="v"><span id="q-util">0</span>%</div><div class="l">อัตราการใช้กล้อง (ช่วงหลัก)</div><div class="n" id="q-utilsub"></div></div></div>
+    <div class="card kpi"><div class="ic ic-b"><span data-ic="calendar" data-size="24"></span></div><div><div class="v" id="q-open">0</div><div class="l">วันที่มีช่วงหลัก</div><div class="n" id="q-total">— slot ทั้งหมด</div></div></div>
+    <div class="card kpi"><div class="ic ic-a"><span data-ic="pulse" data-size="24"></span></div><div><div class="v" id="q-used">0</div><div class="l">slot ช่วงหลักที่จองแล้ว</div><div class="n" id="q-other"></div></div></div>
+    <div class="card kpi"><div class="ic ic-g"><span data-ic="check" data-size="24"></span></div><div><div class="v" id="q-free">0</div><div class="l">slot ช่วงหลักที่ยังว่าง</div><div class="n">นับจากเวลาปัจจุบันเป็นต้นไป</div></div></div>
+    <div class="card kpi"><div class="ic ic-v"><span data-ic="trend" data-size="24"></span></div><div><div class="v"><span id="q-util">0</span>%</div><div class="l">อัตราการใช้กล้อง (ช่วงหลัก)</div><div class="n" id="q-utilsub"></div></div></div>
   </div>
 
   <div class="card fade" style="margin-bottom:16px">
@@ -192,8 +193,8 @@ tr:hover td{background:#fafcff}
   </div>
 
   <div class="grid g-2">
-    <div class="card"><h3>🟢 slot ว่างที่ใกล้ที่สุด</h3><div class="nf" id="q-next"></div></div>
-    <div class="card"><h3>💡 ข้อสังเกตจากข้อมูล</h3><ul class="tips" id="q-tips"></ul></div>
+    <div class="card"><h3>slot ว่างที่ใกล้ที่สุด</h3><div class="nf" id="q-next"></div></div>
+    <div class="card"><h3>ข้อสังเกตจากข้อมูล</h3><ul class="tips" id="q-tips"></ul></div>
   </div>
 </main>
 
@@ -212,14 +213,14 @@ tr:hover td{background:#fafcff}
     <div class="fg"><label>แพทย์</label><select id="b-doc" class="ctl"><option value="all">ทั้งหมด</option></select></div>
     <div class="fg"><label>หัตถการ</label><select id="b-proc" class="ctl"><option value="all">ทั้งหมด</option><option>Bronchoscopy</option><option>Pleuroscopy</option></select></div>
     <button class="btn btn-p" onclick="loadBooking()">แสดงผล</button>
-    <button class="btn btn-o" onclick="csvBooking()">⬇ CSV</button>
+    <button class="btn btn-o" onclick="csvBooking()"><span data-ic="download" data-size="18"></span> CSV</button>
   </div>
   <div class="grid g-kpi">
-    <div class="card kpi"><div class="ic ic-b">📅</div><div><div class="v" id="b-k-total">0</div><div class="l">การจองทั้งหมด</div></div></div>
-    <div class="card kpi"><div class="ic ic-g">✅</div><div><div class="v" id="b-k-done">0</div><div class="l">ทำแล้ว</div></div></div>
-    <div class="card kpi"><div class="ic ic-a">🕐</div><div><div class="v" id="b-k-up">0</div><div class="l">รอทำ</div></div></div>
-    <div class="card kpi"><div class="ic ic-r">❌</div><div><div class="v" id="b-k-can">0</div><div class="l">ยกเลิก</div></div></div>
-    <div class="card kpi"><div class="ic ic-v">📝</div><div><div class="v" id="b-k-wait">0</div><div class="l">รอบันทึกหัตถการ</div><div class="n">ทำแล้วแต่ยังไม่มีบันทึก</div></div></div>
+    <div class="card kpi"><div class="ic ic-b"><span data-ic="calendar" data-size="24"></span></div><div><div class="v" id="b-k-total">0</div><div class="l">การจองทั้งหมด</div></div></div>
+    <div class="card kpi"><div class="ic ic-g"><span data-ic="check" data-size="24"></span></div><div><div class="v" id="b-k-done">0</div><div class="l">ทำแล้ว</div></div></div>
+    <div class="card kpi"><div class="ic ic-a"><span data-ic="clock" data-size="24"></span></div><div><div class="v" id="b-k-up">0</div><div class="l">รอทำ</div></div></div>
+    <div class="card kpi"><div class="ic ic-r"><span data-ic="cancel" data-size="24"></span></div><div><div class="v" id="b-k-can">0</div><div class="l">ยกเลิก</div></div></div>
+    <div class="card kpi"><div class="ic ic-v"><span data-ic="file" data-size="24"></span></div><div><div class="v" id="b-k-wait">0</div><div class="l">รอบันทึกหัตถการ</div><div class="n">ทำแล้วแต่ยังไม่มีบันทึก</div></div></div>
   </div>
   <div class="grid g-2">
     <div class="card"><h3>จำนวนการจองรายวัน <span class="badge" id="b-range">—</span></h3><div class="ch"><canvas id="b-ch-time"></canvas></div></div>
@@ -229,11 +230,12 @@ tr:hover td{background:#fafcff}
   </div>
   <div class="card">
     <h3>รายการจอง <span class="badge" id="b-count">0 รายการ</span></h3>
-    <div class="tbl-tools"><input class="ctl" id="b-search" placeholder="ค้นหา HN / ชื่อ / แพทย์ / หัตถการ" oninput="renderBookingTable()">
+    <div class="tbl-tools"><input class="ctl" id="b-search" placeholder="ค้นหา HN / ชื่อ / แพทย์ / หัตถการ" oninput="renderBookingTable()" aria-label="ค้นหารายการจอง">
       <select class="ctl" id="b-status" style="max-width:190px;min-width:150px" onchange="renderBookingTable()">
         <option value="all">ทุกสถานะ</option><option value="wait">รอบันทึกหัตถการ</option><option value="done">ทำแล้ว</option>
         <option value="upcoming">รอทำ</option><option value="cancelled">ยกเลิก</option>
-      </select></div>
+      </select>
+      <button type="button" class="btn btn-o btn-sm" id="b-reveal" onclick="toggleReveal('b')" aria-pressed="false"><span data-ic="eye" data-size="18"></span> แสดง HN/ชื่อทั้งหมด</button></div>
     <div class="tbl-wrap"><table><thead><tr><th>วันที่/เวลา</th><th>แพทย์</th><th>หัตถการ</th><th>HN</th><th>ผู้ป่วย</th><th>สถานะ</th></tr></thead><tbody id="b-body"></tbody></table></div>
   </div>
 </main>
@@ -253,14 +255,14 @@ tr:hover td{background:#fafcff}
     <div class="fg"><label>แพทย์</label><select id="p-doc" class="ctl"><option value="all">ทั้งหมด</option></select></div>
     <div class="fg"><label>หัตถการ</label><select id="p-proc" class="ctl"><option value="all">ทั้งหมด</option><option>Bronchoscopy</option><option>Pleuroscopy</option></select></div>
     <button class="btn btn-p" onclick="loadProcedure()">แสดงผล</button>
-    <button class="btn btn-o" onclick="csvProcedure()">⬇ CSV</button>
-    <button class="btn btn-o" onclick="pdfProcedure()">🖨 PDF</button>
+    <button class="btn btn-o" onclick="csvProcedure()"><span data-ic="download" data-size="18"></span> CSV</button>
+    <button class="btn btn-o" onclick="pdfProcedure()"><span data-ic="print" data-size="18"></span> พิมพ์รายงาน</button>
   </div>
   <div class="grid g-kpi">
-    <div class="card kpi"><div class="ic ic-b">🔬</div><div><div class="v" id="p-k-cases">0</div><div class="l">จำนวน Case</div></div></div>
-    <div class="card kpi"><div class="ic ic-g">💰</div><div><div class="v" id="p-k-rev">0</div><div class="l">รายได้รวม (บาท)</div></div></div>
-    <div class="card kpi"><div class="ic ic-a">⏱</div><div><div class="v" id="p-k-dur">0</div><div class="l">เวลาเฉลี่ย (นาที)</div><div class="n">เฉพาะ case ที่บันทึกเวลา</div></div></div>
-    <div class="card kpi"><div class="ic ic-v">🔭</div><div><div class="v" id="p-k-fl">0</div><div class="l">ใช้ Fluoroscope</div></div></div>
+    <div class="card kpi"><div class="ic ic-b"><span data-ic="pulse" data-size="24"></span></div><div><div class="v" id="p-k-cases">0</div><div class="l">จำนวน Case</div></div></div>
+    <div class="card kpi"><div class="ic ic-g"><span data-ic="money" data-size="24"></span></div><div><div class="v" id="p-k-rev">0</div><div class="l">รายได้รวม (บาท)</div></div></div>
+    <div class="card kpi"><div class="ic ic-a"><span data-ic="timer" data-size="24"></span></div><div><div class="v" id="p-k-dur">0</div><div class="l">เวลาเฉลี่ย (นาที)</div><div class="n">เฉพาะ case ที่บันทึกเวลา</div></div></div>
+    <div class="card kpi"><div class="ic ic-v"><span data-ic="target" data-size="24"></span></div><div><div class="v" id="p-k-fl">0</div><div class="l">ใช้ Fluoroscope</div></div></div>
   </div>
   <div class="grid g-2">
     <div class="card"><h3>จำนวน Case รายวัน <span class="badge" id="p-range">—</span></h3><div class="ch"><canvas id="p-ch-time"></canvas></div></div>
@@ -271,17 +273,19 @@ tr:hover td{background:#fafcff}
   </div>
   <div class="card">
     <h3>รายการบันทึกหัตถการ <span class="badge" id="p-count">0 รายการ</span></h3>
-    <div class="tbl-tools"><input class="ctl" id="p-search" placeholder="ค้นหา HN / ชื่อ / แพทย์ / หัตถการ" oninput="renderProcedureTable()"></div>
+    <div class="tbl-tools"><input class="ctl" id="p-search" placeholder="ค้นหา HN / ชื่อ / แพทย์ / หัตถการ" oninput="renderProcedureTable()" aria-label="ค้นหาบันทึกหัตถการ">
+      <button type="button" class="btn btn-o btn-sm" id="p-reveal" onclick="toggleReveal('p')" aria-pressed="false"><span data-ic="eye" data-size="18"></span> แสดง HN/ชื่อทั้งหมด</button></div>
     <div class="tbl-wrap"><table><thead><tr><th>วันที่</th><th>HN</th><th>ผู้ป่วย</th><th>Operation</th><th>แพทย์</th><th>เวลา</th><th>ราคา</th><th>Fluoro</th><th>กล้อง</th></tr></thead><tbody id="p-body"></tbody></table></div>
   </div>
 </main>
 
 <script>
 const { esc, csvSafe } = Broncho;
-const PAL = ['#0056D2','#00695C','#FF9800','#6d4ad6','#D32F2F','#00A3FF','#7aa412','#c2569c'];
+const PAL = ['#1B4F9C','#1E6B4F','#B26A00','#59479A','#A4262C','#4C86C8','#6B8E23','#8A4F7D'];
 const TH_DOW = ['อา','จ','อ','พ','พฤ','ศ','ส'];
 const TH_MON = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
-const St = { scope:'all', user:null, tab:'queue', q:'w4', b:'month', p:'month', qData:null, bData:null, pData:null, selDay:null };
+const St = { scope:'all', user:null, tab:'queue', q:'w4', b:'month', p:'month', qData:null, bData:null, pData:null, selDay:null,
+  revealAll:{ b:false, p:false }, shown:{ b:new Set(), p:new Set() } };
 const charts = {};
 
 /* ───────── helpers ───────── */
@@ -305,28 +309,31 @@ function rangeFor(period, fromId, toId){
 
 function mkChart(id, cfg){
   if (charts[id]) charts[id].destroy();
-  Chart.defaults.font.family="'Sarabun',sans-serif"; Chart.defaults.font.size=12.5; Chart.defaults.color='#51627a';
+  Chart.defaults.font.family="'Sarabun',sans-serif"; Chart.defaults.font.size=14; Chart.defaults.color='#43536B';
   charts[id] = new Chart(document.getElementById(id).getContext('2d'), cfg);
 }
-const axes = (extra={}) => ({ x:{grid:{display:false}}, y:{beginAtZero:true, grid:{color:'#eef2f8'}, ticks:{precision:0}, ...extra} });
+const axes = (extra={}) => ({ x:{grid:{display:false}}, y:{beginAtZero:true, grid:{color:'#E3E8EF'}, ticks:{precision:0}, ...extra} });
 function bar(id, labels, data, color, label, yExtra){
-  mkChart(id,{ type:'bar', data:{labels, datasets:[{label, data, backgroundColor:color, borderRadius:6, maxBarThickness:38}]},
+  mkChart(id,{ type:'bar', data:{labels, datasets:[{label, data, backgroundColor:color, borderRadius:2, maxBarThickness:38}]},
     options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:axes(yExtra) }});
 }
 function hbar(id, labels, data){
-  mkChart(id,{ type:'bar', data:{labels, datasets:[{data, backgroundColor:PAL, borderRadius:6, maxBarThickness:26}]},
+  mkChart(id,{ type:'bar', data:{labels, datasets:[{data, backgroundColor:PAL, borderRadius:2, maxBarThickness:26}]},
     options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
-      scales:{ x:{beginAtZero:true, grid:{color:'#eef2f8'}, ticks:{precision:0}}, y:{grid:{display:false}} }}});
+      scales:{ x:{beginAtZero:true, grid:{color:'#E3E8EF'}, ticks:{precision:0}}, y:{grid:{display:false}} }}});
 }
 function donut(id, labels, data, colors){
-  if (!data.some(v=>v>0)) { labels=['ไม่มีข้อมูล']; data=[1]; colors=['#e3e9f2']; }
+  if (!data.some(v=>v>0)) { labels=['ไม่มีข้อมูล']; data=[1]; colors=['#E3E8EF']; }
   mkChart(id,{ type:'doughnut', data:{labels, datasets:[{data, backgroundColor:colors||PAL, borderWidth:2, borderColor:'#fff'}]},
     options:{ responsive:true, maintainAspectRatio:false, cutout:'62%', plugins:{legend:{position:'bottom', labels:{boxWidth:12, padding:14}}} }});
 }
 function count(id, target, comma){
-  const el=document.getElementById(id), from=parseFloat(el.textContent.replace(/,/g,''))||0, t0=performance.now();
-  (function step(now){ const t=Math.min((now-t0)/600,1), v=Math.round(from+(target-from)*(1-Math.pow(1-t,3)));
-    el.textContent = comma ? v.toLocaleString() : v; if (t<1) requestAnimationFrame(step); })(t0);
+  const el=document.getElementById(id), from=parseFloat(el.textContent.replace(/,/g,''))||0; let t0=null;
+  requestAnimationFrame(function step(now){
+    if (t0===null) t0=now;
+    const t=Math.min((now-t0)/600,1), v=Math.round(from+(target-from)*(1-Math.pow(1-t,3)));
+    el.textContent = comma ? v.toLocaleString() : v; if (t<1) requestAnimationFrame(step);
+  });
 }
 const day = iso => new Date(iso+'T00:00:00');
 const shortDay = iso => { const d=day(iso); return d.getDate()+' '+TH_MON[d.getMonth()]; };
@@ -470,14 +477,14 @@ function renderQueue(r, from, to){
   const wlist = Object.keys(perWin).map(k => perWin[k]).filter(x => keys.indexOf(x.w.key)>=0);
   const wPct = wlist.map(x => x.total ? Math.round(x.used*100/x.total) : 0);
   mkChart('ch-wd', { type:'bar', data:{ labels: wlist.map(x => x.w.label+' ('+x.w.owner+')'),
-    datasets:[ {label:'เจ้าของช่วงจองเอง', data:wlist.map(x=>x.own), backgroundColor:'#0056D2'},
-               {label:'แพทย์อื่นใช้ช่วงนี้', data:wlist.map(x=>x.oth), backgroundColor:'#00A3FF'},
-               {label:'ว่าง', data:wlist.map(x=>x.total-x.used), backgroundColor:'#E0F2F1'} ] },
+    datasets:[ {label:'เจ้าของช่วงจองเอง', data:wlist.map(x=>x.own), backgroundColor:'#12315C'},
+               {label:'แพทย์อื่นใช้ช่วงนี้', data:wlist.map(x=>x.oth), backgroundColor:'#6F98CF'},
+               {label:'ว่าง', data:wlist.map(x=>x.total-x.used), backgroundColor:'#CFE3D8'} ] },
     options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'bottom'}},
-      scales:{ x:{stacked:true, grid:{display:false}}, y:{stacked:true, beginAtZero:true, grid:{color:'#eef2f8'}, ticks:{precision:0}, title:{display:true, text:'slot'}} } }});
+      scales:{ x:{stacked:true, grid:{display:false}}, y:{stacked:true, beginAtZero:true, grid:{color:'#E3E8EF'}, ticks:{precision:0}, title:{display:true, text:'slot'}} } }});
   const hrs = ['09:00','09:30','10:00','10:30','11:00','11:30','13:00','13:30','14:00','14:30','15:00','15:30']
     .filter(h => wlist.some(x => h>=x.w.from && h<=x.w.to));
-  bar('ch-hr', hrs, hrs.map(h => byHour[h]||0), '#0056D2', 'จำนวนการจอง');
+  bar('ch-hr', hrs, hrs.map(h => byHour[h]||0), '#1B4F9C', 'จำนวนการจอง');
 
   // next free
   document.getElementById('q-next').innerHTML = nextFree.length
@@ -549,12 +556,40 @@ function renderBooking(r, from, to){
   const s = r.summary, c = r.charts;
   count('b-k-total', s.total); count('b-k-done', s.done); count('b-k-up', s.upcoming); count('b-k-can', s.cancelled); count('b-k-wait', s.awaitingRecord||0);
   setText('b-range', from ? fmtDay(from)+' – '+fmtDay(to) : 'ทั้งหมด');
-  bar('b-ch-time', c.timeline.map(t=>shortDay(t.date)), c.timeline.map(t=>t.count), '#0056D2', 'การจอง');
+  bar('b-ch-time', c.timeline.map(t=>shortDay(t.date)), c.timeline.map(t=>t.count), '#1B4F9C', 'การจอง');
   donut('b-ch-proc', Object.keys(c.byProcedure), Object.values(c.byProcedure));
-  donut('b-ch-stat', ['ทำแล้ว','รอทำ','ยกเลิก'], [s.done,s.upcoming,s.cancelled], ['#00695C','#0056D2','#D32F2F']);
+  donut('b-ch-stat', ['ทำแล้ว','รอทำ','ยกเลิก'], [s.done,s.upcoming,s.cancelled], ['#1E6B4F','#1B4F9C','#A4262C']);
   hbar('b-ch-doc', Object.keys(c.byDoctor), Object.values(c.byDoctor));
   renderBookingTable();
 }
+// ปิดบังชื่อ/HN ผู้ป่วยในรายการเป็นค่าเริ่มต้น (กดที่ข้อมูลเพื่อดูทั้งแถว หรือใช้ปุ่ม "แสดงทั้งหมด")
+function patCell(kind, idx, hn, name){
+  const open = St.revealAll[kind] || St.shown[kind].has(idx);
+  if (open) return [esc(hn), esc(name)];
+  const btn = (txt, label) => '<button type="button" class="mask" data-k="'+kind+'" data-i="'+idx+'" title="กดเพื่อแสดงข้อมูลแถวนี้" aria-label="แสดง'+label+'ของแถวนี้">'+esc(txt)+'</button>';
+  return [btn(Broncho.maskHn(hn), ' HN'), btn(Broncho.maskName(name), 'ชื่อผู้ป่วย')];
+}
+function setRevealBtn(kind){
+  const b = document.getElementById(kind+'-reveal'); if (!b) return;
+  b.innerHTML = '<span data-ic="'+(St.revealAll[kind]?'eyeoff':'eye')+'" data-size="18"></span> '+(St.revealAll[kind]?'ซ่อน HN/ชื่อ':'แสดง HN/ชื่อทั้งหมด');
+  b.setAttribute('aria-pressed', St.revealAll[kind] ? 'true' : 'false');
+  Broncho.hydrateIcons(b);
+}
+const revealTimers = {};
+function toggleReveal(kind){
+  St.revealAll[kind] = !St.revealAll[kind];
+  St.shown[kind].clear();
+  clearTimeout(revealTimers[kind]);
+  if (St.revealAll[kind]) revealTimers[kind] = setTimeout(() => { St.revealAll[kind] = false; setRevealBtn(kind); kind==='b' ? renderBookingTable() : renderProcedureTable(); }, 2*60*1000);
+  setRevealBtn(kind);
+  kind==='b' ? renderBookingTable() : renderProcedureTable();
+}
+document.addEventListener('click', e => {
+  const m = e.target.closest && e.target.closest('button.mask'); if (!m) return;
+  St.shown[m.dataset.k].add(+m.dataset.i);
+  m.dataset.k==='b' ? renderBookingTable() : renderProcedureTable();
+});
+
 function renderBookingTable(){
   if (!St.bData) return;
   const q = val('b-search').trim().toLowerCase();
@@ -567,10 +602,11 @@ function renderBookingTable(){
     const [c,l] = tag[b.status]||['',''];
     const rec = (b.status==='done' && !b.hasRecord)
       ? ' <a class="tag t-w" style="text-decoration:none" title="เปิดหน้าบันทึกหัตถการของเคสนี้" href="record.html?date='+encodeURIComponent(b.dateISO)+'&ref='+encodeURIComponent(b.eventId||'')+'">รอบันทึก ›</a>' : '';
-    const why = (b.status==='cancelled' && b.cancelReason) ? '<div style="font-size:11.5px;color:var(--ink3);margin-top:3px">'+esc(b.cancelReason)+'</div>' : '';
-    return '<tr><td style="white-space:nowrap;font-weight:600">'+esc(b.dateTime)+'</td><td>'+esc(b.doctor)+'</td>'
+    const why = (b.status==='cancelled' && b.cancelReason) ? '<div style="font-size:13px;color:var(--ink3);margin-top:3px">'+esc(b.cancelReason)+'</div>' : '';
+    const [hn, nm] = patCell('b', St.bData.bookings.indexOf(b), b.hn, b.patientName);
+    return '<tr><td style="white-space:nowrap;font-weight:600">'+esc(Broncho.thDate(b.dateTime))+'</td><td>'+esc(b.doctor)+'</td>'
       + '<td><span class="tag '+(b.procedure.includes('Bronchoscopy')?'t-b':'t-p')+'">'+esc(b.procedure)+'</span></td>'
-      + '<td style="font-weight:600">'+esc(b.hn)+'</td><td>'+esc(b.patientName)+'</td><td><span class="tag '+c+'">'+l+'</span>'+rec+why+'</td></tr>';
+      + '<td style="font-weight:600">'+hn+'</td><td>'+nm+'</td><td><span class="tag '+c+'">'+l+'</span>'+rec+why+'</td></tr>';
   }).join('') : '<tr><td colspan="6" class="empty">ไม่มีข้อมูล</td></tr>';
 }
 
@@ -589,10 +625,10 @@ function renderProcedure(r, from, to){
   const s = r.summary, c = r.charts;
   count('p-k-cases', s.totalCases); count('p-k-rev', s.totalRevenue, true); count('p-k-dur', s.avgDuration); count('p-k-fl', s.fluoroUsed);
   setText('p-range', from ? fmtDay(from)+' – '+fmtDay(to) : 'ทั้งหมด');
-  bar('p-ch-time', c.caseTimeline.map(t=>shortDay(t.date)), c.caseTimeline.map(t=>t.count), '#0056D2', 'Case');
-  bar('p-ch-rev',  c.revenueTimeline.map(t=>shortDay(t.date)), c.revenueTimeline.map(t=>t.revenue), '#00695C', 'บาท');
+  bar('p-ch-time', c.caseTimeline.map(t=>shortDay(t.date)), c.caseTimeline.map(t=>t.count), '#1B4F9C', 'Case');
+  bar('p-ch-rev',  c.revenueTimeline.map(t=>shortDay(t.date)), c.revenueTimeline.map(t=>t.revenue), '#1E6B4F', 'บาท');
   donut('p-ch-proc', Object.keys(c.byProcedure), Object.values(c.byProcedure));
-  donut('p-ch-an', ['MAC','GA'], [c.byAnesthesia.MAC||0, c.byAnesthesia.GA||0], ['#0056D2','#6d4ad6']);
+  donut('p-ch-an', ['MAC','GA'], [c.byAnesthesia.MAC||0, c.byAnesthesia.GA||0], ['#1B4F9C','#59479A']);
   hbar('p-ch-doc', Object.keys(c.byDoctor), Object.values(c.byDoctor));
   renderProcedureTable();
 }
@@ -601,13 +637,15 @@ function renderProcedureTable(){
   const q = val('p-search').trim().toLowerCase();
   const rows = St.pData.records.filter(r => !q || [r.doctor,r.operation,r.hn,r.patientName,r.procedureDate].join(' ').toLowerCase().includes(q));
   setText('p-count', rows.length+' รายการ');
-  document.getElementById('p-body').innerHTML = rows.length ? rows.map(r =>
-    '<tr><td style="white-space:nowrap;font-weight:600">'+esc(r.procedureDate)+'</td><td style="font-weight:600">'+esc(r.hn)+'</td>'
-    + '<td>'+esc(r.namePrefix)+esc(r.patientName)+'</td>'
+  document.getElementById('p-body').innerHTML = rows.length ? rows.map(r => {
+    const [hn, nm] = patCell('p', St.pData.records.indexOf(r), r.hn, (r.namePrefix||'')+(r.patientName||''));
+    return '<tr><td style="white-space:nowrap;font-weight:600">'+esc(Broncho.thDate(r.procedureDate))+'</td><td style="font-weight:600">'+hn+'</td>'
+    + '<td>'+nm+'</td>'
     + '<td><span class="tag '+(r.operation.includes('Bronchoscopy')?'t-b':'t-p')+'">'+esc(r.operation)+'</span></td>'
     + '<td>'+esc(r.doctor)+'</td><td style="white-space:nowrap">'+esc(r.timeStart||'—')+' – '+esc(r.timeEnd||'—')+'</td>'
     + '<td style="font-weight:700;color:var(--green)">'+(r.price?r.price.toLocaleString():'—')+'</td>'
-    + '<td>'+esc(r.fluoroscope||'—')+'</td><td>'+esc(r.bronchoscope||'—')+'</td></tr>').join('')
+    + '<td>'+esc(r.fluoroscope||'—')+'</td><td>'+esc(r.bronchoscope||'—')+'</td></tr>';
+  }).join('')
     : '<tr><td colspan="9" class="empty">ไม่มีข้อมูล</td></tr>';
 }
 
@@ -634,13 +672,16 @@ function pdfProcedure(){
   const {from,to} = rangeFor(St.p,'p-from','p-to'), s = St.pData.summary;
   const w = window.open('','_blank');
   if (!w) { Broncho.toast('กรุณาอนุญาต popup เพื่อพิมพ์', true); return; }
-  const rows = St.pData.records.map(r => '<tr><td>'+esc(r.procedureDate)+'</td><td>'+esc(r.hn)+'</td><td>'+esc(r.namePrefix)+esc(r.patientName)+'</td><td>'+esc(r.operation)+'</td><td>'+esc(r.doctor)+'</td><td>'+esc(r.timeStart||'')+'–'+esc(r.timeEnd||'')+'</td><td>'+(r.price?r.price.toLocaleString():'')+'</td><td>'+esc(r.fluoroscope||'')+'</td></tr>').join('');
+  const rows = St.pData.records.map(r => '<tr><td>'+esc(Broncho.thDate(r.procedureDate))+'</td><td>'+esc(r.hn)+'</td><td>'+esc(r.namePrefix)+esc(r.patientName)+'</td><td>'+esc(r.operation)+'</td><td>'+esc(r.doctor)+'</td><td>'+esc(r.timeStart||'')+'–'+esc(r.timeEnd||'')+'</td><td>'+(r.price?r.price.toLocaleString():'')+'</td><td>'+esc(r.fluoroscope||'')+'</td></tr>').join('');
+  const fontCss = new URL('theme.css', location.href).href;
   w.document.write('<!DOCTYPE html><html lang="th"><head><meta charset="UTF-8"><title>รายงานการส่องกล้องหลอดลม</title>'
-   + '<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">'
-   + '<style>body{font-family:Sarabun,sans-serif;font-size:13px;margin:20px;color:#152238}h1{font-size:18px}.k{display:flex;gap:12px;margin:14px 0}.k div{flex:1;border:1px solid #d1dbe8;border-radius:8px;padding:10px;text-align:center}.k b{display:block;font-size:22px;color:#0056D2}table{width:100%;border-collapse:collapse;font-size:12px}th{background:#F5F7FA;text-align:left}th,td{border:1px solid #d1dbe8;padding:6px 8px}</style></head><body>'
-   + '<h1>รายงานการส่องกล้องหลอดลม</h1><div>'+(from?esc(fmtDay(from))+' – '+esc(fmtDay(to)):'ทั้งหมด')+' · พิมพ์ '+esc(new Date().toLocaleString('th-TH'))+'</div>'
+   + '<link rel="stylesheet" href="'+esc(fontCss)+'">'
+   + '<style>body{font-family:Sarabun,sans-serif;font-size:14px;margin:24px;color:#14223A;background:#fff}.org{border-bottom:3px double #12315C;padding-bottom:8px;margin-bottom:12px}.org b{font-size:18px;color:#12315C}.org div{font-size:13px;color:#43536B}h1{font-size:20px;margin:6px 0 2px;color:#12315C}.k{display:flex;gap:12px;margin:14px 0}.k div{flex:1;border:1px solid #C7CFDB;border-radius:4px;padding:10px;text-align:center}.k b{display:block;font-size:22px;color:#12315C}table{width:100%;border-collapse:collapse;font-size:13px}th{background:#EDF1F6;text-align:left}th,td{border:1px solid #C7CFDB;padding:6px 8px}.foot{margin-top:14px;font-size:12px;color:#5A6980}</style></head><body>'
+   + '<div class="org"><b>โรงพยาบาลมหาสารคาม</b><div>หน่วยโรคระบบการหายใจและภาวะวิกฤติโรคระบบการหายใจ · แผนกอายุรกรรม</div></div>'
+   + '<h1>รายงานการส่องกล้องหลอดลม</h1><div>'+(from?esc(fmtDay(from))+' – '+esc(fmtDay(to)):'ทั้งหมด')+' · พิมพ์ '+esc(new Date().toLocaleString('th-TH'))+' · โดย '+esc((St.user&&St.user.name)||'')+'</div>'
    + '<div class="k"><div><b>'+s.totalCases+'</b>Case</div><div><b>'+s.totalRevenue.toLocaleString()+'</b>รายได้ (บาท)</div><div><b>'+s.avgDuration+'</b>เวลาเฉลี่ย (นาที)</div><div><b>'+s.fluoroUsed+'</b>ใช้ Fluoroscope</div></div>'
    + '<table><tr><th>วันที่</th><th>HN</th><th>ผู้ป่วย</th><th>Operation</th><th>แพทย์</th><th>เวลา</th><th>ราคา</th><th>Fluoro</th></tr>'+rows+'</table>'
+   + '<div class="foot">เอกสารนี้มีข้อมูลส่วนบุคคลของผู้ป่วย ใช้เพื่อการรักษาและการบริหารเท่านั้น ห้ามเปิดเผยนอกเหนือหน้าที่</div>'
    + '<script>window.onload=function(){window.print()}<\/script></body></html>');
   w.document.close();
 }

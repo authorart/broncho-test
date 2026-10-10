@@ -1,0 +1,293 @@
+/* theme.css — ธีมกลางของ Bronchoscopy Program (โรงพยาบาลมหาสารคาม)
+   โหลดต่อจาก <style> ของแต่ละหน้า เพื่อทับค่าเดิมด้วยโทเคนชุดเดียว
+   ฟอนต์: Sarabun (SIL OFL) ฝังในโฟลเดอร์ fonts/ ไม่เรียก Google Fonts */
+
+@font-face{font-family:'Sarabun';font-weight:400;font-style:normal;font-display:swap;src:url('fonts/Sarabun-Regular.woff2') format('woff2')}
+@font-face{font-family:'Sarabun';font-weight:500;font-style:normal;font-display:swap;src:url('fonts/Sarabun-Medium.woff2') format('woff2')}
+@font-face{font-family:'Sarabun';font-weight:600;font-style:normal;font-display:swap;src:url('fonts/Sarabun-SemiBold.woff2') format('woff2')}
+@font-face{font-family:'Sarabun';font-weight:700;font-style:normal;font-display:swap;src:url('fonts/Sarabun-Bold.woff2') format('woff2')}
+
+:root{
+  /* หลัก */
+  --navy:#12315C;        /* กรมท่า: แถบตัวระบุ หัวเรื่อง */
+  --navy-dk:#0C2244;
+  --action:#1B4F9C;      /* ปุ่มหลัก ลิงก์ */
+  --action-dk:#12396F;
+  --gold:#9C7A2B;        /* ใช้เฉพาะเส้นเน้นของแถบตัวระบุ/เมนูที่เลือก */
+  --gold-lt:#E3C877;
+  /* พื้นผิว */
+  --paper:#F4F6F9;
+  --card-bg:#FFFFFF;
+  --line-1:#C7CFDB;      /* เส้นขอบการ์ด/ตาราง */
+  --line-2:#E3E8EF;      /* เส้นแบ่งบางๆ */
+  --field:#7B889C;       /* ขอบช่องกรอก (คอนทราสต์ ≥ 3:1) */
+  --head-bg:#EDF1F6;
+  /* ตัวอักษร */
+  --text-1:#14223A;
+  --text-2:#43536B;
+  --text-3:#5A6980;
+  /* สถานะ */
+  --ok:#1E6B4F;   --ok-lt:#E5F1EB;   --ok-bd:#A9CDBB;
+  --warn:#8A5300; --warn-lt:#FBF0DC; --warn-bd:#E5C48A;
+  --bad:#A4262C;  --bad-lt:#FAE8E9;  --bad-bd:#E2A9AC;
+  --info:#1B4F9C; --info-lt:#E8EEF8; --info-bd:#B3C6E4;
+  --plum:#59479A; --plum-lt:#EEEAF7;
+  --focus:#1B4F9C;
+  --font:'Sarabun','Noto Sans Thai',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --rad:4px;
+
+  /* ── ทับชื่อโทเคนเดิมของแต่ละหน้า ── */
+  /* dashboard / users */
+  --bg:var(--paper); --surface:var(--card-bg); --line:var(--line-1); --line2:var(--line-2);
+  --ink:var(--text-1); --ink2:var(--text-2); --ink3:var(--text-3);
+  --brand:var(--action); --brand-dk:var(--action-dk); --brand-lt:var(--info-lt);
+  --green:var(--ok); --green-lt:var(--ok-lt);
+  --amber:#B26A00; --amber-lt:var(--warn-lt);
+  --red:var(--bad); --red-lt:var(--bad-lt);
+  --violet:var(--plum); --violet-lt:var(--plum-lt);
+  --shadow:none; --r:var(--rad);
+  /* index */
+  --blue:var(--action); --blue-light:var(--info-lt); --blue-dark:var(--action-dk);
+  --green-light:var(--ok-lt); --red-light:var(--bad-lt); --orange:#B26A00;
+  --grey-bg:var(--paper); --grey-border:var(--line-1);
+  --text:var(--text-1); --text-light:var(--text-3); --card:var(--card-bg);
+  --radius:var(--rad); --radius-sm:var(--rad);
+  /* record */
+  --border:var(--line-1); --border2:var(--line-2);
+  --teal:var(--action); --teal-dk:var(--action-dk); --teal-lt:var(--info-lt);
+  --blue-lt:var(--info-lt); --orange-lt:var(--warn-lt);
+  --purple:var(--plum); --purple-lt:var(--plum-lt);
+  --text2:var(--text-2); --text3:var(--text-3);
+}
+
+/* ── พื้นฐาน ── */
+html{font-size:16px;-webkit-text-size-adjust:100%}
+body{font-family:var(--font);font-size:16px;line-height:1.55;background:var(--paper);color:var(--text-1);-webkit-font-smoothing:antialiased}
+:is(input,select,textarea,button):not(#_){font-family:var(--font)}
+.btn:not(#_),.toggle-btn:not(#_),.pill:not(#_),.tab:not(#_){font-family:var(--font)}
+b,strong{font-weight:700}
+a{color:var(--action)}
+
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-radius:2px}
+.skip-link{position:absolute;left:8px;top:-60px;z-index:20000;background:#fff;color:var(--navy);border:2px solid var(--navy);border-radius:var(--rad);padding:8px 14px;font-weight:700;text-decoration:none}
+.skip-link:focus{top:8px}
+
+@media (prefers-reduced-motion:reduce){
+  .fade,.fade-in{animation:none!important}
+  *{transition:none!important;scroll-behavior:auto!important}
+}
+
+/* ── หัวเรื่องของหน้า (แทนแถบไล่เฉดเดิม) ── */
+.top:not(#_),.header:not(#_),.topbar:not(#_){
+  background:var(--card-bg);color:var(--text-1);box-shadow:none;
+  border-bottom:1px solid var(--line-1);
+}
+.top .logo,.topbar-icon{display:none}
+.top-in{padding:14px 20px}
+.top h1,.topbar-title,.header-title{font-size:22px;font-weight:700;color:var(--navy);letter-spacing:0;line-height:1.3}
+.top .sub,.topbar-sub,.header-sub{font-size:14px;color:var(--text-2);opacity:1;margin-top:2px}
+.header{padding:12px 16px 10px}
+.topbar{padding:14px 20px}
+.chip{background:var(--paper);color:var(--text-2);border:1px solid var(--line-1);border-radius:var(--rad);padding:6px 12px;font-size:14px}
+.btn-ref{background:var(--action);color:#fff;border:0;border-radius:var(--rad);padding:9px 16px;font-weight:600;font-size:14px;min-height:40px}
+.btn-ref:hover{background:var(--action-dk)}
+
+/* ── แท็บของ Dashboard ── */
+.tabs{background:var(--card-bg);border-bottom:1px solid var(--line-1);box-shadow:none}
+.tab{font-size:16px;font-weight:600;color:var(--text-2);padding:13px 18px;border-bottom:3px solid transparent}
+.tab:hover{color:var(--action);background:var(--paper)}
+.tab.active{color:var(--navy);border-bottom-color:var(--action)}
+
+/* ── การ์ด / กล่อง ── */
+.card,.section,.booking-card,.kpi{border-radius:var(--rad)}
+.card:not(.kpi),.section{background:var(--card-bg);border:1px solid var(--line-1);box-shadow:none}
+.card h3{font-size:17px;font-weight:700;color:var(--navy);margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--line-2)}
+.card h3 .badge{font-size:13px;font-weight:600;color:var(--text-2);background:var(--head-bg);border-radius:var(--rad);padding:3px 10px}
+.card-title{font-size:16px;font-weight:700;color:var(--navy)}
+.section-head{background:var(--head-bg);border-bottom:1px solid var(--line-1)}
+.section-num{background:var(--navy);border-radius:var(--rad)}
+.section-title{font-size:17px;font-weight:700;color:var(--navy)}
+
+/* ── ตัวกรอง / ปุ่มเลือกช่วง ── */
+.pill{border:1px solid var(--field);background:var(--card-bg);color:var(--text-1);border-radius:var(--rad);padding:8px 14px;font-size:15px;font-weight:600;min-height:40px}
+.pill:hover{border-color:var(--action);color:var(--action)}
+.pill.active{background:var(--navy);border-color:var(--navy);color:#fff}
+.fg label{font-size:14px;color:var(--text-2);font-weight:600}
+
+/* ── ฟอร์ม ── */
+.ctl,.form-input,.form-select,.form-textarea,.tools input,.tools select,
+.modal input,.modal select,.cc-box select,.cc-box textarea,.bp-card input{
+  border:1px solid var(--field);border-radius:var(--rad);background:#fff;color:var(--text-1);
+  font-size:16px;min-height:44px;padding:9px 12px;
+}
+.form-textarea,.cc-box textarea{min-height:84px}
+.ctl:focus,.form-input:focus,.form-select:focus,.form-textarea:focus,.tools input:focus,.tools select:focus,
+.modal input:focus,.modal select:focus,.cc-box select:focus,.cc-box textarea:focus,.bp-card input:focus{
+  outline:3px solid var(--focus);outline-offset:0;border-color:var(--focus);background:#fff;box-shadow:none;
+}
+.form-input.prefilled{background:var(--info-lt);border-color:var(--info-bd)}
+.form-label{font-size:15px;font-weight:600;color:var(--text-1);text-transform:none;letter-spacing:0}
+.form-hint,.hint{font-size:14px;color:var(--text-3)}
+.req{color:var(--bad)}
+
+/* ── ปุ่ม ── */
+.btn{border-radius:var(--rad);font-weight:600;font-size:16px;min-height:44px;box-shadow:none}
+.btn-primary,.btn-p,.btn-pri,.bp-go{background:var(--action);color:#fff;border:1px solid var(--action)}
+.btn-primary:hover:not(:disabled),.btn-p:hover,.btn-pri:hover:not(:disabled){background:var(--action-dk);filter:none}
+.btn-outline,.btn-o{background:#fff;color:var(--action);border:1px solid var(--action)}
+.btn-outline:hover,.btn-o:hover{background:var(--info-lt);color:var(--action-dk);border-color:var(--action-dk)}
+.btn-danger{background:#fff;color:var(--bad);border:1px solid var(--bad)}
+.btn-danger.solid{background:var(--bad);color:#fff}
+.btn-ghost{background:var(--head-bg);color:var(--text-1);border:1px solid var(--line-1)}
+.btn-sm{font-size:14px;min-height:36px;border-radius:var(--rad)}
+.btn-warn{background:var(--warn-lt);color:var(--warn);border:1px solid var(--warn-bd)}
+.btn-ok{background:var(--ok-lt);color:var(--ok);border:1px solid var(--ok-bd)}
+.btn:disabled{opacity:.45}
+.btn-cancel-case{border-radius:var(--rad);color:var(--bad);border:1px solid var(--bad);font-size:15px;font-weight:600}
+.btn-cancel-case:hover{background:var(--bad-lt)}
+
+/* ── ปุ่มเลือก (จองคิว/บันทึก) ── */
+.proc-btn,.check-btn,.toggle-item,.date-card,.slot-btn,.toggle-btn,.week-nav-btn{border-width:1px;border-color:var(--field);border-radius:var(--rad);color:var(--text-1)}
+.toggle-btn{padding:10px 18px;font-size:16px;font-weight:600;color:var(--text-1)}
+.proc-btn.selected,.check-btn.checked,.toggle-item.active,.date-card.selected,.toggle-btn.active{
+  border-color:var(--navy);background:var(--info-lt);color:var(--navy);box-shadow:inset 0 0 0 1px var(--navy)}
+.toggle-btn.active{background:var(--navy);color:#fff}
+.toggle-btn.active-orange{background:var(--warn);border-color:var(--warn);color:#fff}
+.date-card .dc-date{font-size:16px}
+.date-card .dc-info{font-size:14px}
+.slot-btn{font-size:16px}
+.slot-btn .slot-sub{font-size:13px}
+.slot-btn.available{border-color:var(--ok);background:var(--ok-lt);color:var(--ok)}
+.slot-btn.available:hover,.slot-btn.available.selected{background:var(--ok);color:#fff;border-color:var(--ok)}
+.slot-btn.booked{border-color:var(--bad-bd);background:var(--bad-lt);color:var(--bad);opacity:.8}
+.week-label{font-size:15px;color:var(--text-2)}
+.week-nav-btn{width:44px;height:44px;background:#fff}
+.step-dot{height:6px;border-radius:0}
+.slot-summary{background:var(--info-lt);border-left:4px solid var(--navy);border-radius:0;color:var(--navy);font-size:16px}
+.confirm-lbl{font-size:15px;color:var(--text-3)}
+.confirm-row{font-size:16px}
+.bc-date{color:var(--action);font-size:14px}
+.bc-pt{font-size:14px}
+.booking-card{border-radius:var(--rad);border:1px solid var(--line-1);border-left:4px solid var(--navy);box-shadow:none}
+.bc-badge{border-radius:var(--rad);border-color:var(--line-1);font-size:13px}
+.bc-proc{color:var(--navy)}
+.empty{color:var(--text-3)}
+.empty p{font-size:16px}
+
+/* ── ตัวชี้วัด (KPI) ── */
+.kpi.card,.kpi{border:1px solid var(--line-1);box-shadow:none;background:var(--card-bg)}
+.kpi .ic{width:46px;height:46px;border-radius:var(--rad);font-size:0;color:var(--action)}
+.kpi .ic svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.ic-b{background:var(--info-lt);color:var(--action)}
+.ic-g{background:var(--ok-lt);color:var(--ok)}
+.ic-a{background:var(--warn-lt);color:var(--warn)}
+.ic-r{background:var(--bad-lt);color:var(--bad)}
+.ic-v{background:var(--plum-lt);color:var(--plum)}
+.kpi .v{font-size:28px;font-weight:700;color:var(--navy)}
+.kpi .l{font-size:15px;color:var(--text-1)}
+.kpi .n{font-size:13px;color:var(--text-3)}
+.kpi b{font-size:26px;color:var(--navy)}
+.kpi span{font-size:14px}
+
+/* ── ปฏิทินคิวห้อง ── */
+.cal-head div{font-size:14px;color:var(--text-2)}
+.cell{border:1px solid var(--line-1);border-radius:var(--rad);transition:none}
+.cell.click:hover{transform:none;box-shadow:none;border-color:var(--action);background:var(--info-lt)}
+.cell.today{outline:2px solid var(--gold);outline-offset:-2px}
+.cell.sel{box-shadow:none;border:2px solid var(--navy);background:var(--info-lt)}
+.cell .d{font-size:15px}
+.cell .t{font-size:13px;color:var(--text-2)}
+.cell .d small{font-size:12px}
+.cell.off{background:repeating-linear-gradient(135deg,var(--paper),var(--paper) 6px,#E9EDF3 6px,#E9EDF3 12px);color:var(--text-3)}
+.bar{height:8px;border-radius:0;background:var(--line-2)}
+.bar i{border-radius:0}
+.legend{font-size:14px;color:var(--text-2)}
+.legend span::before{border-radius:0}
+.slot{border-radius:var(--rad);font-size:14px}
+.slot b{font-size:16px}
+.slot.free{background:var(--ok-lt);border-color:var(--ok-bd);color:var(--ok)}
+a.slot.free.book:hover{transform:none;box-shadow:none;border-color:var(--ok);background:#D6EADF}
+a.slot.free.book .go{font-size:13px}
+.nf span{background:var(--info-lt);color:var(--navy);border-radius:var(--rad);font-size:15px}
+.tips li{background:var(--paper);border:1px solid var(--line-2);border-radius:var(--rad);font-size:15px}
+
+/* ── ตาราง ── */
+.tbl-wrap{border:1px solid var(--line-1);border-radius:var(--rad)}
+table{font-size:15px}
+th{background:var(--head-bg);color:var(--text-1);font-size:14px;font-weight:700;border-bottom:1px solid var(--line-1)}
+td{border-bottom:1px solid var(--line-2)}
+tr:hover td{background:#F8FAFC}
+tr.pending td{background:var(--warn-lt)}
+.tag,.badge{border-radius:var(--rad);font-size:13px;font-weight:600}
+.tag{padding:3px 9px;border:1px solid transparent}
+.t-done{background:var(--ok-lt);color:var(--ok);border-color:var(--ok-bd)}
+.t-up,.t-b{background:var(--info-lt);color:var(--navy);border-color:var(--info-bd)}
+.t-can{background:var(--bad-lt);color:var(--bad);border-color:var(--bad-bd)}
+.t-p{background:var(--plum-lt);color:var(--plum);border-color:#CFC5EA}
+.t-w{background:var(--warn-lt);color:var(--warn);border-color:var(--warn-bd)}
+.b-admin{background:var(--plum-lt);color:var(--plum)}
+.b-doctor{background:var(--info-lt);color:var(--navy)}
+.b-user{background:var(--ok-lt);color:var(--ok)}
+.s-Active{background:var(--ok-lt);color:var(--ok)}
+.s-Pending{background:var(--warn-lt);color:var(--warn)}
+.s-Inactive{background:#E9ECF1;color:var(--text-2)}
+.mut{color:var(--text-3);font-size:14px}
+
+/* ── แจ้งเตือน / กล่องข้อความ ── */
+.alert,.info,.warn,.bp-note{border-radius:var(--rad);font-size:15px}
+.alert-info,.info{background:var(--info-lt);color:var(--navy);border:1px solid var(--info-bd)}
+.alert-warn,.warn,.bp-note{background:var(--warn-lt);color:var(--warn);border:1px solid var(--warn-bd)}
+.alert-err{background:var(--bad-lt);color:var(--bad);border:1px solid var(--bad-bd)}
+.err{color:var(--bad);font-size:14px}
+.price-box{background:var(--ok-lt);border:1px solid var(--ok-bd);border-radius:var(--rad)}
+.price-label,.price-val,.price-unit{color:var(--ok)}
+.price-breakdown{color:var(--text-2);font-size:13px}
+.pwbox{background:var(--ok-lt);color:var(--ok);border-radius:var(--rad);border:1px solid var(--ok-bd)}
+
+/* ── หน้าต่างโต้ตอบ ── */
+.overlay{background:rgba(12,34,68,.55)}
+.ov,.cc-ov{background:rgba(12,34,68,.55)}
+.modal{border-radius:var(--rad) var(--rad) 0 0;box-shadow:none;border-top:4px solid var(--navy)}
+.ov .modal,.cc-box{border-radius:var(--rad);box-shadow:0 12px 32px rgba(12,34,68,.3);border-top:4px solid var(--navy)}
+.modal-title,.modal h2,.cc-box h3{font-size:19px;font-weight:700;color:var(--navy)}
+.modal label,.cc-lbl{font-size:15px;font-weight:600;color:var(--text-1)}
+.cc-sum{border-radius:var(--rad);background:var(--paper);border:1px solid var(--line-2);font-size:15px}
+.cc-go{background:var(--bad)}
+.cc-no{background:var(--head-bg);color:var(--text-1);border:1px solid var(--line-1)}
+.cc-act button{border-radius:var(--rad)}
+
+/* ── สถานะกำลังโหลด ── */
+.spin,.spinner{border-color:var(--line-1);border-top-color:var(--action)}
+#busy{background:rgba(244,246,249,.75);backdrop-filter:none}
+
+/* ── มือถือ ── */
+@media(max-width:720px){
+  .top h1,.topbar-title,.header-title{font-size:19px}
+  .top-in{padding:10px 12px}
+  .topbar{padding:10px 14px}
+  .header{padding:10px 14px 8px}
+  .tab{padding:12px 12px}
+}
+
+/* ── พิมพ์ ── */
+@media print{
+  body{background:#fff;color:#000}
+  .bp-nav,.bp-idbar,.bp-idle,.skip-link{display:none!important}
+}
+
+/* ── ข้อมูลผู้ป่วยที่ปิดบังไว้ ── */
+.mask{background:none;border:0;border-bottom:1px dotted var(--text-3);padding:0;font:inherit;color:inherit;cursor:pointer;text-align:left}
+.mask:hover{color:var(--action);border-bottom-color:var(--action)}
+.mask-tools{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--text-2)}
+
+/* ── ไอคอน / ส่วนเสริม ── */
+[data-ic]{display:inline-flex;align-items:center;vertical-align:middle}
+.btn-ref,.btn-sm,.btn-o,.btn-p{display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.success-icon{color:var(--ok);line-height:1;margin-bottom:6px}
+#unauthorized .icon{color:var(--navy)}
+.empty .ei{color:var(--text-3);margin-bottom:10px;line-height:1}
+.header-org{font-size:13px;color:var(--text-3);margin-bottom:2px}
+.bp-nav ~ * .header-org{display:none}
+.tbl-tools{gap:10px}
+.btn-back{font-size:15px;color:var(--action);font-weight:600;min-height:40px}
+.btn-back:hover{text-decoration:underline}
